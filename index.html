@@ -497,11 +497,12 @@ let isRunning = false;
 
 let mediaRecorder = null;
 let audioChunks = [];
-let recordingInterval = null;
-let translationTimeout = null;
 let lastTranscript = '';
 
-const CHUNK_DURATION_MS = 3500; // Captura a cada 3.5s
+const CHUNK_DURATION_MS = 4000; // Duração de cada bloco gravado
+let translationQueue = [];       // Fila de blobs esperando tradução
+let isTranslating = false;       // Mutex: só uma tradução por vez
+let activeStream = null;         // Stream do microfone ativo
 
 // ══════════════════════════════════════════════
 // UI HELPERS
@@ -632,44 +633,50 @@ async function startApp() {
 }
 
 // ══════════════════════════════════════════════
-// GRAVAÇÃO E TRANSCRIÇÃO
+// GRAVAÇÃO CONTÍNUA — PIPELINE PARALELO
+// Grava o próximo bloco ENQUANTO traduz o anterior
 // ══════════════════════════════════════════════
 async function startRecording() {
   try {
     const audioConstraints = selectedDeviceId
       ? { deviceId: { exact: selectedDeviceId } }
       : true;
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
+    activeStream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
     isRunning = true;
+    translationQueue = [];
+    isTranslating = false;
     setStatus('listening');
     $('source-label').textContent = 'Ouvindo microfone...';
     animateWave(true);
 
-    function startChunk() {
+    const mimeType = ['audio/webm;codecs=opus','audio/webm','audio/ogg','audio/mp4']
+      .find(m => MediaRecorder.isTypeSupported(m)) || '';
+
+    function recordChunk() {
       if (!isRunning) return;
-      audioChunks = [];
+      const chunks = [];
 
-      // Tenta formatos suportados
-      const mimeType = ['audio/webm;codecs=opus','audio/webm','audio/ogg','audio/mp4']
-        .find(m => MediaRecorder.isTypeSupported(m)) || '';
+      const recorder = new MediaRecorder(activeStream, mimeType ? { mimeType } : {});
+      recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
 
-      mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
-      mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
-
-      mediaRecorder.onstop = async () => {
+      recorder.onstop = () => {
         if (!isRunning) return;
-        const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
-        if (blob.size > 5000) { // ignora silêncio
-          await transcribeAndTranslate(blob);
+        const blob = new Blob(chunks, { type: recorder.mimeType });
+        // Só enfileira se tiver áudio real (>5KB)
+        if (blob.size > 5000) {
+          translationQueue.push(blob);
+          drainQueue(); // processa fila sem bloquear gravação
         }
-        startChunk(); // começa próximo chunk
+        recordChunk(); // ← inicia IMEDIATAMENTE o próximo bloco
       };
 
-      mediaRecorder.start();
-      setTimeout(() => { if (mediaRecorder.state === 'recording') mediaRecorder.stop(); }, CHUNK_DURATION_MS);
+      recorder.start();
+      setTimeout(() => {
+        if (recorder.state === 'recording') recorder.stop();
+      }, CHUNK_DURATION_MS);
     }
 
-    startChunk();
+    recordChunk();
 
   } catch (err) {
     setStatus('error');
@@ -678,10 +685,25 @@ async function startRecording() {
   }
 }
 
+// Processa fila de blocos de áudio sequencialmente
+async function drainQueue() {
+  if (isTranslating || translationQueue.length === 0) return;
+  isTranslating = true;
+  while (translationQueue.length > 0) {
+    const blob = translationQueue.shift();
+    // Se fila acumulou muito (lag), descarta intermediários e pula pro mais recente
+    if (translationQueue.length > 2) {
+      translationQueue.splice(0, translationQueue.length - 1);
+    }
+    await transcribeAndTranslate(blob);
+  }
+  isTranslating = false;
+}
+
 function stopRecording() {
   isRunning = false;
-  if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
-  clearInterval(recordingInterval);
+  if (activeStream) activeStream.getTracks().forEach(t => t.stop());
+  translationQueue = [];
   animateWave(false);
   setStatus('idle');
 }
@@ -691,7 +713,6 @@ function stopRecording() {
 // ══════════════════════════════════════════════
 async function transcribeAndTranslate(audioBlob) {
   setStatus('translating');
-  animateWave(false);
 
   try {
     // 1. Transcrição com Whisper
@@ -779,8 +800,6 @@ async function transcribeAndTranslate(audioBlob) {
     setTimeout(() => setStatus('listening'), 3000);
   } finally {
     setStatus('listening');
-    animateWave(true);
-    $('source-label').textContent = 'Ouvindo microfone...';
   }
 }
 
