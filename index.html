@@ -494,21 +494,19 @@ let sourceLang = 'auto';
 let churchName = '';
 let selectedDeviceId = '';
 let isRunning = false;
-
-let mediaRecorder = null;
-let audioChunks = [];
+let ws = null;               // WebSocket Realtime API
+let activeStream = null;     // Stream do microfone
+let audioContext = null;
+let processorNode = null;
 let lastTranscript = '';
-
-const CHUNK_DURATION_MS = 4000; // Duração de cada bloco gravado
-let translationQueue = [];       // Fila de blobs esperando tradução
-let isTranslating = false;       // Mutex: só uma tradução por vez
-let activeStream = null;         // Stream do microfone ativo
+let partialTranscript = '';
+let translateTimer = null;   // Debounce da tradução
 
 // ══════════════════════════════════════════════
 // UI HELPERS
 // ══════════════════════════════════════════════
 const $ = id => document.getElementById(id);
-const setStatus = (state) => { // 'idle' | 'listening' | 'translating' | 'error'
+const setStatus = (state) => {
   $('status-dot').className = state === 'idle' ? '' : state;
 };
 
@@ -516,13 +514,13 @@ function showError(msg) {
   const el = $('error-msg');
   el.textContent = msg;
   el.classList.add('visible');
-  setTimeout(() => el.classList.remove('visible'), 6000);
+  setTimeout(() => el.classList.remove('visible'), 7000);
 }
 
 function setTranslatedText(text, isPlaceholder = false) {
   const el = $('translated-text');
   el.classList.remove('text-animate');
-  void el.offsetWidth; // reflow
+  void el.offsetWidth;
   el.textContent = text;
   el.classList.toggle('placeholder-text', isPlaceholder);
   if (!isPlaceholder) el.classList.add('text-animate');
@@ -571,7 +569,6 @@ function animateWave(active) {
 // ══════════════════════════════════════════════
 async function loadAudioDevices() {
   try {
-    // Pede permissão primeiro para que os rótulos apareçam
     await navigator.mediaDevices.getUserMedia({ audio: true });
     const devices = await navigator.mediaDevices.enumerateDevices();
     const inputs = devices.filter(d => d.kind === 'audioinput');
@@ -581,7 +578,6 @@ async function loadAudioDevices() {
       const opt = document.createElement('option');
       opt.value = d.deviceId;
       opt.textContent = d.label || `Microfone ${i + 1}`;
-      // Destaca entradas de linha/mesa de som
       if (/usb|line|scarlett|behringer|focusrite|aux|interface|hw:/i.test(d.label)) {
         opt.textContent = '🎚️ ' + opt.textContent;
       } else {
@@ -601,7 +597,7 @@ async function loadAudioDevices() {
 // SETUP → START
 // ══════════════════════════════════════════════
 function showSetup() {
-  stopRecording();
+  stopAll();
   $('setup-screen').classList.remove('hidden');
   $('main-screen').classList.remove('visible');
   isRunning = false;
@@ -619,7 +615,6 @@ async function startApp() {
     return;
   }
 
-  // Atualiza UI
   $('church-display').textContent = churchName;
   const langNames = { en:'EN', pt:'PT', es:'ES', fr:'FR', de:'DE', it:'IT', ja:'JA', zh:'ZH' };
   const srcLabel = sourceLang === 'auto' ? 'AUTO' : sourceLang.split('-')[0].toUpperCase();
@@ -629,139 +624,168 @@ async function startApp() {
   $('main-screen').classList.add('visible');
   buildWaveform();
 
-  await startRecording();
+  await startRealtimeSession();
 }
 
 // ══════════════════════════════════════════════
-// GRAVAÇÃO CONTÍNUA — PIPELINE PARALELO
-// Grava o próximo bloco ENQUANTO traduz o anterior
+// REALTIME API — WebSocket (transcrição ao vivo)
 // ══════════════════════════════════════════════
-async function startRecording() {
+async function startRealtimeSession() {
   try {
+    // 1. Pega o stream do microfone
     const audioConstraints = selectedDeviceId
-      ? { deviceId: { exact: selectedDeviceId } }
-      : true;
+      ? { deviceId: { exact: selectedDeviceId }, sampleRate: 24000, channelCount: 1 }
+      : { sampleRate: 24000, channelCount: 1 };
     activeStream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
-    isRunning = true;
-    translationQueue = [];
-    isTranslating = false;
-    setStatus('listening');
-    $('source-label').textContent = 'Ouvindo microfone...';
-    animateWave(true);
 
-    const mimeType = ['audio/webm;codecs=opus','audio/webm','audio/ogg','audio/mp4']
-      .find(m => MediaRecorder.isTypeSupported(m)) || '';
+    // 2. Abre WebSocket com a Realtime API
+    const langParam = sourceLang !== 'auto' ? sourceLang.split('-')[0] : '';
+    ws = new WebSocket(
+      'wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview',
+      ['realtime', `openai-insecure-api-key.${apiKey}`, 'openai-beta.realtime-v1']
+    );
 
-    function recordChunk() {
-      if (!isRunning) return;
-      const chunks = [];
-
-      const recorder = new MediaRecorder(activeStream, mimeType ? { mimeType } : {});
-      recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-
-      recorder.onstop = () => {
-        if (!isRunning) return;
-        const blob = new Blob(chunks, { type: recorder.mimeType });
-        // Só enfileira se tiver áudio real (>5KB)
-        if (blob.size > 5000) {
-          translationQueue.push(blob);
-          drainQueue(); // processa fila sem bloquear gravação
+    ws.onopen = () => {
+      // Configura a sessão: só transcrição, sem resposta de voz
+      ws.send(JSON.stringify({
+        type: 'session.update',
+        session: {
+          modalities: ['text'],
+          instructions: buildSystemPrompt(),
+          input_audio_transcription: {
+            model: 'whisper-1',
+            ...(langParam ? { language: langParam } : {})
+          },
+          turn_detection: {
+            type: 'server_vad',       // Detecção de fala automática no servidor
+            threshold: 0.5,
+            prefix_padding_ms: 300,
+            silence_duration_ms: 600  // Considera pausa após 600ms de silêncio
+          }
         }
-        recordChunk(); // ← inicia IMEDIATAMENTE o próximo bloco
-      };
+      }));
 
-      recorder.start();
-      setTimeout(() => {
-        if (recorder.state === 'recording') recorder.stop();
-      }, CHUNK_DURATION_MS);
-    }
+      isRunning = true;
+      setStatus('listening');
+      $('source-label').textContent = 'Ouvindo em tempo real...';
+      animateWave(true);
+      startAudioStreaming();
+    };
 
-    recordChunk();
+    ws.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
+      handleRealtimeEvent(msg);
+    };
+
+    ws.onerror = (err) => {
+      console.error('WS error:', err);
+      showError('Erro de conexão com a API. Verifique sua chave e conexão.');
+      setStatus('error');
+    };
+
+    ws.onclose = (e) => {
+      if (isRunning) {
+        showError(`Conexão encerrada (${e.code}). Reconectando...`);
+        setTimeout(startRealtimeSession, 3000);
+      }
+    };
 
   } catch (err) {
     setStatus('error');
-    showError('Não foi possível acessar o microfone. Verifique as permissões do navegador.');
+    showError('Não foi possível acessar o microfone: ' + err.message);
     console.error(err);
   }
 }
 
-// Processa fila de blocos de áudio sequencialmente
-async function drainQueue() {
-  if (isTranslating || translationQueue.length === 0) return;
-  isTranslating = true;
-  while (translationQueue.length > 0) {
-    const blob = translationQueue.shift();
-    // Se fila acumulou muito (lag), descarta intermediários e pula pro mais recente
-    if (translationQueue.length > 2) {
-      translationQueue.splice(0, translationQueue.length - 1);
-    }
-    await transcribeAndTranslate(blob);
+// Envia áudio PCM16 pelo WebSocket em tempo real
+function startAudioStreaming() {
+  audioContext = new AudioContext({ sampleRate: 24000 });
+  const source = audioContext.createMediaStreamSource(activeStream);
+
+  // ScriptProcessor para capturar amostras de áudio
+  processorNode = audioContext.createScriptProcessor(4096, 1, 1);
+  processorNode.onaudioprocess = (e) => {
+    if (!isRunning || !ws || ws.readyState !== WebSocket.OPEN) return;
+    const float32 = e.inputBuffer.getChannelData(0);
+    const pcm16 = float32ToPcm16(float32);
+    const b64 = arrayBufferToBase64(pcm16.buffer);
+    ws.send(JSON.stringify({ type: 'input_audio_buffer.append', audio: b64 }));
+  };
+
+  source.connect(processorNode);
+  processorNode.connect(audioContext.destination);
+}
+
+// ══════════════════════════════════════════════
+// EVENTOS DA REALTIME API
+// ══════════════════════════════════════════════
+function handleRealtimeEvent(msg) {
+  switch (msg.type) {
+
+    // Transcrição parcial — mostra em tempo real enquanto o pastor fala
+    case 'conversation.item.input_audio_transcription.delta':
+      if (msg.delta) {
+        partialTranscript += msg.delta;
+        setSourceText(partialTranscript);
+        $('source-label').textContent = 'Ouvindo:';
+        // Traduz a cada fragmento com debounce de 800ms
+        scheduleTranslation(partialTranscript);
+      }
+      break;
+
+    // Transcrição completa de uma fala
+    case 'conversation.item.input_audio_transcription.completed':
+      if (msg.transcript && msg.transcript.trim().length > 2) {
+        const final = msg.transcript.trim();
+        setSourceText(final);
+        $('source-label').textContent = 'Detectado:';
+        clearTimeout(translateTimer);
+        translateNow(final); // Traduz imediatamente ao finalizar
+        partialTranscript = '';
+        lastTranscript = final;
+      }
+      break;
+
+    // Início de fala detectado
+    case 'input_audio_buffer.speech_started':
+      setStatus('listening');
+      animateWave(true);
+      partialTranscript = '';
+      break;
+
+    // Fim de fala detectado
+    case 'input_audio_buffer.speech_stopped':
+      setStatus('translating');
+      break;
+
+    case 'error':
+      console.error('Realtime API error:', msg.error);
+      showError('Erro da API: ' + (msg.error?.message || 'desconhecido'));
+      break;
   }
-  isTranslating = false;
 }
 
-function stopRecording() {
-  isRunning = false;
-  if (activeStream) activeStream.getTracks().forEach(t => t.stop());
-  translationQueue = [];
-  animateWave(false);
-  setStatus('idle');
+// Debounce: traduz enquanto fala, mas sem sobrecarregar a API
+function scheduleTranslation(text) {
+  clearTimeout(translateTimer);
+  translateTimer = setTimeout(() => translateNow(text), 900);
 }
 
 // ══════════════════════════════════════════════
-// TRANSCRIÇÃO (Whisper) + TRADUÇÃO (GPT-4o)
+// TRADUÇÃO (GPT-4o mini streaming)
 // ══════════════════════════════════════════════
-async function transcribeAndTranslate(audioBlob) {
-  setStatus('translating');
+async function translateNow(text) {
+  if (!text || text.trim().length < 3) return;
+  if (text.trim() === lastTranscript.trim()) return;
+
+  const langNames = {
+    en:'English', pt:'Portuguese', es:'Spanish', fr:'French',
+    de:'German', it:'Italian', ja:'Japanese', zh:'Mandarin Chinese'
+  };
+  const targetName = langNames[targetLang] || targetLang;
 
   try {
-    // 1. Transcrição com Whisper
-    const formData = new FormData();
-    formData.append('file', audioBlob, 'audio.webm');
-    formData.append('model', 'whisper-1');
-    if (sourceLang !== 'auto') {
-      formData.append('language', sourceLang.split('-')[0]);
-    }
-    formData.append('response_format', 'json');
-
-    const whisperRes = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${apiKey}` },
-      body: formData
-    });
-
-    if (!whisperRes.ok) {
-      const err = await whisperRes.json().catch(() => ({}));
-      throw new Error(err?.error?.message || `Whisper error ${whisperRes.status}`);
-    }
-
-    const { text: transcript } = await whisperRes.json();
-
-    if (!transcript || transcript.trim().length < 3) {
-      setStatus('listening');
-      animateWave(true);
-      return;
-    }
-
-    // Evita repetir mesma frase
-    if (transcript.trim() === lastTranscript.trim()) {
-      setStatus('listening');
-      animateWave(true);
-      return;
-    }
-    lastTranscript = transcript;
-
-    setSourceText(transcript);
-    $('source-label').textContent = 'Detectado:';
-
-    // 2. Tradução com GPT-4o mini
-    const langNames = {
-      en:'English', pt:'Portuguese', es:'Spanish', fr:'French',
-      de:'German', it:'Italian', ja:'Japanese', zh:'Mandarin Chinese'
-    };
-    const targetName = langNames[targetLang] || targetLang;
-
-    const chatRes = await fetch('https://api.openai.com/v1/chat/completions', {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
@@ -769,41 +793,91 @@ async function transcribeAndTranslate(audioBlob) {
       },
       body: JSON.stringify({
         model: 'gpt-4o-mini',
-        max_tokens: 500,
+        max_tokens: 300,
+        stream: true,   // ← Streaming: palavras aparecem uma a uma
         messages: [
           {
             role: 'system',
-            content: `You are a real-time church sermon translator. Translate the input text to ${targetName}. Return ONLY the translated text, nothing else. Keep a respectful, natural tone appropriate for a religious service. Do not add explanations or quotes.`
+            content: `You are a real-time church sermon translator. Translate to ${targetName}. Return ONLY the translation, no explanations. Keep a respectful religious tone.`
           },
-          { role: 'user', content: transcript }
+          { role: 'user', content: text }
         ]
       })
     });
 
-    if (!chatRes.ok) {
-      const err = await chatRes.json().catch(() => ({}));
-      throw new Error(err?.error?.message || `GPT error ${chatRes.status}`);
+    if (!res.ok) return;
+
+    // Lê o stream e vai exibindo as palavras conforme chegam
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let translationBuffer = '';
+    $('translated-label').textContent = `Tradução → ${targetName}`;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value);
+      const lines = chunk.split('\n').filter(l => l.startsWith('data: '));
+      for (const line of lines) {
+        const data = line.replace('data: ', '');
+        if (data === '[DONE]') break;
+        try {
+          const json = JSON.parse(data);
+          const delta = json.choices?.[0]?.delta?.content;
+          if (delta) {
+            translationBuffer += delta;
+            setTranslatedText(translationBuffer);
+          }
+        } catch {}
+      }
     }
-
-    const chatData = await chatRes.json();
-    const translation = chatData.choices?.[0]?.message?.content?.trim();
-
-    if (translation) {
-      setTranslatedText(translation);
-      $('translated-label').textContent = `Tradução → ${targetName}`;
-    }
-
   } catch (err) {
-    console.error('Erro:', err);
-    showError(`Erro: ${err.message}`);
-    setStatus('error');
-    setTimeout(() => setStatus('listening'), 3000);
-  } finally {
-    setStatus('listening');
+    console.error('Erro tradução:', err);
   }
 }
 
-// Inicializa waveform vazio e lista dispositivos
+function buildSystemPrompt() {
+  const langNames = {
+    en:'English', pt:'Portuguese', es:'Spanish', fr:'French',
+    de:'German', it:'Italian', ja:'Japanese', zh:'Mandarin Chinese'
+  };
+  return `You are a real-time church sermon translator. When responding, translate to ${langNames[targetLang] || targetLang}. Keep a respectful religious tone.`;
+}
+
+// ══════════════════════════════════════════════
+// PARAR TUDO
+// ══════════════════════════════════════════════
+function stopAll() {
+  isRunning = false;
+  clearTimeout(translateTimer);
+  if (ws) { try { ws.close(); } catch {} ws = null; }
+  if (processorNode) { try { processorNode.disconnect(); } catch {} processorNode = null; }
+  if (audioContext) { try { audioContext.close(); } catch {} audioContext = null; }
+  if (activeStream) { activeStream.getTracks().forEach(t => t.stop()); activeStream = null; }
+  animateWave(false);
+  setStatus('idle');
+}
+
+// ══════════════════════════════════════════════
+// UTILS: Conversão de áudio Float32 → PCM16 → Base64
+// ══════════════════════════════════════════════
+function float32ToPcm16(float32Array) {
+  const pcm = new Int16Array(float32Array.length);
+  for (let i = 0; i < float32Array.length; i++) {
+    const s = Math.max(-1, Math.min(1, float32Array[i]));
+    pcm[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+  }
+  return pcm;
+}
+
+function arrayBufferToBase64(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+}
+
+// Inicializa
 buildWaveform();
 loadAudioDevices();
 </script>
