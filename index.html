@@ -6,386 +6,369 @@
 <title>Tradução ao Vivo — Culto</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600&family=Inter:wght@300;400&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0a0a0f;
-    --bg2: #10101a;
-    --gold: #c9a84c;
-    --gold2: #e8c97a;
-    --text: #f0ead6;
-    --muted: #7a7565;
-    --accent: #3d6b8c;
-    --glow: rgba(201,168,76,0.15);
-    --red: #c0392b;
-  }
+:root {
+  --bg: #0a0a0f;
+  --bg2: #10101a;
+  --gold: #c9a84c;
+  --gold2: #e8c97a;
+  --text: #f0ead6;
+  --muted: #7a7565;
+  --accent: #3d6b8c;
+  --glow: rgba(201,168,76,0.15);
+  --red: #c0392b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  overflow: hidden;
+}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+/* ─── Background ornamental ─── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 0%, rgba(201,168,76,0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 30% at 80% 100%, rgba(61,107,140,0.08) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
-    min-height: 100vh;
-    overflow: hidden;
-  }
+/* ─── TELA DE SETUP ─── */
+#setup-screen {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(4px);
+  background: rgba(10,10,15,0.97);
+  flex-direction: column;
+  gap: 0;
+  transition: opacity 0.6s, transform 0.6s;
+  overflow-y: auto;
+  padding: 2rem 0;
+}
+#setup-screen.hidden {
+  opacity: 0; pointer-events: none; transform: scale(1.04);
+}
+.setup-card {
+  background: linear-gradient(145deg, #13131f, #0d0d18);
+  border: 1px solid rgba(201,168,76,0.25);
+  border-radius: 2px;
+  padding: 3rem 3.5rem;
+  width: min(520px, 90vw);
+  box-shadow: 0 0 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(201,168,76,0.1);
+  margin: auto;
+}
+.ornament {
+  text-align: center;
+  color: var(--gold);
+  font-size: 1.2rem;
+  letter-spacing: 0.4em;
+  margin-bottom: 0.4rem;
+  opacity: 0.5;
+}
+.setup-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--gold2);
+  text-align: center;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.3rem;
+}
+.setup-subtitle {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 2.5rem;
+}
+.field-group {
+  margin-bottom: 1.4rem;
+}
+label {
+  display: block;
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.5rem;
+  opacity: 0.8;
+}
+select, input[type="text"], input[type="password"] {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(201,168,76,0.2);
+  border-radius: 2px;
+  color: var(--text);
+  padding: 0.7rem 1rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+}
+select:focus, input[type="text"]:focus, input[type="password"]:focus {
+  border-color: rgba(201,168,76,0.5);
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.08);
+}
+select option { background: #13131f; }
+.api-hint {
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-top: 0.4rem;
+  line-height: 1.5;
+}
+.api-hint a { color: var(--gold); text-decoration: none; }
+.btn-start {
+  width: 100%;
+  margin-top: 2rem;
+  padding: 0.85rem;
+  background: linear-gradient(135deg, #b8943a, #c9a84c, #dbb96a);
+  border: none;
+  border-radius: 2px;
+  color: #0a0a0f;
+  font-family: 'Cinzel', serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+.btn-start:hover { opacity: 0.9; }
+.btn-start:active { transform: scale(0.99); }
 
-  /* ─── Background ornamental ─── */
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background:
-      radial-gradient(ellipse 60% 50% at 50% 0%, rgba(201,168,76,0.07) 0%, transparent 70%),
-      radial-gradient(ellipse 40% 30% at 80% 100%, rgba(61,107,140,0.08) 0%, transparent 60%);
-    pointer-events: none;
-    z-index: 0;
-  }
+/* ─── TELA PRINCIPAL (telão) ─── */
+#main-screen {
+  position: fixed; inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5vw;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.8s 0.3s;
+}
+#main-screen.visible { opacity: 1; }
 
-  /* ─── TELA DE SETUP ─── */
-  #setup-screen {
-    position: fixed; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    z-index: 100;
-    backdrop-filter: blur(4px);
-    background: rgba(10,10,15,0.97);
-    flex-direction: column;
-    gap: 0;
-    transition: opacity 0.6s, transform 0.6s;
-  }
-  #setup-screen.hidden {
-    opacity: 0; pointer-events: none; transform: scale(1.04);
-  }
+/* Barra de status topo */
+#top-bar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  background: linear-gradient(to bottom, rgba(10,10,15,0.9), transparent);
+  z-index: 10;
+}
+.church-name {
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  color: var(--gold);
+  letter-spacing: 0.2em;
+  opacity: 0.7;
+}
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+#lang-badge {
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(201,168,76,0.15);
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+}
+#status-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition: background 0.3s, box-shadow 0.3s;
+}
+#status-dot.listening {
+  background: #4caf75;
+  box-shadow: 0 0 10px rgba(76,175,117,0.6);
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+#status-dot.translating {
+  background: var(--gold);
+  box-shadow: 0 0 10px rgba(201,168,76,0.6);
+}
+#status-dot.error {
+  background: var(--red);
+}
+#status-dot.reconnecting {
+  background: var(--accent);
+  animation: pulse-dot 0.8s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.7; }
+}
+.btn-settings {
+  background: none;
+  border: 1px solid rgba(201,168,76,0.2);
+  color: var(--muted);
+  padding: 0.3rem 0.8rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-settings:hover {
+  border-color: rgba(201,168,76,0.5);
+  color: var(--gold);
+}
 
-  .setup-card {
-    background: linear-gradient(145deg, #13131f, #0d0d18);
-    border: 1px solid rgba(201,168,76,0.25);
-    border-radius: 2px;
-    padding: 3rem 3.5rem;
-    width: min(520px, 90vw);
-    box-shadow: 0 0 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(201,168,76,0.1);
-  }
+/* ─── Área de texto principal ─── */
+#text-area {
+  width: 100%;
+  max-width: 1200px;
+  text-align: center;
+  position: relative;
+}
 
-  .ornament {
-    text-align: center;
-    color: var(--gold);
-    font-size: 1.2rem;
-    letter-spacing: 0.4em;
-    margin-bottom: 0.4rem;
-    opacity: 0.5;
-  }
+/* Linha decorativa topo */
+.deco-line {
+  width: 60px; height: 1px;
+  background: linear-gradient(to right, transparent, var(--gold), transparent);
+  margin: 0 auto 2rem;
+  opacity: 0.5;
+}
+#source-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 1rem;
+  min-height: 1em;
+  transition: opacity 0.3s;
+}
+#source-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.1rem, 2.5vw, 1.8rem);
+  font-style: italic;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 2.5rem;
+  min-height: 2em;
+  transition: opacity 0.4s;
+  max-width: 900px;
+  margin-left: auto; margin-right: auto;
+}
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 2.5rem;
+}
+.divider-line {
+  width: 40px; height: 1px;
+  background: rgba(201,168,76,0.3);
+}
+.divider-icon {
+  color: var(--gold);
+  font-size: 1rem;
+  opacity: 0.6;
+}
+#translated-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.6;
+  margin-bottom: 1.2rem;
+  min-height: 1em;
+}
+#translated-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2rem, 5.5vw, 5rem);
+  font-weight: 300;
+  color: var(--text);
+  line-height: 1.3;
+  min-height: 1.4em;
+  transition: opacity 0.3s;
+  text-shadow: 0 0 60px rgba(201,168,76,0.1);
+  letter-spacing: 0.01em;
+}
 
-  .setup-title {
-    font-family: 'Cinzel', serif;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--gold2);
-    text-align: center;
-    letter-spacing: 0.1em;
-    margin-bottom: 0.3rem;
-  }
+/* Estado vazio / aguardando */
+.placeholder-text {
+  color: rgba(122,117,101,0.35) !important;
+  font-style: italic;
+}
 
-  .setup-subtitle {
-    text-align: center;
-    color: var(--muted);
-    font-size: 0.78rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    margin-bottom: 2.5rem;
-  }
+/* Animação de entrada do texto */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.text-animate { animation: fadeUp 0.5s ease forwards; }
 
-  .field-group {
-    margin-bottom: 1.4rem;
-  }
+/* Barra de microfone (waveform visual) */
+#waveform {
+  position: fixed;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 30px;
+}
+.wave-bar {
+  width: 3px;
+  background: var(--gold);
+  border-radius: 2px;
+  opacity: 0.3;
+  height: 6px;
+  transition: height 0.1s, opacity 0.1s;
+}
+.wave-bar.active {
+  opacity: 0.7;
+  animation: wave-anim 0.6s ease-in-out infinite alternate;
+}
+@keyframes wave-anim {
+  from { height: 4px; }
+  to { height: var(--h, 20px); }
+}
 
-  label {
-    display: block;
-    font-size: 0.72rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--gold);
-    margin-bottom: 0.5rem;
-    opacity: 0.8;
-  }
+/* Mensagem de erro */
+#error-msg {
+  position: fixed;
+  bottom: 5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(192,57,43,0.15);
+  border: 1px solid rgba(192,57,43,0.4);
+  color: #e07070;
+  padding: 0.6rem 1.4rem;
+  border-radius: 2px;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  display: none;
+  text-align: center;
+  max-width: 90vw;
+}
+#error-msg.visible { display: block; }
 
-  select, input[type="text"] {
-    width: 100%;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(201,168,76,0.2);
-    border-radius: 2px;
-    color: var(--text);
-    padding: 0.7rem 1rem;
-    font-family: 'Inter', sans-serif;
-    font-size: 0.9rem;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    -webkit-appearance: none;
-  }
-
-  select:focus, input[type="text"]:focus {
-    border-color: rgba(201,168,76,0.5);
-    box-shadow: 0 0 0 3px rgba(201,168,76,0.08);
-  }
-
-  select option { background: #13131f; }
-
-  .api-hint {
-    font-size: 0.7rem;
-    color: var(--muted);
-    margin-top: 0.4rem;
-    line-height: 1.5;
-  }
-  .api-hint a { color: var(--gold); text-decoration: none; }
-
-  .btn-start {
-    width: 100%;
-    margin-top: 2rem;
-    padding: 0.85rem;
-    background: linear-gradient(135deg, #b8943a, #c9a84c, #dbb96a);
-    border: none;
-    border-radius: 2px;
-    color: #0a0a0f;
-    font-family: 'Cinzel', serif;
-    font-size: 0.9rem;
-    font-weight: 600;
-    letter-spacing: 0.2em;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.1s;
-  }
-  .btn-start:hover { opacity: 0.9; }
-  .btn-start:active { transform: scale(0.99); }
-
-  /* ─── TELA PRINCIPAL (telão) ─── */
-  #main-screen {
-    position: fixed; inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 5vw;
-    z-index: 1;
-    opacity: 0;
-    transition: opacity 0.8s 0.3s;
-  }
-  #main-screen.visible { opacity: 1; }
-
-  /* Barra de status topo */
-  #top-bar {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem 2rem;
-    background: linear-gradient(to bottom, rgba(10,10,15,0.9), transparent);
-    z-index: 10;
-  }
-
-  .church-name {
-    font-family: 'Cinzel', serif;
-    font-size: 0.85rem;
-    color: var(--gold);
-    letter-spacing: 0.2em;
-    opacity: 0.7;
-  }
-
-  .status-row {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  #lang-badge {
-    font-size: 0.7rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted);
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(201,168,76,0.15);
-    padding: 0.3rem 0.8rem;
-    border-radius: 20px;
-  }
-
-  #status-dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    background: var(--muted);
-    transition: background 0.3s, box-shadow 0.3s;
-  }
-  #status-dot.listening {
-    background: #4caf75;
-    box-shadow: 0 0 10px rgba(76,175,117,0.6);
-    animation: pulse-dot 1.5s ease-in-out infinite;
-  }
-  #status-dot.translating {
-    background: var(--gold);
-    box-shadow: 0 0 10px rgba(201,168,76,0.6);
-  }
-  #status-dot.error {
-    background: var(--red);
-  }
-
-  @keyframes pulse-dot {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.4); opacity: 0.7; }
-  }
-
-  .btn-settings {
-    background: none;
-    border: 1px solid rgba(201,168,76,0.2);
-    color: var(--muted);
-    padding: 0.3rem 0.8rem;
-    font-family: 'Inter', sans-serif;
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-settings:hover {
-    border-color: rgba(201,168,76,0.5);
-    color: var(--gold);
-  }
-
-  /* ─── Área de texto principal ─── */
-  #text-area {
-    width: 100%;
-    max-width: 1200px;
-    text-align: center;
-    position: relative;
-  }
-
-  /* Linha decorativa topo */
-  .deco-line {
-    width: 60px; height: 1px;
-    background: linear-gradient(to right, transparent, var(--gold), transparent);
-    margin: 0 auto 2rem;
-    opacity: 0.5;
-  }
-
-  #source-label {
-    font-size: 0.65rem;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 1rem;
-    min-height: 1em;
-    transition: opacity 0.3s;
-  }
-
-  #source-text {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(1.1rem, 2.5vw, 1.8rem);
-    font-style: italic;
-    color: var(--muted);
-    line-height: 1.6;
-    margin-bottom: 2.5rem;
-    min-height: 2em;
-    transition: opacity 0.4s;
-    max-width: 900px;
-    margin-left: auto; margin-right: auto;
-  }
-
-  .divider {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    justify-content: center;
-    margin-bottom: 2.5rem;
-  }
-  .divider-line {
-    width: 40px; height: 1px;
-    background: rgba(201,168,76,0.3);
-  }
-  .divider-icon {
-    color: var(--gold);
-    font-size: 1rem;
-    opacity: 0.6;
-  }
-
-  #translated-label {
-    font-size: 0.65rem;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    color: var(--gold);
-    opacity: 0.6;
-    margin-bottom: 1.2rem;
-    min-height: 1em;
-  }
-
-  #translated-text {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(2rem, 5.5vw, 5rem);
-    font-weight: 300;
-    color: var(--text);
-    line-height: 1.3;
-    min-height: 1.4em;
-    transition: opacity 0.3s;
-    text-shadow: 0 0 60px rgba(201,168,76,0.1);
-    letter-spacing: 0.01em;
-  }
-
-  /* Estado vazio / aguardando */
-  .placeholder-text {
-    color: rgba(122,117,101,0.35) !important;
-    font-style: italic;
-  }
-
-  /* Animação de entrada do texto */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .text-animate { animation: fadeUp 0.5s ease forwards; }
-
-  /* Barra de microfone (waveform visual) */
-  #waveform {
-    position: fixed;
-    bottom: 2.5rem;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    height: 30px;
-  }
-  .wave-bar {
-    width: 3px;
-    background: var(--gold);
-    border-radius: 2px;
-    opacity: 0.3;
-    height: 6px;
-    transition: height 0.1s, opacity 0.1s;
-  }
-  .wave-bar.active {
-    opacity: 0.7;
-    animation: wave-anim 0.6s ease-in-out infinite alternate;
-  }
-  @keyframes wave-anim {
-    from { height: 4px; }
-    to { height: var(--h, 20px); }
-  }
-
-  /* Mensagem de erro */
-  #error-msg {
-    position: fixed;
-    bottom: 5rem;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(192,57,43,0.15);
-    border: 1px solid rgba(192,57,43,0.4);
-    color: #e07070;
-    padding: 0.6rem 1.4rem;
-    border-radius: 2px;
-    font-size: 0.78rem;
-    letter-spacing: 0.08em;
-    display: none;
-    text-align: center;
-    max-width: 90vw;
-  }
-  #error-msg.visible { display: block; }
-
-  /* ─── Responsivo TV ─── */
-  @media (min-width: 1400px) {
-    #translated-text { font-size: 5.5rem; }
-  }
+/* ─── Responsivo TV ─── */
+@media (min-width: 1400px) {
+  #translated-text { font-size: 5.5rem; }
+}
 </style>
 </head>
 <body>
@@ -405,8 +388,8 @@
     <div class="field-group">
       <label>Idioma de origem (quem fala)</label>
       <select id="source-lang">
-        <option value="auto" selected>🔍 Detectar automaticamente</option>
-        <option value="pt-BR">🇧🇷 Português (Brasil)</option>
+        <option value="auto">🔍 Detectar automaticamente</option>
+        <option value="pt-BR" selected>🇧🇷 Português (Brasil)</option>
         <option value="pt-PT">🇵🇹 Português (Portugal)</option>
         <option value="en-GB">🇬🇧 Inglês (UK)</option>
         <option value="en-US">🇺🇸 Inglês (EUA)</option>
@@ -439,11 +422,12 @@
 
     <div class="field-group">
       <label>Chave da API do OpenAI</label>
-      <input type="text" id="api-key-input" placeholder="sk-...">
+      <input type="password" id="api-key-input" placeholder="sk-...">
       <p class="api-hint">
         Necessário para transcrição e tradução. Crie a sua em
         <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a>
         — custo aproximado de £2–5/mês para uso em cultos.
+        A chave fica salva apenas neste navegador.
       </p>
     </div>
 
@@ -453,7 +437,6 @@
 
 <!-- ══════════ TELA DO TELÃO ══════════ -->
 <div id="main-screen">
-
   <div id="top-bar">
     <span class="church-name" id="church-display">Igreja Brasileira de Londres</span>
     <div class="status-row">
@@ -481,7 +464,6 @@
 
   <div id="waveform"></div>
   <div id="error-msg"></div>
-
 </div>
 
 <script>
@@ -490,31 +472,135 @@
 // ══════════════════════════════════════════════
 let apiKey = '';
 let targetLang = 'en';
-let sourceLang = 'auto';
+let sourceLang = 'pt-BR';
 let churchName = '';
 let selectedDeviceId = '';
 let isRunning = false;
-let ws = null;               // WebSocket Realtime API
-let activeStream = null;     // Stream do microfone
+let ws = null;
+let activeStream = null;
 let audioContext = null;
 let processorNode = null;
-let lastTranscript = '';
-let partialTranscript = '';
-let translateTimer = null;   // Debounce da tradução
+let reconnectAttempts = 0;
+let reconnectTimer = null;
+let lastTranslatedText = '';
+let activeTranslationController = null; // AbortController da tradução em andamento
+
+const MAX_RECONNECT_DELAY = 30000; // 30s
+const BASE_RECONNECT_DELAY = 3000; // 3s
+
+// ══════════════════════════════════════════════
+// GLOSSÁRIO TEOLÓGICO — Evangélica tradicional, NVI ↔ NIV
+// ══════════════════════════════════════════════
+// Usado para construir o system prompt. Editar conforme cresce a base de erros observados.
+const THEOLOGICAL_GLOSSARY = {
+  // PT-BR → EN (NVI → NIV)
+  ptToEn: [
+    ['santificação', 'sanctification'],
+    ['justificação', 'justification'],
+    ['redenção', 'redemption'],
+    ['expiação', 'atonement'],
+    ['propiciação', 'propitiation'],
+    ['arrependimento', 'repentance'],
+    ['salvação', 'salvation'],
+    ['graça', 'grace'],
+    ['misericórdia', 'mercy'],
+    ['louvor', 'praise'],
+    ['adoração', 'worship'],
+    ['intercessão', 'intercession'],
+    ['comunhão', 'fellowship'],
+    ['discipulado', 'discipleship'],
+    ['ministério', 'ministry'],
+    ['unção', 'anointing'],
+    ['ungido', 'anointed'],
+    ['arrebatamento', 'rapture'],
+    ['segunda vinda', 'second coming'],
+    ['novo nascimento', 'new birth'],
+    ['nascer de novo', 'born again'],
+    ['Espírito Santo', 'Holy Spirit'],
+    ['Senhor', 'Lord'],
+    ['Reino dos Céus', 'Kingdom of Heaven'],
+    ['Reino de Deus', 'Kingdom of God'],
+    ['Aliança', 'Covenant'],
+    ['pecado original', 'original sin'],
+    ['queda', 'the Fall'],
+    ['profecia', 'prophecy'],
+    ['evangelho', 'gospel'],
+    ['ide', 'go ye / go therefore'],
+    ['anátema', 'anathema'],
+    ['glória', 'glory'],
+    ['aleluia', 'hallelujah'],
+    ['amém', 'amen'],
+    ['benção', 'blessing'],
+    ['dízimo', 'tithe'],
+    ['oferta', 'offering'],
+    ['parábola', 'parable'],
+    ['fariseu', 'Pharisee'],
+    ['saduceu', 'Sadducee'],
+    ['publicano', 'tax collector'],
+    ['gentio', 'Gentile'],
+    ['justo', 'righteous'],
+    ['ímpio', 'wicked / ungodly'],
+  ],
+  // Nomes próprios bíblicos que costumam errar
+  biblicalNames: [
+    ['Tiago', 'James'],
+    ['João', 'John'],
+    ['Mateus', 'Matthew'],
+    ['Marcos', 'Mark'],
+    ['Lucas', 'Luke'],
+    ['Paulo', 'Paul'],
+    ['Pedro', 'Peter'],
+    ['Davi', 'David'],
+    ['Salomão', 'Solomon'],
+    ['Isaías', 'Isaiah'],
+    ['Jeremias', 'Jeremiah'],
+    ['Ezequiel', 'Ezekiel'],
+    ['Daniel', 'Daniel'],
+    ['Oséias', 'Hosea'],
+    ['Provérbios', 'Proverbs'],
+    ['Salmos', 'Psalms'],
+    ['Gênesis', 'Genesis'],
+    ['Êxodo', 'Exodus'],
+    ['Levítico', 'Leviticus'],
+    ['Números', 'Numbers'],
+    ['Deuteronômio', 'Deuteronomy'],
+    ['Cantares', 'Song of Songs'],
+    ['Eclesiastes', 'Ecclesiastes'],
+    ['Apocalipse', 'Revelation'],
+    ['Hebreus', 'Hebrews'],
+    ['Romanos', 'Romans'],
+    ['Coríntios', 'Corinthians'],
+    ['Gálatas', 'Galatians'],
+    ['Efésios', 'Ephesians'],
+    ['Filipenses', 'Philippians'],
+    ['Colossenses', 'Colossians'],
+    ['Tessalonicenses', 'Thessalonians'],
+    ['Timóteo', 'Timothy'],
+    ['Tito', 'Titus'],
+    ['Filemom', 'Philemon'],
+  ]
+};
 
 // ══════════════════════════════════════════════
 // UI HELPERS
 // ══════════════════════════════════════════════
 const $ = id => document.getElementById(id);
+
 const setStatus = (state) => {
   $('status-dot').className = state === 'idle' ? '' : state;
 };
 
-function showError(msg) {
+function showError(msg, persistent = false) {
   const el = $('error-msg');
   el.textContent = msg;
   el.classList.add('visible');
-  setTimeout(() => el.classList.remove('visible'), 7000);
+  if (!persistent) {
+    setTimeout(() => el.classList.remove('visible'), 7000);
+  }
+}
+
+function hideError() {
+  $('error-msg').classList.remove('visible');
 }
 
 function setTranslatedText(text, isPlaceholder = false) {
@@ -545,7 +631,6 @@ function buildWaveform(n = 18) {
     waveBars.push(b);
   }
 }
-
 let waveAnimFrame = null;
 function animateWave(active) {
   cancelAnimationFrame(waveAnimFrame);
@@ -593,6 +678,29 @@ async function loadAudioDevices() {
   }
 }
 
+// Restaura chave da API salva localmente (apenas neste navegador)
+function loadSavedApiKey() {
+  try {
+    const saved = localStorage.getItem('traducao_culto_api_key');
+    if (saved) $('api-key-input').value = saved;
+    const savedChurch = localStorage.getItem('traducao_culto_church');
+    if (savedChurch) $('church-input').value = savedChurch;
+    const savedSource = localStorage.getItem('traducao_culto_source');
+    if (savedSource) $('source-lang').value = savedSource;
+    const savedTarget = localStorage.getItem('traducao_culto_target');
+    if (savedTarget) $('target-lang').value = savedTarget;
+  } catch {}
+}
+
+function savePreferences() {
+  try {
+    localStorage.setItem('traducao_culto_api_key', apiKey);
+    localStorage.setItem('traducao_culto_church', churchName);
+    localStorage.setItem('traducao_culto_source', sourceLang);
+    localStorage.setItem('traducao_culto_target', targetLang);
+  } catch {}
+}
+
 // ══════════════════════════════════════════════
 // SETUP → START
 // ══════════════════════════════════════════════
@@ -615,6 +723,8 @@ async function startApp() {
     return;
   }
 
+  savePreferences();
+
   $('church-display').textContent = churchName;
   const langNames = { en:'EN', pt:'PT', es:'ES', fr:'FR', de:'DE', it:'IT', ja:'JA', zh:'ZH' };
   const srcLabel = sourceLang === 'auto' ? 'AUTO' : sourceLang.split('-')[0].toUpperCase();
@@ -622,8 +732,9 @@ async function startApp() {
 
   $('setup-screen').classList.add('hidden');
   $('main-screen').classList.add('visible');
-  buildWaveform();
 
+  buildWaveform();
+  reconnectAttempts = 0;
   await startRealtimeSession();
 }
 
@@ -634,67 +745,107 @@ async function startRealtimeSession() {
   try {
     // 1. Pega o stream do microfone
     const audioConstraints = selectedDeviceId
-      ? { deviceId: { exact: selectedDeviceId }, sampleRate: 24000, channelCount: 1 }
-      : { sampleRate: 24000, channelCount: 1 };
+      ? { deviceId: { exact: selectedDeviceId }, sampleRate: 24000, channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+      : { sampleRate: 24000, channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false };
+
     activeStream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
 
     // 2. Abre WebSocket com a Realtime API
     const langParam = sourceLang !== 'auto' ? sourceLang.split('-')[0] : '';
+
     ws = new WebSocket(
       'wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview',
       ['realtime', `openai-insecure-api-key.${apiKey}`, 'openai-beta.realtime-v1']
     );
 
     ws.onopen = () => {
-      // Configura a sessão: só transcrição, sem resposta de voz
+      // Configura a sessão: usa gpt-4o-transcribe (mais preciso que whisper-1)
       ws.send(JSON.stringify({
         type: 'session.update',
         session: {
           modalities: ['text'],
-          instructions: buildSystemPrompt(),
           input_audio_transcription: {
-            model: 'whisper-1',
-            ...(langParam ? { language: langParam } : {})
+            model: 'gpt-4o-transcribe',
+            ...(langParam ? { language: langParam } : {}),
+            // Prompt do transcritor: ajuda a reconhecer termos religiosos
+            prompt: 'Contexto: culto evangélico cristão. Termos comuns: Jesus, Cristo, Senhor, Deus, Espírito Santo, Bíblia, evangelho, salvação, graça, fé, oração, aleluia, amém, igreja, pastor, irmão, irmã, glória, louvor, adoração, ministério, comunhão, arrependimento, santificação, redenção. Nomes de livros bíblicos: Gênesis, Êxodo, Salmos, Provérbios, Isaías, Mateus, Marcos, Lucas, João, Atos, Romanos, Coríntios, Apocalipse.'
           },
           turn_detection: {
-            type: 'server_vad',       // Detecção de fala automática no servidor
+            type: 'server_vad',
             threshold: 0.5,
             prefix_padding_ms: 300,
-            silence_duration_ms: 600  // Considera pausa após 600ms de silêncio
+            silence_duration_ms: 700 // Um pouco maior para evitar cortar pausas naturais de pregação
           }
         }
       }));
 
       isRunning = true;
+      reconnectAttempts = 0;
       setStatus('listening');
+      hideError();
       $('source-label').textContent = 'Ouvindo em tempo real...';
       animateWave(true);
       startAudioStreaming();
     };
 
     ws.onmessage = (event) => {
-      const msg = JSON.parse(event.data);
-      handleRealtimeEvent(msg);
+      try {
+        const msg = JSON.parse(event.data);
+        handleRealtimeEvent(msg);
+      } catch (err) {
+        console.error('Erro ao processar mensagem:', err);
+      }
     };
 
     ws.onerror = (err) => {
       console.error('WS error:', err);
-      showError('Erro de conexão com a API. Verifique sua chave e conexão.');
-      setStatus('error');
     };
 
     ws.onclose = (e) => {
       if (isRunning) {
-        showError(`Conexão encerrada (${e.code}). Reconectando...`);
-        setTimeout(startRealtimeSession, 3000);
+        scheduleReconnect(e.code, e.reason);
       }
     };
-
   } catch (err) {
     setStatus('error');
-    showError('Não foi possível acessar o microfone: ' + err.message);
+    showError('Não foi possível acessar o microfone: ' + err.message, true);
     console.error(err);
   }
+}
+
+// Reconexão com backoff exponencial
+function scheduleReconnect(code, reason) {
+  // Códigos que NÃO devem reconectar (erro de autenticação, etc)
+  if (code === 1008 || code === 4001 || code === 4003) {
+    setStatus('error');
+    showError('Erro de autenticação. Verifique sua chave da API.', true);
+    isRunning = false;
+    return;
+  }
+
+  reconnectAttempts++;
+  const delay = Math.min(BASE_RECONNECT_DELAY * Math.pow(2, reconnectAttempts - 1), MAX_RECONNECT_DELAY);
+  const delaySeconds = Math.round(delay / 1000);
+
+  setStatus('reconnecting');
+  showError(`Conexão perdida. Reconectando em ${delaySeconds}s... (tentativa ${reconnectAttempts})`, true);
+
+  // Limpa processador de áudio antes de reconectar
+  if (processorNode) { try { processorNode.disconnect(); } catch {} processorNode = null; }
+  if (audioContext) { try { audioContext.close(); } catch {} audioContext = null; }
+  if (activeStream) { activeStream.getTracks().forEach(t => t.stop()); activeStream = null; }
+
+  if (reconnectAttempts > 8) {
+    setStatus('error');
+    showError('Não foi possível reconectar após várias tentativas. Verifique sua conexão e clique em Configurar para reiniciar.', true);
+    isRunning = false;
+    return;
+  }
+
+  clearTimeout(reconnectTimer);
+  reconnectTimer = setTimeout(() => {
+    if (isRunning) startRealtimeSession();
+  }, delay);
 }
 
 // Envia áudio PCM16 pelo WebSocket em tempo real
@@ -702,7 +853,7 @@ function startAudioStreaming() {
   audioContext = new AudioContext({ sampleRate: 24000 });
   const source = audioContext.createMediaStreamSource(activeStream);
 
-  // ScriptProcessor para capturar amostras de áudio
+  // ScriptProcessor (deprecado mas funcional — migrar para AudioWorklet na Fase 2)
   processorNode = audioContext.createScriptProcessor(4096, 1, 1);
   processorNode.onaudioprocess = (e) => {
     if (!isRunning || !ws || ws.readyState !== WebSocket.OPEN) return;
@@ -721,28 +872,26 @@ function startAudioStreaming() {
 // ══════════════════════════════════════════════
 function handleRealtimeEvent(msg) {
   switch (msg.type) {
-
-    // Transcrição parcial — mostra em tempo real enquanto o pastor fala
+    // Transcrição parcial — apenas atualiza o texto de origem (lado superior, em itálico)
+    // NÃO dispara tradução aqui (correção do loop redundante da versão anterior)
     case 'conversation.item.input_audio_transcription.delta':
       if (msg.delta) {
-        partialTranscript += msg.delta;
-        setSourceText(partialTranscript);
+        // Acumula no source-text apenas para feedback visual
+        const current = $('source-text').textContent;
+        const isPlaceholder = $('source-text').classList.contains('placeholder-text');
+        const accumulated = isPlaceholder ? msg.delta : current + msg.delta;
+        setSourceText(accumulated);
         $('source-label').textContent = 'Ouvindo:';
-        // Traduz a cada fragmento com debounce de 800ms
-        scheduleTranslation(partialTranscript);
       }
       break;
 
-    // Transcrição completa de uma fala
+    // Transcrição completa — AQUI dispara a tradução (uma vez por frase)
     case 'conversation.item.input_audio_transcription.completed':
       if (msg.transcript && msg.transcript.trim().length > 2) {
         const final = msg.transcript.trim();
         setSourceText(final);
         $('source-label').textContent = 'Detectado:';
-        clearTimeout(translateTimer);
-        translateNow(final); // Traduz imediatamente ao finalizar
-        partialTranscript = '';
-        lastTranscript = final;
+        translateNow(final);
       }
       break;
 
@@ -750,7 +899,9 @@ function handleRealtimeEvent(msg) {
     case 'input_audio_buffer.speech_started':
       setStatus('listening');
       animateWave(true);
-      partialTranscript = '';
+      // Limpa source-text para nova frase
+      setSourceText('', true);
+      $('source-label').textContent = 'Ouvindo:';
       break;
 
     // Fim de fala detectado
@@ -760,15 +911,60 @@ function handleRealtimeEvent(msg) {
 
     case 'error':
       console.error('Realtime API error:', msg.error);
-      showError('Erro da API: ' + (msg.error?.message || 'desconhecido'));
+      const errMsg = msg.error?.message || 'desconhecido';
+      // Erros não-fatais não devem assustar o operador
+      if (msg.error?.code === 'session_expired') {
+        showError('Sessão expirada. Reconectando...');
+      } else {
+        showError('Erro da API: ' + errMsg);
+      }
       break;
   }
 }
 
-// Debounce: traduz enquanto fala, mas sem sobrecarregar a API
-function scheduleTranslation(text) {
-  clearTimeout(translateTimer);
-  translateTimer = setTimeout(() => translateNow(text), 900);
+// ══════════════════════════════════════════════
+// SYSTEM PROMPT — Tradutor com calibração teológica
+// ══════════════════════════════════════════════
+function buildTranslationSystemPrompt() {
+  const langNames = {
+    en: 'English (NIV style — modern, clear, reverent)',
+    pt: 'Portuguese (NVI style — clear, reverent)',
+    es: 'Spanish (NVI style)',
+    fr: 'French (modern, reverent)',
+    de: 'German (modern, reverent)',
+    it: 'Italian (modern, reverent)',
+    ja: 'Japanese (respectful)',
+    zh: 'Mandarin Chinese (simplified, respectful)'
+  };
+
+  const targetName = langNames[targetLang] || targetLang;
+
+  // Constrói o glossário no formato "termo_pt → termo_en"
+  const glossaryLines = [
+    ...THEOLOGICAL_GLOSSARY.ptToEn.map(([pt, en]) => `  - "${pt}" → "${en}"`),
+    ...THEOLOGICAL_GLOSSARY.biblicalNames.map(([pt, en]) => `  - "${pt}" (book/person) → "${en}"`)
+  ].join('\n');
+
+  return `You are a professional real-time interpreter for an Evangelical Christian church service (Igreja Brasileira de Londres — traditional Evangelical, Baptist/Presbyterian style).
+
+TARGET LANGUAGE: ${targetName}
+
+TRANSLATION RULES:
+1. Translate ONLY. Do NOT explain, summarize, add commentary, or refuse anything. Return only the translated text.
+2. Preserve the reverent, pastoral tone of preaching. Use clear, accessible language — not academic.
+3. For Bible verse references (e.g. "João 3:16"), output the English book name and the SAME numbers ("John 3:16"). Never invent verse content.
+4. For direct Bible quotes, translate naturally in NIV style when target is English. Do not paste copyrighted full passages from memory; translate what was actually said.
+5. Use second person plural ("you all" / "brothers and sisters") when the preacher addresses the congregation.
+6. Keep exclamations ("Glória a Deus!" → "Glory to God!", "Aleluia!" → "Hallelujah!", "Amém!" → "Amen!").
+7. If the input is incomplete or a fragment, translate it as-is — do NOT complete the thought.
+8. If the input is unclear or just filler ("hum", "então", "tipo"), return an empty string.
+
+THEOLOGICAL GLOSSARY (use these exact equivalents):
+${glossaryLines}
+
+IMPORTANT:
+- Return ONLY the translation. No quotation marks. No prefixes like "Translation:". No explanations.
+- If unsure between two phrasings, pick the one closer to NIV style for English.`;
 }
 
 // ══════════════════════════════════════════════
@@ -776,13 +972,20 @@ function scheduleTranslation(text) {
 // ══════════════════════════════════════════════
 async function translateNow(text) {
   if (!text || text.trim().length < 3) return;
-  if (text.trim() === lastTranscript.trim()) return;
 
-  const langNames = {
+  // Cancela qualquer tradução anterior que ainda esteja rodando
+  if (activeTranslationController) {
+    activeTranslationController.abort();
+  }
+  activeTranslationController = new AbortController();
+  const signal = activeTranslationController.signal;
+
+  const langDisplayNames = {
     en:'English', pt:'Portuguese', es:'Spanish', fr:'French',
     de:'German', it:'Italian', ja:'Japanese', zh:'Mandarin Chinese'
   };
-  const targetName = langNames[targetLang] || targetLang;
+  const targetDisplay = langDisplayNames[targetLang] || targetLang;
+  $('translated-label').textContent = `Tradução → ${targetDisplay}`;
 
   try {
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -791,36 +994,51 @@ async function translateNow(text) {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       },
+      signal,
       body: JSON.stringify({
         model: 'gpt-4o-mini',
-        max_tokens: 300,
-        stream: true,   // ← Streaming: palavras aparecem uma a uma
+        max_tokens: 500,
+        temperature: 0.2, // Baixa para tradução consistente
+        stream: true,
         messages: [
-          {
-            role: 'system',
-            content: `You are a real-time church sermon translator. Translate to ${targetName}. Return ONLY the translation, no explanations. Keep a respectful religious tone.`
-          },
+          { role: 'system', content: buildTranslationSystemPrompt() },
           { role: 'user', content: text }
         ]
       })
     });
 
-    if (!res.ok) return;
+    if (!res.ok) {
+      const errBody = await res.text().catch(() => '');
+      console.error('Translation API error:', res.status, errBody);
+      if (res.status === 401) {
+        showError('Chave da API inválida.', true);
+      } else if (res.status === 429) {
+        showError('Limite de uso da API atingido. Aguarde alguns segundos.');
+      } else {
+        showError(`Erro na tradução (${res.status})`);
+      }
+      return;
+    }
 
-    // Lê o stream e vai exibindo as palavras conforme chegam
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let translationBuffer = '';
-    $('translated-label').textContent = `Tradução → ${targetName}`;
+    let leftover = '';
 
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-      const chunk = decoder.decode(value);
-      const lines = chunk.split('\n').filter(l => l.startsWith('data: '));
+
+      const chunk = leftover + decoder.decode(value, { stream: true });
+      const lines = chunk.split('\n');
+      // Última linha pode estar incompleta — guarda para próxima iteração
+      leftover = lines.pop() || '';
+
       for (const line of lines) {
-        const data = line.replace('data: ', '');
+        if (!line.startsWith('data: ')) continue;
+        const data = line.slice(6).trim();
         if (data === '[DONE]') break;
+        if (!data) continue;
         try {
           const json = JSON.parse(data);
           const delta = json.choices?.[0]?.delta?.content;
@@ -831,17 +1049,18 @@ async function translateNow(text) {
         } catch {}
       }
     }
-  } catch (err) {
-    console.error('Erro tradução:', err);
-  }
-}
 
-function buildSystemPrompt() {
-  const langNames = {
-    en:'English', pt:'Portuguese', es:'Spanish', fr:'French',
-    de:'German', it:'Italian', ja:'Japanese', zh:'Mandarin Chinese'
-  };
-  return `You are a real-time church sermon translator. When responding, translate to ${langNames[targetLang] || targetLang}. Keep a respectful religious tone.`;
+    if (translationBuffer.trim()) {
+      lastTranslatedText = translationBuffer.trim();
+    }
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      // Tradução cancelada porque uma nova chegou — comportamento esperado
+      return;
+    }
+    console.error('Erro tradução:', err);
+    showError('Erro na tradução: ' + err.message);
+  }
 }
 
 // ══════════════════════════════════════════════
@@ -849,7 +1068,11 @@ function buildSystemPrompt() {
 // ══════════════════════════════════════════════
 function stopAll() {
   isRunning = false;
-  clearTimeout(translateTimer);
+  clearTimeout(reconnectTimer);
+  if (activeTranslationController) {
+    activeTranslationController.abort();
+    activeTranslationController = null;
+  }
   if (ws) { try { ws.close(); } catch {} ws = null; }
   if (processorNode) { try { processorNode.disconnect(); } catch {} processorNode = null; }
   if (audioContext) { try { audioContext.close(); } catch {} audioContext = null; }
@@ -873,13 +1096,19 @@ function float32ToPcm16(float32Array) {
 function arrayBufferToBase64(buffer) {
   const bytes = new Uint8Array(buffer);
   let binary = '';
-  for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+  // Para buffers grandes, processa em chunks para evitar stack overflow
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+  }
   return btoa(binary);
 }
 
 // Inicializa
 buildWaveform();
 loadAudioDevices();
+loadSavedApiKey();
 </script>
+
 </body>
 </html>
