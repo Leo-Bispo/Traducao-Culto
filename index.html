@@ -26,7 +26,6 @@ body {
   overflow: hidden;
 }
 
-/* ─── Background ornamental ─── */
 body::before {
   content: '';
   position: fixed; inset: 0;
@@ -45,7 +44,6 @@ body::before {
   backdrop-filter: blur(4px);
   background: rgba(10,10,15,0.97);
   flex-direction: column;
-  gap: 0;
   transition: opacity 0.6s, transform 0.6s;
   overflow-y: auto;
   padding: 2rem 0;
@@ -62,43 +60,11 @@ body::before {
   box-shadow: 0 0 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(201,168,76,0.1);
   margin: auto;
 }
-.ornament {
-  text-align: center;
-  color: var(--gold);
-  font-size: 1.2rem;
-  letter-spacing: 0.4em;
-  margin-bottom: 0.4rem;
-  opacity: 0.5;
-}
-.setup-title {
-  font-family: 'Cinzel', serif;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--gold2);
-  text-align: center;
-  letter-spacing: 0.1em;
-  margin-bottom: 0.3rem;
-}
-.setup-subtitle {
-  text-align: center;
-  color: var(--muted);
-  font-size: 0.78rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin-bottom: 2.5rem;
-}
-.field-group {
-  margin-bottom: 1.4rem;
-}
-label {
-  display: block;
-  font-size: 0.72rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--gold);
-  margin-bottom: 0.5rem;
-  opacity: 0.8;
-}
+.ornament { text-align: center; color: var(--gold); font-size: 1.2rem; letter-spacing: 0.4em; margin-bottom: 0.4rem; opacity: 0.5; }
+.setup-title { font-family: 'Cinzel', serif; font-size: 1.5rem; font-weight: 600; color: var(--gold2); text-align: center; letter-spacing: 0.1em; margin-bottom: 0.3rem; }
+.setup-subtitle { text-align: center; color: var(--muted); font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 2.5rem; }
+.field-group { margin-bottom: 1.4rem; }
+label { display: block; font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.5rem; opacity: 0.8; }
 select, input[type="text"], input[type="password"] {
   width: 100%;
   background: rgba(255,255,255,0.04);
@@ -117,12 +83,7 @@ select:focus, input[type="text"]:focus, input[type="password"]:focus {
   box-shadow: 0 0 0 3px rgba(201,168,76,0.08);
 }
 select option { background: #13131f; }
-.api-hint {
-  font-size: 0.7rem;
-  color: var(--muted);
-  margin-top: 0.4rem;
-  line-height: 1.5;
-}
+.api-hint { font-size: 0.7rem; color: var(--muted); margin-top: 0.4rem; line-height: 1.5; }
 .api-hint a { color: var(--gold); text-decoration: none; }
 .btn-start {
   width: 100%;
@@ -142,21 +103,20 @@ select option { background: #13131f; }
 .btn-start:hover { opacity: 0.9; }
 .btn-start:active { transform: scale(0.99); }
 
-/* ─── TELA PRINCIPAL (telão) ─── */
+/* ─── TELA PRINCIPAL ─── */
 #main-screen {
   position: fixed; inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 5vw;
+  padding: 4vw 5vw 6vw;
   z-index: 1;
   opacity: 0;
   transition: opacity 0.8s 0.3s;
 }
 #main-screen.visible { opacity: 1; }
 
-/* Barra de status topo */
 #top-bar {
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -167,18 +127,8 @@ select option { background: #13131f; }
   background: linear-gradient(to bottom, rgba(10,10,15,0.9), transparent);
   z-index: 10;
 }
-.church-name {
-  font-family: 'Cinzel', serif;
-  font-size: 0.85rem;
-  color: var(--gold);
-  letter-spacing: 0.2em;
-  opacity: 0.7;
-}
-.status-row {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
+.church-name { font-family: 'Cinzel', serif; font-size: 0.85rem; color: var(--gold); letter-spacing: 0.2em; opacity: 0.7; }
+.status-row { display: flex; align-items: center; gap: 1rem; }
 #lang-badge {
   font-size: 0.7rem;
   letter-spacing: 0.15em;
@@ -195,27 +145,15 @@ select option { background: #13131f; }
   background: var(--muted);
   transition: background 0.3s, box-shadow 0.3s;
 }
-#status-dot.listening {
-  background: #4caf75;
-  box-shadow: 0 0 10px rgba(76,175,117,0.6);
-  animation: pulse-dot 1.5s ease-in-out infinite;
-}
-#status-dot.translating {
-  background: var(--gold);
-  box-shadow: 0 0 10px rgba(201,168,76,0.6);
-}
-#status-dot.error {
-  background: var(--red);
-}
-#status-dot.reconnecting {
-  background: var(--accent);
-  animation: pulse-dot 0.8s ease-in-out infinite;
-}
+#status-dot.listening { background: #4caf75; box-shadow: 0 0 10px rgba(76,175,117,0.6); animation: pulse-dot 1.5s ease-in-out infinite; }
+#status-dot.translating { background: var(--gold); box-shadow: 0 0 10px rgba(201,168,76,0.6); }
+#status-dot.error { background: var(--red); }
+#status-dot.reconnecting { background: var(--accent); animation: pulse-dot 0.8s ease-in-out infinite; }
 @keyframes pulse-dot {
   0%, 100% { transform: scale(1); opacity: 1; }
   50% { transform: scale(1.4); opacity: 0.7; }
 }
-.btn-settings {
+.btn-settings, .btn-clear {
   background: none;
   border: 1px solid rgba(201,168,76,0.2);
   color: var(--muted);
@@ -227,129 +165,134 @@ select option { background: #13131f; }
   cursor: pointer;
   transition: all 0.2s;
 }
-.btn-settings:hover {
-  border-color: rgba(201,168,76,0.5);
-  color: var(--gold);
-}
+.btn-settings:hover, .btn-clear:hover { border-color: rgba(201,168,76,0.5); color: var(--gold); }
 
-/* ─── Área de texto principal ─── */
-#text-area {
+/* ─── TELEPROMPTER ─── */
+#prompter-stage {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1400px;
   text-align: center;
   position: relative;
+  margin-top: 3vh;
 }
-
-/* Linha decorativa topo */
 .deco-line {
   width: 60px; height: 1px;
   background: linear-gradient(to right, transparent, var(--gold), transparent);
-  margin: 0 auto 2rem;
+  margin: 0 auto 1.5rem;
   opacity: 0.5;
 }
-#source-label {
+#prompter-label {
   font-size: 0.65rem;
   letter-spacing: 0.25em;
   text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 1rem;
-  min-height: 1em;
-  transition: opacity 0.3s;
+  color: var(--gold);
+  opacity: 0.6;
+  margin-bottom: 2rem;
+}
+#prompter-window {
+  position: relative;
+  height: 70vh;
+  max-height: 720px;
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom,
+    transparent 0%,
+    rgba(0,0,0,0.4) 12%,
+    rgba(0,0,0,1) 30%,
+    rgba(0,0,0,1) 100%);
+  -webkit-mask-image: linear-gradient(to bottom,
+    transparent 0%,
+    rgba(0,0,0,0.4) 12%,
+    rgba(0,0,0,1) 30%,
+    rgba(0,0,0,1) 100%);
+}
+#prompter-track {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.prompter-line {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2rem, 4.5vw, 4rem);
+  font-weight: 300;
+  color: var(--text);
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+  padding: 0.4em 0.5em;
+  text-shadow: 0 0 60px rgba(201,168,76,0.08);
+  animation: line-enter 0.9s cubic-bezier(0.25, 0.1, 0.25, 1) backwards;
+  will-change: transform, opacity;
+}
+@keyframes line-enter {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.prompter-line.is-current::after {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 0.9em;
+  background: var(--gold);
+  margin-left: 0.25em;
+  vertical-align: middle;
+  animation: cursor-blink 1.2s ease-in-out infinite;
+}
+@keyframes cursor-blink {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 0.2; }
+}
+.prompter-placeholder {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.4rem, 3vw, 2.2rem);
+  font-style: italic;
+  color: rgba(122,117,101,0.4);
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+/* Faixa inferior do operador */
+#source-strip {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  padding: 1.2rem 2rem 1.4rem;
+  background: linear-gradient(to top, rgba(10,10,15,0.95) 0%, transparent 100%);
+  text-align: center;
+  z-index: 5;
+  pointer-events: none;
 }
 #source-text {
   font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(1.1rem, 2.5vw, 1.8rem);
+  font-size: clamp(0.85rem, 1.2vw, 1.1rem);
   font-style: italic;
   color: var(--muted);
-  line-height: 1.6;
-  margin-bottom: 2.5rem;
-  min-height: 2em;
+  opacity: 0.55;
+  line-height: 1.4;
+  max-width: 1000px;
+  margin: 0 auto;
+  min-height: 1.2em;
   transition: opacity 0.4s;
-  max-width: 900px;
-  margin-left: auto; margin-right: auto;
 }
-.divider {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  justify-content: center;
-  margin-bottom: 2.5rem;
-}
-.divider-line {
-  width: 40px; height: 1px;
-  background: rgba(201,168,76,0.3);
-}
-.divider-icon {
-  color: var(--gold);
-  font-size: 1rem;
-  opacity: 0.6;
-}
-#translated-label {
-  font-size: 0.65rem;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  color: var(--gold);
-  opacity: 0.6;
-  margin-bottom: 1.2rem;
-  min-height: 1em;
-}
-#translated-text {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(2rem, 5.5vw, 5rem);
-  font-weight: 300;
-  color: var(--text);
-  line-height: 1.3;
-  min-height: 1.4em;
-  transition: opacity 0.3s;
-  text-shadow: 0 0 60px rgba(201,168,76,0.1);
-  letter-spacing: 0.01em;
-}
+.source-placeholder { opacity: 0.25 !important; }
 
-/* Estado vazio / aguardando */
-.placeholder-text {
-  color: rgba(122,117,101,0.35) !important;
-  font-style: italic;
-}
-
-/* Animação de entrada do texto */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.text-animate { animation: fadeUp 0.5s ease forwards; }
-
-/* Barra de microfone (waveform visual) */
 #waveform {
   position: fixed;
-  bottom: 2.5rem;
+  bottom: 0.8rem;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
   gap: 4px;
-  height: 30px;
+  height: 18px;
+  z-index: 6;
 }
-.wave-bar {
-  width: 3px;
-  background: var(--gold);
-  border-radius: 2px;
-  opacity: 0.3;
-  height: 6px;
-  transition: height 0.1s, opacity 0.1s;
-}
-.wave-bar.active {
-  opacity: 0.7;
-  animation: wave-anim 0.6s ease-in-out infinite alternate;
-}
-@keyframes wave-anim {
-  from { height: 4px; }
-  to { height: var(--h, 20px); }
-}
+.wave-bar { width: 2px; background: var(--gold); border-radius: 2px; opacity: 0.25; height: 4px; transition: height 0.12s, opacity 0.12s; }
+.wave-bar.active { opacity: 0.6; animation: wave-anim 0.6s ease-in-out infinite alternate; }
+@keyframes wave-anim { from { height: 3px; } to { height: var(--h, 14px); } }
 
-/* Mensagem de erro */
 #error-msg {
   position: fixed;
-  bottom: 5rem;
+  bottom: 4.5rem;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(192,57,43,0.15);
@@ -362,18 +305,13 @@ select option { background: #13131f; }
   display: none;
   text-align: center;
   max-width: 90vw;
+  z-index: 20;
 }
 #error-msg.visible { display: block; }
-
-/* ─── Responsivo TV ─── */
-@media (min-width: 1400px) {
-  #translated-text { font-size: 5.5rem; }
-}
 </style>
 </head>
 <body>
 
-<!-- ══════════ TELA DE CONFIGURAÇÃO ══════════ -->
 <div id="setup-screen">
   <div class="setup-card">
     <div class="ornament">✦ ✦ ✦</div>
@@ -382,7 +320,7 @@ select option { background: #13131f; }
 
     <div class="field-group">
       <label>Nome da Igreja (aparece no telão)</label>
-      <input type="text" id="church-input" placeholder="Ex: Igreja Brasileira de Londres" value="Igreja Brasileira de Londres">
+      <input type="text" id="church-input" value="Igreja Brasileira de Londres">
     </div>
 
     <div class="field-group">
@@ -417,16 +355,15 @@ select option { background: #13131f; }
       <select id="audio-device">
         <option value="">⏳ Carregando dispositivos...</option>
       </select>
-      <p class="api-hint">Selecione a entrada da mesa de som (ex: "USB Audio", "Line In", "Scarlett") ou o microfone desejado.</p>
+      <p class="api-hint">Selecione a entrada da mesa de som (ex: "CABLE Output", "USB Audio", "Scarlett") ou o microfone.</p>
     </div>
 
     <div class="field-group">
       <label>Chave da API do OpenAI</label>
       <input type="password" id="api-key-input" placeholder="sk-...">
       <p class="api-hint">
-        Necessário para transcrição e tradução. Crie a sua em
-        <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a>
-        — custo aproximado de £2–5/mês para uso em cultos.
+        Necessário para transcrição e tradução. Crie em
+        <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a>.
         A chave fica salva apenas neste navegador.
       </p>
     </div>
@@ -435,31 +372,30 @@ select option { background: #13131f; }
   </div>
 </div>
 
-<!-- ══════════ TELA DO TELÃO ══════════ -->
 <div id="main-screen">
   <div id="top-bar">
     <span class="church-name" id="church-display">Igreja Brasileira de Londres</span>
     <div class="status-row">
       <span id="lang-badge">PT → EN</span>
       <div id="status-dot"></div>
+      <button class="btn-clear" onclick="clearPrompter()" title="Limpar telão">⌫ Limpar</button>
       <button class="btn-settings" onclick="showSetup()">⚙ Configurar</button>
     </div>
   </div>
 
-  <div id="text-area">
+  <div id="prompter-stage">
     <div class="deco-line"></div>
+    <div id="prompter-label">Translation</div>
 
-    <div id="source-label">Ouvindo...</div>
-    <div id="source-text" class="placeholder-text">O áudio do culto aparecerá aqui</div>
-
-    <div class="divider">
-      <div class="divider-line"></div>
-      <span class="divider-icon">✦</span>
-      <div class="divider-line"></div>
+    <div id="prompter-window">
+      <div id="prompter-track">
+        <div class="prompter-placeholder">The translation will appear here as the preacher speaks…</div>
+      </div>
     </div>
+  </div>
 
-    <div id="translated-label">Tradução</div>
-    <div id="translated-text" class="placeholder-text">The translation will appear here</div>
+  <div id="source-strip">
+    <div id="source-text" class="source-placeholder">Aguardando áudio…</div>
   </div>
 
   <div id="waveform"></div>
@@ -467,9 +403,9 @@ select option { background: #13131f; }
 </div>
 
 <script>
-// ══════════════════════════════════════════════
-// CONFIG & STATE
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+// ESTADO E CONFIGURAÇÃO
+// ══════════════════════════════════════════════════════════════
 let apiKey = '';
 let targetLang = 'en';
 let sourceLang = 'pt-BR';
@@ -482,143 +418,82 @@ let audioContext = null;
 let processorNode = null;
 let reconnectAttempts = 0;
 let reconnectTimer = null;
-let lastTranslatedText = '';
-let activeTranslationController = null; // AbortController da tradução em andamento
 
-const MAX_RECONNECT_DELAY = 30000; // 30s
-const BASE_RECONNECT_DELAY = 3000; // 3s
+const MAX_RECONNECT_DELAY = 30000;
+const BASE_RECONNECT_DELAY = 3000;
 
-// ══════════════════════════════════════════════
-// GLOSSÁRIO TEOLÓGICO — Evangélica tradicional, NVI ↔ NIV
-// ══════════════════════════════════════════════
-// Usado para construir o system prompt. Editar conforme cresce a base de erros observados.
-const THEOLOGICAL_GLOSSARY = {
-  // PT-BR → EN (NVI → NIV)
-  ptToEn: [
-    ['santificação', 'sanctification'],
-    ['justificação', 'justification'],
-    ['redenção', 'redemption'],
-    ['expiação', 'atonement'],
-    ['propiciação', 'propitiation'],
-    ['arrependimento', 'repentance'],
-    ['salvação', 'salvation'],
-    ['graça', 'grace'],
-    ['misericórdia', 'mercy'],
-    ['louvor', 'praise'],
-    ['adoração', 'worship'],
-    ['intercessão', 'intercession'],
-    ['comunhão', 'fellowship'],
-    ['discipulado', 'discipleship'],
-    ['ministério', 'ministry'],
-    ['unção', 'anointing'],
-    ['ungido', 'anointed'],
-    ['arrebatamento', 'rapture'],
-    ['segunda vinda', 'second coming'],
-    ['novo nascimento', 'new birth'],
-    ['nascer de novo', 'born again'],
-    ['Espírito Santo', 'Holy Spirit'],
-    ['Senhor', 'Lord'],
-    ['Reino dos Céus', 'Kingdom of Heaven'],
-    ['Reino de Deus', 'Kingdom of God'],
-    ['Aliança', 'Covenant'],
-    ['pecado original', 'original sin'],
-    ['queda', 'the Fall'],
-    ['profecia', 'prophecy'],
-    ['evangelho', 'gospel'],
-    ['ide', 'go ye / go therefore'],
-    ['anátema', 'anathema'],
-    ['glória', 'glory'],
-    ['aleluia', 'hallelujah'],
-    ['amém', 'amen'],
-    ['benção', 'blessing'],
-    ['dízimo', 'tithe'],
-    ['oferta', 'offering'],
-    ['parábola', 'parable'],
-    ['fariseu', 'Pharisee'],
-    ['saduceu', 'Sadducee'],
-    ['publicano', 'tax collector'],
-    ['gentio', 'Gentile'],
-    ['justo', 'righteous'],
-    ['ímpio', 'wicked / ungodly'],
-  ],
-  // Nomes próprios bíblicos que costumam errar
-  biblicalNames: [
-    ['Tiago', 'James'],
-    ['João', 'John'],
-    ['Mateus', 'Matthew'],
-    ['Marcos', 'Mark'],
-    ['Lucas', 'Luke'],
-    ['Paulo', 'Paul'],
-    ['Pedro', 'Peter'],
-    ['Davi', 'David'],
-    ['Salomão', 'Solomon'],
-    ['Isaías', 'Isaiah'],
-    ['Jeremias', 'Jeremiah'],
-    ['Ezequiel', 'Ezekiel'],
-    ['Daniel', 'Daniel'],
-    ['Oséias', 'Hosea'],
-    ['Provérbios', 'Proverbs'],
-    ['Salmos', 'Psalms'],
-    ['Gênesis', 'Genesis'],
-    ['Êxodo', 'Exodus'],
-    ['Levítico', 'Leviticus'],
-    ['Números', 'Numbers'],
-    ['Deuteronômio', 'Deuteronomy'],
-    ['Cantares', 'Song of Songs'],
-    ['Eclesiastes', 'Ecclesiastes'],
-    ['Apocalipse', 'Revelation'],
-    ['Hebreus', 'Hebrews'],
-    ['Romanos', 'Romans'],
-    ['Coríntios', 'Corinthians'],
-    ['Gálatas', 'Galatians'],
-    ['Efésios', 'Ephesians'],
-    ['Filipenses', 'Philippians'],
-    ['Colossenses', 'Colossians'],
-    ['Tessalonicenses', 'Thessalonians'],
-    ['Timóteo', 'Timothy'],
-    ['Tito', 'Titus'],
-    ['Filemom', 'Philemon'],
-  ]
-};
+// Configurações do teleprompter
+const PROMPTER_MAX_LINES = 5;
+const PROMPTER_HISTORY_SIZE = 12;
+const CONTEXT_LINES_FOR_TRANSLATION = 3;
+const SILENCE_DURATION_MS = 500;
+const TRANSLATION_TIMEOUT_MS = 15000;
 
-// ══════════════════════════════════════════════
-// UI HELPERS
-// ══════════════════════════════════════════════
+// Estado do teleprompter e da fila ordenada
+let prompterLines = [];
+let translationCounter = 0;
+let pendingChunks = new Map();
+let translationOrder = [];
+
+// ══════════════════════════════════════════════════════════════
+// HELPERS DE UI
+// ══════════════════════════════════════════════════════════════
 const $ = id => document.getElementById(id);
-
-const setStatus = (state) => {
-  $('status-dot').className = state === 'idle' ? '' : state;
-};
+const setStatus = (state) => { $('status-dot').className = state === 'idle' ? '' : state; };
 
 function showError(msg, persistent = false) {
   const el = $('error-msg');
   el.textContent = msg;
   el.classList.add('visible');
-  if (!persistent) {
-    setTimeout(() => el.classList.remove('visible'), 7000);
-  }
+  if (!persistent) setTimeout(() => el.classList.remove('visible'), 7000);
 }
-
-function hideError() {
-  $('error-msg').classList.remove('visible');
-}
-
-function setTranslatedText(text, isPlaceholder = false) {
-  const el = $('translated-text');
-  el.classList.remove('text-animate');
-  void el.offsetWidth;
-  el.textContent = text;
-  el.classList.toggle('placeholder-text', isPlaceholder);
-  if (!isPlaceholder) el.classList.add('text-animate');
-}
+function hideError() { $('error-msg').classList.remove('visible'); }
 
 function setSourceText(text, isPlaceholder = false) {
   const el = $('source-text');
   el.textContent = text;
-  el.classList.toggle('placeholder-text', isPlaceholder);
+  el.classList.toggle('source-placeholder', isPlaceholder);
 }
 
-// Waveform visual
+// ══════════════════════════════════════════════════════════════
+// TELEPROMPTER
+// ══════════════════════════════════════════════════════════════
+function appendPrompterLine(text) {
+  if (!text || !text.trim()) return;
+
+  const placeholder = $('prompter-track').querySelector('.prompter-placeholder');
+  if (placeholder) placeholder.remove();
+
+  prompterLines.push({ text: text.trim() });
+  if (prompterLines.length > PROMPTER_HISTORY_SIZE) prompterLines.shift();
+
+  renderPrompter();
+}
+
+function renderPrompter() {
+  const track = $('prompter-track');
+  const visibleLines = prompterLines.slice(-PROMPTER_MAX_LINES);
+  track.innerHTML = '';
+  visibleLines.forEach((line, index) => {
+    const div = document.createElement('div');
+    div.className = 'prompter-line';
+    if (index === visibleLines.length - 1) div.classList.add('is-current');
+    div.textContent = line.text;
+    track.appendChild(div);
+  });
+}
+
+function clearPrompter() {
+  prompterLines = [];
+  pendingChunks.clear();
+  translationOrder = [];
+  const track = $('prompter-track');
+  track.innerHTML = '<div class="prompter-placeholder">The translation will appear here as the preacher speaks…</div>';
+}
+
+// ══════════════════════════════════════════════════════════════
+// WAVEFORM
+// ══════════════════════════════════════════════════════════════
 const waveform = $('waveform');
 let waveBars = [];
 function buildWaveform(n = 18) {
@@ -635,23 +510,23 @@ let waveAnimFrame = null;
 function animateWave(active) {
   cancelAnimationFrame(waveAnimFrame);
   if (!active) {
-    waveBars.forEach(b => { b.classList.remove('active'); b.style.height = '4px'; });
+    waveBars.forEach(b => { b.classList.remove('active'); b.style.height = '3px'; });
     return;
   }
   function tick() {
     waveBars.forEach(b => {
-      const h = 4 + Math.random() * 20;
+      const h = 3 + Math.random() * 14;
       b.style.setProperty('--h', h + 'px');
       b.classList.add('active');
     });
-    waveAnimFrame = requestAnimationFrame(() => setTimeout(tick, 80));
+    waveAnimFrame = requestAnimationFrame(() => setTimeout(tick, 90));
   }
   tick();
 }
 
-// ══════════════════════════════════════════════
-// LISTAR DISPOSITIVOS DE ÁUDIO
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+// DISPOSITIVOS E PREFERÊNCIAS
+// ══════════════════════════════════════════════════════════════
 async function loadAudioDevices() {
   try {
     await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -663,22 +538,21 @@ async function loadAudioDevices() {
       const opt = document.createElement('option');
       opt.value = d.deviceId;
       opt.textContent = d.label || `Microfone ${i + 1}`;
-      if (/usb|line|scarlett|behringer|focusrite|aux|interface|hw:/i.test(d.label)) {
+      if (/cable|vb-audio|virtual|blackhole|loopback/i.test(d.label)) {
+        opt.textContent = '🔌 ' + opt.textContent;
+      } else if (/usb|line|scarlett|behringer|focusrite|aux|interface|hw:/i.test(d.label)) {
         opt.textContent = '🎚️ ' + opt.textContent;
       } else {
         opt.textContent = '🎙️ ' + opt.textContent;
       }
       sel.appendChild(opt);
     });
-    if (inputs.length === 0) {
-      sel.innerHTML = '<option value="">Nenhum dispositivo encontrado</option>';
-    }
+    if (inputs.length === 0) sel.innerHTML = '<option value="">Nenhum dispositivo encontrado</option>';
   } catch (err) {
     $('audio-device').innerHTML = '<option value="">Erro ao listar dispositivos</option>';
   }
 }
 
-// Restaura chave da API salva localmente (apenas neste navegador)
 function loadSavedApiKey() {
   try {
     const saved = localStorage.getItem('traducao_culto_api_key');
@@ -701,9 +575,9 @@ function savePreferences() {
   } catch {}
 }
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
 // SETUP → START
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
 function showSetup() {
   stopAll();
   $('setup-screen').classList.remove('hidden');
@@ -730,6 +604,12 @@ async function startApp() {
   const srcLabel = sourceLang === 'auto' ? 'AUTO' : sourceLang.split('-')[0].toUpperCase();
   $('lang-badge').textContent = `${srcLabel} → ${langNames[targetLang] || targetLang.toUpperCase()}`;
 
+  prompterLines = [];
+  translationCounter = 0;
+  pendingChunks.clear();
+  translationOrder = [];
+  clearPrompter();
+
   $('setup-screen').classList.add('hidden');
   $('main-screen').classList.add('visible');
 
@@ -738,19 +618,16 @@ async function startApp() {
   await startRealtimeSession();
 }
 
-// ══════════════════════════════════════════════
-// REALTIME API — WebSocket (transcrição ao vivo)
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+// REALTIME API — transcrição streaming
+// ══════════════════════════════════════════════════════════════
 async function startRealtimeSession() {
   try {
-    // 1. Pega o stream do microfone
     const audioConstraints = selectedDeviceId
       ? { deviceId: { exact: selectedDeviceId }, sampleRate: 24000, channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false }
       : { sampleRate: 24000, channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false };
 
     activeStream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
-
-    // 2. Abre WebSocket com a Realtime API
     const langParam = sourceLang !== 'auto' ? sourceLang.split('-')[0] : '';
 
     ws = new WebSocket(
@@ -759,7 +636,6 @@ async function startRealtimeSession() {
     );
 
     ws.onopen = () => {
-      // Configura a sessão: usa gpt-4o-transcribe (mais preciso que whisper-1)
       ws.send(JSON.stringify({
         type: 'session.update',
         session: {
@@ -767,14 +643,13 @@ async function startRealtimeSession() {
           input_audio_transcription: {
             model: 'gpt-4o-transcribe',
             ...(langParam ? { language: langParam } : {}),
-            // Prompt do transcritor: ajuda a reconhecer termos religiosos
-            prompt: 'Contexto: culto evangélico cristão. Termos comuns: Jesus, Cristo, Senhor, Deus, Espírito Santo, Bíblia, evangelho, salvação, graça, fé, oração, aleluia, amém, igreja, pastor, irmão, irmã, glória, louvor, adoração, ministério, comunhão, arrependimento, santificação, redenção. Nomes de livros bíblicos: Gênesis, Êxodo, Salmos, Provérbios, Isaías, Mateus, Marcos, Lucas, João, Atos, Romanos, Coríntios, Apocalipse.'
+            prompt: 'Contexto: culto evangélico cristão tradicional (batista/presbiteriana), Bíblia NVI. Termos comuns: Jesus, Cristo, Senhor, Deus, Espírito Santo, evangelho, salvação, graça, fé, oração, aleluia, amém, igreja, pastor, irmão, irmã, glória, louvor, adoração, ministério, comunhão, arrependimento, santificação, redenção, unção, ungido, Reino dos Céus, aliança, justificação. Livros bíblicos: Gênesis, Êxodo, Salmos, Provérbios, Isaías, Jeremias, Mateus, Marcos, Lucas, João, Atos, Romanos, Coríntios, Gálatas, Efésios, Hebreus, Apocalipse.'
           },
           turn_detection: {
             type: 'server_vad',
             threshold: 0.5,
             prefix_padding_ms: 300,
-            silence_duration_ms: 700 // Um pouco maior para evitar cortar pausas naturais de pregação
+            silence_duration_ms: SILENCE_DURATION_MS
           }
         }
       }));
@@ -783,29 +658,18 @@ async function startRealtimeSession() {
       reconnectAttempts = 0;
       setStatus('listening');
       hideError();
-      $('source-label').textContent = 'Ouvindo em tempo real...';
       animateWave(true);
       startAudioStreaming();
     };
 
     ws.onmessage = (event) => {
-      try {
-        const msg = JSON.parse(event.data);
-        handleRealtimeEvent(msg);
-      } catch (err) {
-        console.error('Erro ao processar mensagem:', err);
-      }
+      try { handleRealtimeEvent(JSON.parse(event.data)); }
+      catch (err) { console.error('Erro ao processar mensagem:', err); }
     };
 
-    ws.onerror = (err) => {
-      console.error('WS error:', err);
-    };
+    ws.onerror = (err) => { console.error('WS error:', err); };
 
-    ws.onclose = (e) => {
-      if (isRunning) {
-        scheduleReconnect(e.code, e.reason);
-      }
-    };
+    ws.onclose = (e) => { if (isRunning) scheduleReconnect(e.code, e.reason); };
   } catch (err) {
     setStatus('error');
     showError('Não foi possível acessar o microfone: ' + err.message, true);
@@ -813,16 +677,13 @@ async function startRealtimeSession() {
   }
 }
 
-// Reconexão com backoff exponencial
 function scheduleReconnect(code, reason) {
-  // Códigos que NÃO devem reconectar (erro de autenticação, etc)
   if (code === 1008 || code === 4001 || code === 4003) {
     setStatus('error');
     showError('Erro de autenticação. Verifique sua chave da API.', true);
     isRunning = false;
     return;
   }
-
   reconnectAttempts++;
   const delay = Math.min(BASE_RECONNECT_DELAY * Math.pow(2, reconnectAttempts - 1), MAX_RECONNECT_DELAY);
   const delaySeconds = Math.round(delay / 1000);
@@ -830,30 +691,24 @@ function scheduleReconnect(code, reason) {
   setStatus('reconnecting');
   showError(`Conexão perdida. Reconectando em ${delaySeconds}s... (tentativa ${reconnectAttempts})`, true);
 
-  // Limpa processador de áudio antes de reconectar
   if (processorNode) { try { processorNode.disconnect(); } catch {} processorNode = null; }
   if (audioContext) { try { audioContext.close(); } catch {} audioContext = null; }
   if (activeStream) { activeStream.getTracks().forEach(t => t.stop()); activeStream = null; }
 
   if (reconnectAttempts > 8) {
     setStatus('error');
-    showError('Não foi possível reconectar após várias tentativas. Verifique sua conexão e clique em Configurar para reiniciar.', true);
+    showError('Não foi possível reconectar. Clique em Configurar.', true);
     isRunning = false;
     return;
   }
 
   clearTimeout(reconnectTimer);
-  reconnectTimer = setTimeout(() => {
-    if (isRunning) startRealtimeSession();
-  }, delay);
+  reconnectTimer = setTimeout(() => { if (isRunning) startRealtimeSession(); }, delay);
 }
 
-// Envia áudio PCM16 pelo WebSocket em tempo real
 function startAudioStreaming() {
   audioContext = new AudioContext({ sampleRate: 24000 });
   const source = audioContext.createMediaStreamSource(activeStream);
-
-  // ScriptProcessor (deprecado mas funcional — migrar para AudioWorklet na Fase 2)
   processorNode = audioContext.createScriptProcessor(4096, 1, 1);
   processorNode.onaudioprocess = (e) => {
     if (!isRunning || !ws || ws.readyState !== WebSocket.OPEN) return;
@@ -862,217 +717,155 @@ function startAudioStreaming() {
     const b64 = arrayBufferToBase64(pcm16.buffer);
     ws.send(JSON.stringify({ type: 'input_audio_buffer.append', audio: b64 }));
   };
-
   source.connect(processorNode);
   processorNode.connect(audioContext.destination);
 }
 
-// ══════════════════════════════════════════════
-// EVENTOS DA REALTIME API
-// ══════════════════════════════════════════════
 function handleRealtimeEvent(msg) {
   switch (msg.type) {
-    // Transcrição parcial — apenas atualiza o texto de origem (lado superior, em itálico)
-    // NÃO dispara tradução aqui (correção do loop redundante da versão anterior)
     case 'conversation.item.input_audio_transcription.delta':
       if (msg.delta) {
-        // Acumula no source-text apenas para feedback visual
         const current = $('source-text').textContent;
-        const isPlaceholder = $('source-text').classList.contains('placeholder-text');
-        const accumulated = isPlaceholder ? msg.delta : current + msg.delta;
-        setSourceText(accumulated);
-        $('source-label').textContent = 'Ouvindo:';
+        const isPlaceholder = $('source-text').classList.contains('source-placeholder');
+        setSourceText(isPlaceholder ? msg.delta : current + msg.delta);
       }
       break;
-
-    // Transcrição completa — AQUI dispara a tradução (uma vez por frase)
     case 'conversation.item.input_audio_transcription.completed':
-      if (msg.transcript && msg.transcript.trim().length > 2) {
-        const final = msg.transcript.trim();
-        setSourceText(final);
-        $('source-label').textContent = 'Detectado:';
-        translateNow(final);
+      if (msg.transcript && msg.transcript.trim().length > 1) {
+        const fragment = msg.transcript.trim();
+        setSourceText(fragment);
+        translateChunk(fragment);
       }
       break;
-
-    // Início de fala detectado
     case 'input_audio_buffer.speech_started':
       setStatus('listening');
       animateWave(true);
-      // Limpa source-text para nova frase
       setSourceText('', true);
-      $('source-label').textContent = 'Ouvindo:';
       break;
-
-    // Fim de fala detectado
     case 'input_audio_buffer.speech_stopped':
       setStatus('translating');
       break;
-
     case 'error':
       console.error('Realtime API error:', msg.error);
       const errMsg = msg.error?.message || 'desconhecido';
-      // Erros não-fatais não devem assustar o operador
-      if (msg.error?.code === 'session_expired') {
-        showError('Sessão expirada. Reconectando...');
-      } else {
-        showError('Erro da API: ' + errMsg);
-      }
+      if (msg.error?.code === 'session_expired') showError('Sessão expirada. Reconectando...');
+      else showError('Erro da API: ' + errMsg);
       break;
   }
 }
 
-// ══════════════════════════════════════════════
-// SYSTEM PROMPT — Tradutor com calibração teológica
-// ══════════════════════════════════════════════
-function buildTranslationSystemPrompt() {
+// ══════════════════════════════════════════════════════════════
+// TRADUÇÃO COM CONTEXTO E FILA ORDENADA
+// ══════════════════════════════════════════════════════════════
+function buildSystemPrompt() {
   const langNames = {
     en: 'English (NIV style — modern, clear, reverent)',
-    pt: 'Portuguese (NVI style — clear, reverent)',
-    es: 'Spanish (NVI style)',
-    fr: 'French (modern, reverent)',
-    de: 'German (modern, reverent)',
-    it: 'Italian (modern, reverent)',
-    ja: 'Japanese (respectful)',
-    zh: 'Mandarin Chinese (simplified, respectful)'
+    pt: 'Portuguese (NVI style)',
+    es: 'Spanish', fr: 'French', de: 'German',
+    it: 'Italian', ja: 'Japanese', zh: 'Mandarin Chinese (simplified)'
   };
-
   const targetName = langNames[targetLang] || targetLang;
 
-  // Constrói o glossário no formato "termo_pt → termo_en"
-  const glossaryLines = [
-    ...THEOLOGICAL_GLOSSARY.ptToEn.map(([pt, en]) => `  - "${pt}" → "${en}"`),
-    ...THEOLOGICAL_GLOSSARY.biblicalNames.map(([pt, en]) => `  - "${pt}" (book/person) → "${en}"`)
-  ].join('\n');
+  return `You are a professional simultaneous interpreter for an Evangelical Christian church service (Brazilian Portuguese to ${targetName}).
 
-  return `You are a professional real-time interpreter for an Evangelical Christian church service (Igreja Brasileira de Londres — traditional Evangelical, Baptist/Presbyterian style).
-
-TARGET LANGUAGE: ${targetName}
-
-TRANSLATION RULES:
-1. Translate ONLY. Do NOT explain, summarize, add commentary, or refuse anything. Return only the translated text.
-2. Preserve the reverent, pastoral tone of preaching. Use clear, accessible language — not academic.
-3. For Bible verse references (e.g. "João 3:16"), output the English book name and the SAME numbers ("John 3:16"). Never invent verse content.
-4. For direct Bible quotes, translate naturally in NIV style when target is English. Do not paste copyrighted full passages from memory; translate what was actually said.
-5. Use second person plural ("you all" / "brothers and sisters") when the preacher addresses the congregation.
-6. Keep exclamations ("Glória a Deus!" → "Glory to God!", "Aleluia!" → "Hallelujah!", "Amém!" → "Amen!").
-7. If the input is incomplete or a fragment, translate it as-is — do NOT complete the thought.
-8. If the input is unclear or just filler ("hum", "então", "tipo"), return an empty string.
-
-THEOLOGICAL GLOSSARY (use these exact equivalents):
-${glossaryLines}
-
-IMPORTANT:
-- Return ONLY the translation. No quotation marks. No prefixes like "Translation:". No explanations.
-- If unsure between two phrasings, pick the one closer to NIV style for English.`;
+CRITICAL RULES:
+1. Translate ONLY. Never explain, answer questions, or add commentary.
+2. The input is a fragment from a live sermon. Translate it AS A CONTINUATION of what came before — do NOT restart the sentence or repeat earlier context in your output.
+3. Output should be 1-3 short lines, suitable for a teleprompter. Break naturally at clause boundaries.
+4. Preserve reverent pastoral tone. Use NIV-style English when target is English.
+5. Bible book names: João→John, Tiago→James, Davi→David, Isaías→Isaiah, Salmos→Psalms, Apocalipse→Revelation, etc.
+6. Bible verse refs: keep numbers ("João 3:16" → "John 3:16", never spell out).
+7. Theological terms: santificação→sanctification, unção→anointing, arrebatamento→rapture, graça→grace, salvação→salvation, ungido→anointed, Espírito Santo→Holy Spirit, Reino dos Céus→Kingdom of Heaven, Aliança→Covenant.
+8. Exclamations: "Glória a Deus!"→"Glory to God!", "Aleluia!"→"Hallelujah!", "Amém!"→"Amen!".
+9. If the fragment is filler only ("hum", "então", "tipo", "né"), return an empty string.
+10. NEVER use quotation marks around your output. NEVER prefix with "Translation:". Return ONLY the translated text.`;
 }
 
-// ══════════════════════════════════════════════
-// TRADUÇÃO (GPT-4o mini streaming)
-// ══════════════════════════════════════════════
-async function translateNow(text) {
-  if (!text || text.trim().length < 3) return;
+async function translateChunk(sourceFragment) {
+  translationCounter++;
+  const myId = translationCounter;
+  translationOrder.push(myId);
+  pendingChunks.set(myId, { status: 'pending', text: null });
 
-  // Cancela qualquer tradução anterior que ainda esteja rodando
-  if (activeTranslationController) {
-    activeTranslationController.abort();
-  }
-  activeTranslationController = new AbortController();
-  const signal = activeTranslationController.signal;
+  const context = prompterLines.slice(-CONTEXT_LINES_FOR_TRANSLATION).map(l => l.text).join(' ');
+  const contextPrompt = context
+    ? `Previous translated lines (for context only, do NOT repeat): "${context}"\n\nNew fragment to translate:`
+    : `New fragment to translate (start of sermon):`;
 
-  const langDisplayNames = {
-    en:'English', pt:'Portuguese', es:'Spanish', fr:'French',
-    de:'German', it:'Italian', ja:'Japanese', zh:'Mandarin Chinese'
-  };
-  const targetDisplay = langDisplayNames[targetLang] || targetLang;
-  $('translated-label').textContent = `Tradução → ${targetDisplay}`;
+  const timeoutId = setTimeout(() => {
+    const entry = pendingChunks.get(myId);
+    if (entry && entry.status === 'pending') {
+      console.warn(`Tradução #${myId} excedeu timeout.`);
+      entry.status = 'timeout';
+      tryFlushOrdered();
+    }
+  }, TRANSLATION_TIMEOUT_MS);
 
   try {
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      signal,
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'gpt-4o-mini',
-        max_tokens: 500,
-        temperature: 0.2, // Baixa para tradução consistente
-        stream: true,
+        max_tokens: 200,
+        temperature: 0.2,
         messages: [
-          { role: 'system', content: buildTranslationSystemPrompt() },
-          { role: 'user', content: text }
+          { role: 'system', content: buildSystemPrompt() },
+          { role: 'user', content: `${contextPrompt}\n"${sourceFragment}"` }
         ]
       })
     });
 
+    clearTimeout(timeoutId);
+
     if (!res.ok) {
-      const errBody = await res.text().catch(() => '');
-      console.error('Translation API error:', res.status, errBody);
-      if (res.status === 401) {
-        showError('Chave da API inválida.', true);
-      } else if (res.status === 429) {
-        showError('Limite de uso da API atingido. Aguarde alguns segundos.');
-      } else {
-        showError(`Erro na tradução (${res.status})`);
-      }
+      const entry = pendingChunks.get(myId);
+      if (entry) entry.status = 'error';
+      if (res.status === 401) showError('Chave da API inválida.', true);
+      else if (res.status === 429) showError('Limite de uso atingido. Aguarde alguns segundos.');
+      else showError(`Erro na tradução (${res.status})`);
+      tryFlushOrdered();
       return;
     }
 
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let translationBuffer = '';
-    let leftover = '';
+    const json = await res.json();
+    let translated = json.choices?.[0]?.message?.content?.trim() || '';
+    translated = translated.replace(/^["'`]+|["'`]+$/g, '').trim();
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      const chunk = leftover + decoder.decode(value, { stream: true });
-      const lines = chunk.split('\n');
-      // Última linha pode estar incompleta — guarda para próxima iteração
-      leftover = lines.pop() || '';
-
-      for (const line of lines) {
-        if (!line.startsWith('data: ')) continue;
-        const data = line.slice(6).trim();
-        if (data === '[DONE]') break;
-        if (!data) continue;
-        try {
-          const json = JSON.parse(data);
-          const delta = json.choices?.[0]?.delta?.content;
-          if (delta) {
-            translationBuffer += delta;
-            setTranslatedText(translationBuffer);
-          }
-        } catch {}
-      }
-    }
-
-    if (translationBuffer.trim()) {
-      lastTranslatedText = translationBuffer.trim();
-    }
+    const entry = pendingChunks.get(myId);
+    if (entry) { entry.status = 'done'; entry.text = translated; }
+    tryFlushOrdered();
   } catch (err) {
-    if (err.name === 'AbortError') {
-      // Tradução cancelada porque uma nova chegou — comportamento esperado
-      return;
-    }
-    console.error('Erro tradução:', err);
-    showError('Erro na tradução: ' + err.message);
+    clearTimeout(timeoutId);
+    console.error(`Erro tradução #${myId}:`, err);
+    const entry = pendingChunks.get(myId);
+    if (entry) entry.status = 'error';
+    tryFlushOrdered();
   }
 }
 
-// ══════════════════════════════════════════════
+// Garante ordem das traduções mesmo se chegarem fora de ordem
+function tryFlushOrdered() {
+  while (translationOrder.length > 0) {
+    const nextId = translationOrder[0];
+    const entry = pendingChunks.get(nextId);
+    if (!entry) { translationOrder.shift(); continue; }
+    if (entry.status === 'pending') break; // espera completar
+    translationOrder.shift();
+    pendingChunks.delete(nextId);
+    if (entry.status === 'done' && entry.text) {
+      appendPrompterLine(entry.text);
+    }
+  }
+  if (translationOrder.length === 0) setStatus('listening');
+}
+
+// ══════════════════════════════════════════════════════════════
 // PARAR TUDO
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
 function stopAll() {
   isRunning = false;
   clearTimeout(reconnectTimer);
-  if (activeTranslationController) {
-    activeTranslationController.abort();
-    activeTranslationController = null;
-  }
   if (ws) { try { ws.close(); } catch {} ws = null; }
   if (processorNode) { try { processorNode.disconnect(); } catch {} processorNode = null; }
   if (audioContext) { try { audioContext.close(); } catch {} audioContext = null; }
@@ -1081,9 +874,9 @@ function stopAll() {
   setStatus('idle');
 }
 
-// ══════════════════════════════════════════════
-// UTILS: Conversão de áudio Float32 → PCM16 → Base64
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════════════
 function float32ToPcm16(float32Array) {
   const pcm = new Int16Array(float32Array.length);
   for (let i = 0; i < float32Array.length; i++) {
@@ -1096,7 +889,6 @@ function float32ToPcm16(float32Array) {
 function arrayBufferToBase64(buffer) {
   const bytes = new Uint8Array(buffer);
   let binary = '';
-  // Para buffers grandes, processa em chunks para evitar stack overflow
   const chunkSize = 0x8000;
   for (let i = 0; i < bytes.length; i += chunkSize) {
     binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
@@ -1104,7 +896,7 @@ function arrayBufferToBase64(buffer) {
   return btoa(binary);
 }
 
-// Inicializa
+// Inicialização
 buildWaveform();
 loadAudioDevices();
 loadSavedApiKey();
