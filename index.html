@@ -631,7 +631,7 @@ async function startRealtimeSession() {
     const langParam = sourceLang !== 'auto' ? sourceLang.split('-')[0] : '';
 
     ws = new WebSocket(
-      'wss://api.openai.com/v1/realtime?model=gpt-realtime',
+      'wss://api.openai.com/v1/realtime?intent=transcription',
       ['realtime', `openai-insecure-api-key.${apiKey}`]
     );
 
