@@ -635,7 +635,8 @@ async function startRealtimeSession() {
       ['realtime', `openai-insecure-api-key.${apiKey}`]
     );
 
-    ws.send(JSON.stringify({
+    ws.onopen = () => {
+      ws.send(JSON.stringify({
         type: 'session.update',
         session: {
           type: 'transcription',
