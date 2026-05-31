@@ -149,11 +149,12 @@ select option { background: #13131f; }
 #status-dot.translating { background: var(--gold); box-shadow: 0 0 10px rgba(201,168,76,0.6); }
 #status-dot.error { background: var(--red); }
 #status-dot.reconnecting { background: var(--accent); animation: pulse-dot 0.8s ease-in-out infinite; }
+#status-dot.paused { background: var(--gold2); box-shadow: 0 0 8px rgba(232,201,122,0.5); }
 @keyframes pulse-dot {
   0%, 100% { transform: scale(1); opacity: 1; }
   50% { transform: scale(1.4); opacity: 0.7; }
 }
-.btn-settings, .btn-clear {
+.btn-settings, .btn-clear, .btn-pause {
   background: none;
   border: 1px solid rgba(201,168,76,0.2);
   color: var(--muted);
@@ -165,7 +166,8 @@ select option { background: #13131f; }
   cursor: pointer;
   transition: all 0.2s;
 }
-.btn-settings:hover, .btn-clear:hover { border-color: rgba(201,168,76,0.5); color: var(--gold); }
+.btn-settings:hover, .btn-clear:hover, .btn-pause:hover { border-color: rgba(201,168,76,0.5); color: var(--gold); }
+.btn-pause.is-paused { border-color: rgba(232,201,122,0.6); color: var(--gold2); }
 
 /* ─── TELEPROMPTER ─── */
 #prompter-stage {
@@ -378,6 +380,7 @@ select option { background: #13131f; }
     <div class="status-row">
       <span id="lang-badge">PT → EN</span>
       <div id="status-dot"></div>
+      <button class="btn-pause" id="btn-pause" onclick="togglePause()" title="Pausar/retomar a tradução">⏸ Pausar</button>
       <button class="btn-clear" onclick="clearPrompter()" title="Limpar telão">⌫ Limpar</button>
       <button class="btn-settings" onclick="showSetup()">⚙ Configurar</button>
     </div>
@@ -412,6 +415,8 @@ let sourceLang = 'pt-BR';
 let churchName = '';
 let selectedDeviceId = '';
 let isRunning = false;
+let isPaused = false;
+let savedBadgeText = '';
 let ws = null;
 let activeStream = null;
 let audioContext = null;
@@ -440,6 +445,28 @@ let translationOrder = [];
 // ══════════════════════════════════════════════════════════════
 const $ = id => document.getElementById(id);
 const setStatus = (state) => { $('status-dot').className = state === 'idle' ? '' : state; };
+
+function togglePause() {
+  // Só funciona com a sessão ativa; não altera nenhuma configuração escolhida.
+  if (!isRunning) return;
+  isPaused = !isPaused;
+  const btn = $('btn-pause');
+
+  if (isPaused) {
+    savedBadgeText = $('lang-badge').textContent;
+    $('lang-badge').textContent = '⏸ PAUSADO';
+    btn.textContent = '▶ Retomar';
+    btn.classList.add('is-paused');
+    setStatus('paused');
+    animateWave(false);
+  } else {
+    $('lang-badge').textContent = savedBadgeText || $('lang-badge').textContent;
+    btn.textContent = '⏸ Pausar';
+    btn.classList.remove('is-paused');
+    setStatus('listening');
+    animateWave(true);
+  }
+}
 
 function showError(msg, persistent = false) {
   const el = $('error-msg');
@@ -631,30 +658,25 @@ async function startRealtimeSession() {
     const langParam = sourceLang !== 'auto' ? sourceLang.split('-')[0] : '';
 
     ws = new WebSocket(
-      'wss://api.openai.com/v1/realtime?intent=transcription',
-      ['realtime', `openai-insecure-api-key.${apiKey}`]
+      'wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview',
+      ['realtime', `openai-insecure-api-key.${apiKey}`, 'openai-beta.realtime-v1']
     );
 
     ws.onopen = () => {
       ws.send(JSON.stringify({
         type: 'session.update',
         session: {
-          type: 'transcription',
-          audio: {
-            input: {
-              format: { type: 'audio/pcm', rate: 24000 },
-              transcription: {
-                model: 'gpt-4o-transcribe',
-                ...(langParam ? { language: langParam } : {}),
-                prompt: 'Contexto: culto evangélico cristão tradicional (batista/presbiteriana), Bíblia NVI. Termos comuns: Jesus, Cristo, Senhor, Deus, Espírito Santo, evangelho, salvação, graça, fé, oração, aleluia, amém, igreja, pastor, irmão, irmã, glória, louvor, adoração, ministério, comunhão, arrependimento, santificação, redenção, unção, ungido, Reino dos Céus, aliança, justificação. Livros bíblicos: Gênesis, Êxodo, Salmos, Provérbios, Isaías, Jeremias, Mateus, Marcos, Lucas, João, Atos, Romanos, Coríntios, Gálatas, Efésios, Hebreus, Apocalipse.'
-              },
-              turn_detection: {
-                type: 'server_vad',
-                threshold: 0.5,
-                prefix_padding_ms: 300,
-                silence_duration_ms: SILENCE_DURATION_MS
-              }
-            }
+          modalities: ['text'],
+          input_audio_transcription: {
+            model: 'gpt-4o-transcribe',
+            ...(langParam ? { language: langParam } : {}),
+            prompt: 'Contexto: culto evangélico cristão tradicional (batista/presbiteriana), Bíblia NVI. Termos comuns: Jesus, Cristo, Senhor, Deus, Espírito Santo, evangelho, salvação, graça, fé, oração, aleluia, amém, igreja, pastor, irmão, irmã, glória, louvor, adoração, ministério, comunhão, arrependimento, santificação, redenção, unção, ungido, Reino dos Céus, aliança, justificação. Livros bíblicos: Gênesis, Êxodo, Salmos, Provérbios, Isaías, Jeremias, Mateus, Marcos, Lucas, João, Atos, Romanos, Coríntios, Gálatas, Efésios, Hebreus, Apocalipse.'
+          },
+          turn_detection: {
+            type: 'server_vad',
+            threshold: 0.5,
+            prefix_padding_ms: 300,
+            silence_duration_ms: SILENCE_DURATION_MS
           }
         }
       }));
@@ -716,7 +738,7 @@ function startAudioStreaming() {
   const source = audioContext.createMediaStreamSource(activeStream);
   processorNode = audioContext.createScriptProcessor(4096, 1, 1);
   processorNode.onaudioprocess = (e) => {
-    if (!isRunning || !ws || ws.readyState !== WebSocket.OPEN) return;
+    if (!isRunning || isPaused || !ws || ws.readyState !== WebSocket.OPEN) return;
     const float32 = e.inputBuffer.getChannelData(0);
     const pcm16 = float32ToPcm16(float32);
     const b64 = arrayBufferToBase64(pcm16.buffer);
@@ -764,7 +786,7 @@ function handleRealtimeEvent(msg) {
 // ══════════════════════════════════════════════════════════════
 function buildSystemPrompt() {
   const langNames = {
-    en: 'English (NIV style — modern, clear, reverent)',
+    en: 'British English (NIV style — modern, clear, reverent)',
     pt: 'Portuguese (NVI style)',
     es: 'Spanish', fr: 'French', de: 'German',
     it: 'Italian', ja: 'Japanese', zh: 'Mandarin Chinese (simplified)'
@@ -783,7 +805,9 @@ CRITICAL RULES:
 7. Theological terms: santificação→sanctification, unção→anointing, arrebatamento→rapture, graça→grace, salvação→salvation, ungido→anointed, Espírito Santo→Holy Spirit, Reino dos Céus→Kingdom of Heaven, Aliança→Covenant.
 8. Exclamations: "Glória a Deus!"→"Glory to God!", "Aleluia!"→"Hallelujah!", "Amém!"→"Amen!".
 9. If the fragment is filler only ("hum", "então", "tipo", "né"), return an empty string.
-10. NEVER use quotation marks around your output. NEVER prefix with "Translation:". Return ONLY the translated text.`;
+10. NEVER use quotation marks around your output. NEVER prefix with "Translation:". Return ONLY the translated text.
+11. NATURALNESS: Render the meaning as a native simultaneous interpreter would actually speak it in the target language — idiomatic and fluent, NOT word-for-word. When the target is British English, prefer how a British speaker would naturally phrase the idea over a literal calque of the Portuguese construction. Restructure freely for fluency.
+12. Naturalness must NEVER alter meaning, Bible references, theological terms, or the reverent pastoral tone. Translate faithfully in sense — fluently in form.`;
 }
 
 async function translateChunk(sourceFragment) {
