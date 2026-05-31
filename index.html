@@ -658,25 +658,30 @@ async function startRealtimeSession() {
     const langParam = sourceLang !== 'auto' ? sourceLang.split('-')[0] : '';
 
     ws = new WebSocket(
-      'wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview',
-      ['realtime', `openai-insecure-api-key.${apiKey}`, 'openai-beta.realtime-v1']
+      'wss://api.openai.com/v1/realtime?intent=transcription',
+      ['realtime', `openai-insecure-api-key.${apiKey}`]
     );
 
     ws.onopen = () => {
       ws.send(JSON.stringify({
         type: 'session.update',
         session: {
-          modalities: ['text'],
-          input_audio_transcription: {
-            model: 'gpt-4o-transcribe',
-            ...(langParam ? { language: langParam } : {}),
-            prompt: 'Contexto: culto evangélico cristão tradicional (batista/presbiteriana), Bíblia NVI. Termos comuns: Jesus, Cristo, Senhor, Deus, Espírito Santo, evangelho, salvação, graça, fé, oração, aleluia, amém, igreja, pastor, irmão, irmã, glória, louvor, adoração, ministério, comunhão, arrependimento, santificação, redenção, unção, ungido, Reino dos Céus, aliança, justificação. Livros bíblicos: Gênesis, Êxodo, Salmos, Provérbios, Isaías, Jeremias, Mateus, Marcos, Lucas, João, Atos, Romanos, Coríntios, Gálatas, Efésios, Hebreus, Apocalipse.'
-          },
-          turn_detection: {
-            type: 'server_vad',
-            threshold: 0.5,
-            prefix_padding_ms: 300,
-            silence_duration_ms: SILENCE_DURATION_MS
+          type: 'transcription',
+          audio: {
+            input: {
+              format: { type: 'audio/pcm', rate: 24000 },
+              transcription: {
+                model: 'gpt-4o-transcribe',
+                ...(langParam ? { language: langParam } : {}),
+                prompt: 'Contexto: culto evangélico cristão tradicional (batista/presbiteriana), Bíblia NVI. Termos comuns: Jesus, Cristo, Senhor, Deus, Espírito Santo, evangelho, salvação, graça, fé, oração, aleluia, amém, igreja, pastor, irmão, irmã, glória, louvor, adoração, ministério, comunhão, arrependimento, santificação, redenção, unção, ungido, Reino dos Céus, aliança, justificação. Livros bíblicos: Gênesis, Êxodo, Salmos, Provérbios, Isaías, Jeremias, Mateus, Marcos, Lucas, João, Atos, Romanos, Coríntios, Gálatas, Efésios, Hebreus, Apocalipse.'
+              },
+              turn_detection: {
+                type: 'server_vad',
+                threshold: 0.5,
+                prefix_padding_ms: 300,
+                silence_duration_ms: SILENCE_DURATION_MS
+              }
+            }
           }
         }
       }));
