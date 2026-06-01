@@ -372,6 +372,17 @@ select option { background: #13131f; }
         <option value="it">🇮🇹 Italiano</option>
         <option value="ja">🇯🇵 Japonês</option>
         <option value="zh">🇨🇳 Mandarim</option>
+        <option value="ko">🇰🇷 Coreano</option>
+        <option value="ru">🇷🇺 Russo</option>
+        <option value="ro">🇷🇴 Romeno</option>
+        <option value="pl">🇵🇱 Polonês</option>
+        <option value="uk">🇺🇦 Ucraniano</option>
+        <option value="nl">🇳🇱 Holandês</option>
+        <option value="id">🇮🇩 Indonésio</option>
+        <option value="vi">🇻🇳 Vietnamita</option>
+        <option value="tl">🇵🇭 Filipino (Tagalog)</option>
+        <option value="hi">🇮🇳 Hindi</option>
+        <option value="tr">🇹🇷 Turco</option>
       </select>
     </div>
 
@@ -387,6 +398,12 @@ select option { background: #13131f; }
       <label>Código da sala (para o QR code dos celulares)</label>
       <input type="text" id="sala-input" value="ABUNDANTE" placeholder="EX: ABUNDANTE">
       <p class="api-hint">Código fixo desta igreja. A congregação escaneia o QR code para ler a tradução no próprio celular. Use um código único por igreja.</p>
+    </div>
+
+    <div class="field-group">
+      <label>Termos da igreja (opcional — melhora a precisão)</label>
+      <input type="text" id="context-input" placeholder="Ex: Pastor Silva, Igreja Abundante Vida, Ministério Ágape">
+      <p class="api-hint">Nomes próprios que aparecem no culto (pastor, igreja, ministérios, pregadores). Ajuda a transcrever e traduzir esses nomes corretamente.</p>
     </div>
 
     <button class="btn-start" onclick="startApp()">INICIAR TRADUÇÃO</button>
@@ -443,6 +460,7 @@ let sourceLang = 'pt-BR';
 let churchName = '';
 let selectedDeviceId = '';
 let salaCode = '';
+let customContext = '';
 let isRunning = false;
 let isPaused = false;
 let savedBadgeText = '';
@@ -632,6 +650,8 @@ function loadSavedApiKey() {
     if (savedTarget) $('target-lang').value = savedTarget;
     const savedSala = localStorage.getItem('traducao_culto_sala');
     if (savedSala) $('sala-input').value = savedSala;
+    const savedContext = localStorage.getItem('traducao_culto_context');
+    if (savedContext) $('context-input').value = savedContext;
   } catch {}
 }
 
@@ -641,6 +661,7 @@ function savePreferences() {
     localStorage.setItem('traducao_culto_source', sourceLang);
     localStorage.setItem('traducao_culto_target', targetLang);
     localStorage.setItem('traducao_culto_sala', salaCode);
+    localStorage.setItem('traducao_culto_context', customContext);
   } catch {}
 }
 
@@ -656,7 +677,7 @@ function showSetup() {
 
 function showQR() {
   if (!salaCode) { showError('Defina um código de sala em Configurar.'); return; }
-  const url = `https://leo-bispo.github.io/Traducao-Culto/celular.html?sala=${encodeURIComponent(salaCode)}`;
+  const url = `https://leo-bispo.github.io/Traducao-Culto/celular.html?sala=${encodeURIComponent(salaCode)}&lang=${encodeURIComponent(targetLang)}`;
   $('qr-room').textContent = salaCode;
   $('qr-url').textContent = url;
   const canvas = $('qr-canvas');
@@ -689,6 +710,7 @@ async function startApp() {
   churchName = $('church-input').value.trim() || 'Igreja ao Vivo';
   selectedDeviceId = $('audio-device').value;
   salaCode = $('sala-input').value.trim().toUpperCase();
+  customContext = $('context-input').value.trim();
 
   savePreferences();
 
@@ -755,7 +777,7 @@ async function startRealtimeSession() {
               transcription: {
                 model: 'gpt-4o-transcribe',
                 ...(langParam ? { language: langParam } : {}),
-                prompt: 'Contexto: culto evangélico cristão tradicional (batista/presbiteriana), Bíblia NVI. Termos comuns: Jesus, Cristo, Senhor, Deus, Espírito Santo, evangelho, salvação, graça, fé, oração, aleluia, amém, igreja, pastor, irmão, irmã, glória, louvor, adoração, ministério, comunhão, arrependimento, santificação, redenção, unção, ungido, Reino dos Céus, aliança, justificação. Livros bíblicos: Gênesis, Êxodo, Salmos, Provérbios, Isaías, Jeremias, Mateus, Marcos, Lucas, João, Atos, Romanos, Coríntios, Gálatas, Efésios, Hebreus, Apocalipse.'
+                prompt: 'Contexto: culto evangélico cristão tradicional (batista/presbiteriana), Bíblia NVI. Termos comuns: Jesus, Cristo, Senhor, Deus, Espírito Santo, evangelho, salvação, graça, fé, oração, aleluia, amém, igreja, pastor, irmão, irmã, glória, louvor, adoração, ministério, comunhão, arrependimento, santificação, redenção, unção, ungido, Reino dos Céus, aliança, justificação. Livros bíblicos: Gênesis, Êxodo, Salmos, Provérbios, Isaías, Jeremias, Mateus, Marcos, Lucas, João, Atos, Romanos, Coríntios, Gálatas, Efésios, Hebreus, Apocalipse.' + (customContext ? ' Nomes próprios desta igreja: ' + customContext + '.' : '')
               },
               turn_detection: {
                 type: 'server_vad',
@@ -876,7 +898,10 @@ function buildSystemPrompt() {
     en: 'British English (NIV style — modern, clear, reverent)',
     pt: 'Portuguese (NVI style)',
     es: 'Spanish', fr: 'French', de: 'German',
-    it: 'Italian', ja: 'Japanese', zh: 'Mandarin Chinese (simplified)'
+    it: 'Italian', ja: 'Japanese', zh: 'Mandarin Chinese (simplified)',
+    ko: 'Korean', ru: 'Russian', ro: 'Romanian', pl: 'Polish',
+    uk: 'Ukrainian', nl: 'Dutch', id: 'Indonesian', vi: 'Vietnamese',
+    tl: 'Tagalog (Filipino)', hi: 'Hindi', tr: 'Turkish'
   };
   const targetName = langNames[targetLang] || targetLang;
 
@@ -894,7 +919,7 @@ CRITICAL RULES:
 9. If the fragment is filler only ("hum", "então", "tipo", "né"), return an empty string.
 10. NEVER use quotation marks around your output. NEVER prefix with "Translation:". Return ONLY the translated text.
 11. NATURALNESS: Render the meaning as a native simultaneous interpreter would actually speak it in the target language — idiomatic and fluent, NOT word-for-word. When the target is British English, prefer how a British speaker would naturally phrase the idea over a literal calque of the Portuguese construction. Restructure freely for fluency.
-12. Naturalness must NEVER alter meaning, Bible references, theological terms, or the reverent pastoral tone. Translate faithfully in sense — fluently in form.`;
+12. Naturalness must NEVER alter meaning, Bible references, theological terms, or the reverent pastoral tone. Translate faithfully in sense — fluently in form.${customContext ? `\n13. Church-specific proper nouns (keep them accurate and natural in the target language): ${customContext}.` : ''}`;
 }
 
 async function translateChunk(sourceFragment) {
