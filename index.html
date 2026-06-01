@@ -657,9 +657,25 @@ async function startRealtimeSession() {
     activeStream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
     const langParam = sourceLang !== 'auto' ? sourceLang.split('-')[0] : '';
 
+    // Pede um token efêmero ao Worker (a chave real fica escondida no servidor).
+    const tokenRes = await fetch('https://traducao-culto-api.leandrobisp-s.workers.dev/session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session: { type: 'transcription' } })
+    });
+    if (!tokenRes.ok) {
+      const errText = await tokenRes.text();
+      throw new Error('Falha ao obter token de transcrição (' + tokenRes.status + '): ' + errText);
+    }
+    const tokenData = await tokenRes.json();
+    const ephemeralKey = tokenData?.client_secret?.value || tokenData?.value;
+    if (!ephemeralKey) {
+      throw new Error('Token efêmero ausente na resposta do Worker: ' + JSON.stringify(tokenData));
+    }
+
     ws = new WebSocket(
       'wss://api.openai.com/v1/realtime?intent=transcription',
-      ['realtime', `openai-insecure-api-key.${apiKey}`]
+      ['realtime', `openai-insecure-api-key.${ephemeralKey}`]
     );
 
     ws.onopen = () => {
