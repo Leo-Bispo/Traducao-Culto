@@ -836,9 +836,9 @@ async function translateChunk(sourceFragment) {
   }, TRANSLATION_TIMEOUT_MS);
 
   try {
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    const res = await fetch('https://traducao-culto-api.leandrobisp-s.workers.dev/translate', {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         max_tokens: 200,
