@@ -83,11 +83,23 @@
     z-index: 20;
   }
   #live-btn.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+
+  #listen-btn {
+    background: none;
+    border: 1px solid rgba(201,168,76,0.3);
+    color: var(--gold);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 0.32rem 0.7rem; border-radius: 20px; cursor: pointer;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  #listen-btn.on { background: rgba(201,168,76,0.18); border-color: var(--gold); color: var(--gold2); }
 </style>
 </head>
 <body>
   <div id="topbar">
     <span id="room-label">—</span>
+    <button id="listen-btn">🔊 Listen</button>
     <span id="status"><span id="dot"></span><span id="status-text">Connecting…</span></span>
   </div>
 
@@ -112,6 +124,47 @@
   let following = true;
   let ws = null;
   let reconnectTimer = null;
+
+  // ── Áudio (Text-to-Speech) — lê a tradução em voz alta no próprio celular ──
+  const lang = (params.get("lang") || "en").trim().toLowerCase();
+  const BCP47 = {
+    en:'en-GB', pt:'pt-BR', es:'es-ES', fr:'fr-FR', de:'de-DE', it:'it-IT',
+    ja:'ja-JP', zh:'zh-CN', ko:'ko-KR', ru:'ru-RU', ro:'ro-RO', pl:'pl-PL',
+    uk:'uk-UA', nl:'nl-NL', id:'id-ID', vi:'vi-VN', tl:'fil-PH', hi:'hi-IN', tr:'tr-TR'
+  };
+  const speechLang = BCP47[lang] || 'en-GB';
+  const synth = window.speechSynthesis;
+  const listenBtn = document.getElementById("listen-btn");
+  let speakEnabled = false;
+
+  if (!synth) {
+    listenBtn.style.display = "none"; // navegador sem suporte a voz
+  } else {
+    listenBtn.addEventListener("click", () => {
+      speakEnabled = !speakEnabled;
+      listenBtn.classList.toggle("on", speakEnabled);
+      listenBtn.textContent = speakEnabled ? "🔊 On" : "🔊 Listen";
+      try {
+        synth.cancel();
+        if (speakEnabled) {
+          // desbloqueia o áudio (necessário no iOS) usando o toque do usuário
+          const u = new SpeechSynthesisUtterance(" ");
+          u.lang = speechLang;
+          synth.speak(u);
+        }
+      } catch (e) {}
+    });
+  }
+
+  function speak(text) {
+    if (!speakEnabled || !synth || !text) return;
+    try {
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = speechLang;
+      u.rate = 1.0;
+      synth.speak(u);
+    } catch (e) {}
+  }
 
   roomLabel.textContent = sala ? ("Room " + sala) : "No room";
 
@@ -160,6 +213,8 @@
     div.className = "line";
     div.textContent = text;
     feed.appendChild(div);
+
+    speak(text);
 
     // Só acompanha automaticamente se a pessoa estiver lendo ao vivo (no fim).
     if (following) {
