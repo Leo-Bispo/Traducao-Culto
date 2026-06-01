@@ -360,16 +360,6 @@ select option { background: #13131f; }
       <p class="api-hint">Selecione a entrada da mesa de som (ex: "CABLE Output", "USB Audio", "Scarlett") ou o microfone.</p>
     </div>
 
-    <div class="field-group">
-      <label>Chave da API do OpenAI</label>
-      <input type="password" id="api-key-input" placeholder="sk-...">
-      <p class="api-hint">
-        Necessário para transcrição e tradução. Crie em
-        <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a>.
-        A chave fica salva apenas neste navegador.
-      </p>
-    </div>
-
     <button class="btn-start" onclick="startApp()">INICIAR TRADUÇÃO</button>
   </div>
 </div>
@@ -409,7 +399,6 @@ select option { background: #13131f; }
 // ══════════════════════════════════════════════════════════════
 // ESTADO E CONFIGURAÇÃO
 // ══════════════════════════════════════════════════════════════
-let apiKey = '';
 let targetLang = 'en';
 let sourceLang = 'pt-BR';
 let churchName = '';
@@ -582,8 +571,6 @@ async function loadAudioDevices() {
 
 function loadSavedApiKey() {
   try {
-    const saved = localStorage.getItem('traducao_culto_api_key');
-    if (saved) $('api-key-input').value = saved;
     const savedChurch = localStorage.getItem('traducao_culto_church');
     if (savedChurch) $('church-input').value = savedChurch;
     const savedSource = localStorage.getItem('traducao_culto_source');
@@ -595,7 +582,6 @@ function loadSavedApiKey() {
 
 function savePreferences() {
   try {
-    localStorage.setItem('traducao_culto_api_key', apiKey);
     localStorage.setItem('traducao_culto_church', churchName);
     localStorage.setItem('traducao_culto_source', sourceLang);
     localStorage.setItem('traducao_culto_target', targetLang);
@@ -613,16 +599,10 @@ function showSetup() {
 }
 
 async function startApp() {
-  apiKey = $('api-key-input').value.trim();
   targetLang = $('target-lang').value;
   sourceLang = $('source-lang').value;
   churchName = $('church-input').value.trim() || 'Igreja ao Vivo';
   selectedDeviceId = $('audio-device').value;
-
-  if (!apiKey || !apiKey.startsWith('sk-')) {
-    alert('Por favor, insira uma chave da API do OpenAI válida (começa com sk-).');
-    return;
-  }
 
   savePreferences();
 
@@ -871,7 +851,7 @@ async function translateChunk(sourceFragment) {
     if (!res.ok) {
       const entry = pendingChunks.get(myId);
       if (entry) entry.status = 'error';
-      if (res.status === 401) showError('Chave da API inválida.', true);
+      if (res.status === 401) showError('Erro de autenticação no servidor de tradução.', true);
       else if (res.status === 429) showError('Limite de uso atingido. Aguarde alguns segundos.');
       else showError(`Erro na tradução (${res.status})`);
       tryFlushOrdered();
