@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teste — Enviar para a sala</title>
+<style>
+  body { font-family: sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; background:#111; color:#eee; }
+  h2 { font-weight: 500; }
+  label { display:block; margin-top: 14px; font-size: 13px; color:#aaa; }
+  input, textarea, button { font-size: 16px; width: 100%; margin-top: 6px; padding: 10px; box-sizing: border-box; border-radius: 4px; border: 1px solid #333; background:#1a1a1a; color:#eee; }
+  button { background:#c9a84c; border:none; color:#000; font-weight:bold; cursor:pointer; margin-top: 16px; }
+  #log { margin-top: 16px; font-size: 13px; color:#888; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+  <h2>Teste de envio para a sala</h2>
+  <p style="font-size:13px;color:#888;">Página temporária só para testar o celular recebendo texto ao vivo.</p>
+
+  <label>Código da sala</label>
+  <input id="sala" value="TESTE">
+
+  <label>Texto a enviar</label>
+  <textarea id="texto" rows="2">Esta é uma mensagem de teste ao vivo.</textarea>
+
+  <button onclick="enviar()">Enviar para a sala</button>
+  <div id="log"></div>
+
+<script>
+  const WORKER = "https://traducao-culto-broadcast.leandrobisp-s.workers.dev";
+
+  async function enviar() {
+    const sala = document.getElementById("sala").value.trim().toUpperCase();
+    const text = document.getElementById("texto").value.trim();
+    const log = document.getElementById("log");
+    if (!sala || !text) { log.textContent = "Preencha sala e texto."; return; }
+    try {
+      const r = await fetch(WORKER + "/send?sala=" + encodeURIComponent(sala), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text })
+      });
+      const data = await r.json();
+      log.textContent = "Resposta do servidor: " + JSON.stringify(data);
+    } catch (e) {
+      log.textContent = "Erro: " + e.message;
+    }
+  }
+</script>
+</body>
+</html>

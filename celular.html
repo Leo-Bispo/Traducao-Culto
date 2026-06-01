@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Live Translation</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --gold: #c9a84c;
+    --gold2: #e8c97a;
+    --text: #f0ead6;
+    --muted: #7a7565;
+    --red: #c0392b;
+    --green: #4caf75;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+  }
+  #topbar {
+    position: sticky; top: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.7rem 1rem;
+    background: rgba(10,10,15,0.96);
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+    font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase;
+    z-index: 10;
+  }
+  #room-label { color: var(--gold); }
+  #status { display: flex; align-items: center; gap: 0.45rem; color: var(--muted); }
+  #dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); transition: background 0.3s; }
+  #dot.on { background: var(--green); box-shadow: 0 0 8px rgba(76,175,117,0.6); }
+  #dot.off { background: var(--red); }
+
+  #feed {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 1.6rem 1.2rem 2rem;
+  }
+  .line {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.7rem;
+    font-weight: 400;
+    line-height: 1.45;
+    color: var(--text);
+    margin-bottom: 1.1rem;
+    padding-left: 0.85rem;
+    border-left: 2px solid rgba(201,168,76,0.35);
+    animation: fade 0.4s ease-out;
+  }
+  @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .placeholder {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.3rem;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 30vh;
+    padding: 0 1.5rem;
+  }
+  #live-btn {
+    position: fixed;
+    bottom: 1.4rem; left: 50%;
+    transform: translateX(-50%) translateY(2rem);
+    background: linear-gradient(135deg, #b8943a, #dbb96a);
+    color: #0a0a0f;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem; font-weight: 500; letter-spacing: 0.05em;
+    padding: 0.6rem 1.4rem;
+    border: none; border-radius: 30px;
+    box-shadow: 0 4px 22px rgba(0,0,0,0.55);
+    cursor: pointer;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s, transform 0.25s;
+    z-index: 20;
+  }
+  #live-btn.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+  <div id="topbar">
+    <span id="room-label">—</span>
+    <span id="status"><span id="dot"></span><span id="status-text">Connecting…</span></span>
+  </div>
+
+  <div id="feed">
+    <div class="placeholder" id="placeholder">Waiting for the live translation…</div>
+  </div>
+
+  <button id="live-btn">▼ Live</button>
+
+<script>
+  const WORKER_HOST = "traducao-culto-broadcast.leandrobisp-s.workers.dev";
+
+  const params = new URLSearchParams(location.search);
+  const sala = (params.get("sala") || "").trim().toUpperCase();
+
+  const feed = document.getElementById("feed");
+  const liveBtn = document.getElementById("live-btn");
+  const dot = document.getElementById("dot");
+  const statusText = document.getElementById("status-text");
+  const roomLabel = document.getElementById("room-label");
+
+  let following = true;
+  let ws = null;
+  let reconnectTimer = null;
+
+  roomLabel.textContent = sala ? ("Room " + sala) : "No room";
+
+  if (!sala) {
+    document.getElementById("placeholder").textContent = "Invalid link: no room found.";
+    statusText.textContent = "No room";
+  } else {
+    connect();
+  }
+
+  function setStatus(state, text) {
+    dot.className = state;
+    statusText.textContent = text;
+  }
+
+  function atBottom() {
+    return feed.scrollHeight - feed.scrollTop - feed.clientHeight < 60;
+  }
+  function scrollToBottom(smooth) {
+    feed.scrollTo({ top: feed.scrollHeight, behavior: smooth ? "smooth" : "auto" });
+  }
+
+  // Detecta se a pessoa rolou para cima (para parar de empurrar) ou voltou ao fim (para retomar).
+  feed.addEventListener("scroll", () => {
+    if (atBottom()) {
+      following = true;
+      liveBtn.classList.remove("show");
+    } else {
+      following = false;
+      liveBtn.classList.add("show");
+    }
+  });
+
+  liveBtn.addEventListener("click", () => {
+    following = true;
+    liveBtn.classList.remove("show");
+    scrollToBottom(true);
+  });
+
+  function addLine(text) {
+    if (!text) return;
+    const ph = document.getElementById("placeholder");
+    if (ph) ph.remove();
+
+    const div = document.createElement("div");
+    div.className = "line";
+    div.textContent = text;
+    feed.appendChild(div);
+
+    // Só acompanha automaticamente se a pessoa estiver lendo ao vivo (no fim).
+    if (following) {
+      scrollToBottom(false);
+    } else {
+      liveBtn.classList.add("show");
+    }
+  }
+
+  function connect() {
+    setStatus("", "Connecting…");
+    ws = new WebSocket("wss://" + WORKER_HOST + "/ws?sala=" + encodeURIComponent(sala));
+
+    ws.onopen = () => setStatus("on", "Live");
+    ws.onmessage = (e) => addLine(e.data);
+    ws.onclose = () => {
+      setStatus("off", "Reconnecting…");
+      clearTimeout(reconnectTimer);
+      reconnectTimer = setTimeout(connect, 3000);
+    };
+    ws.onerror = () => { try { ws.close(); } catch {} };
+  }
+</script>
+</body>
+</html>
