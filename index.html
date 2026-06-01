@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tradução ao Vivo — Culto</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 :root {
   --bg: #0a0a0f;
@@ -102,6 +103,28 @@ select option { background: #13131f; }
 }
 .btn-start:hover { opacity: 0.9; }
 .btn-start:active { transform: scale(0.99); }
+
+/* ─── OVERLAY DE QR CODE ─── */
+#qr-overlay {
+  position: fixed; inset: 0;
+  z-index: 200;
+  background: rgba(8,8,12,0.96);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  backdrop-filter: blur(6px);
+}
+#qr-overlay.visible { display: flex; }
+.qr-title { font-family: 'Cinzel', serif; color: var(--gold2); font-size: 1.4rem; letter-spacing: 0.1em; margin-bottom: 0.4rem; text-align: center; }
+.qr-sub { color: var(--muted); font-size: 0.85rem; letter-spacing: 0.05em; margin-bottom: 2rem; text-align: center; }
+#qr-box { background: #fff; padding: 1.5rem; border-radius: 4px; box-shadow: 0 0 60px rgba(201,168,76,0.25); }
+#qr-canvas { width: 320px; height: 320px; display: flex; align-items: center; justify-content: center; }
+.qr-room { font-family: 'Cinzel', serif; color: var(--gold); font-size: 2rem; letter-spacing: 0.15em; margin-top: 2rem; }
+.qr-url { color: var(--muted); font-size: 0.8rem; margin-top: 0.8rem; word-break: break-all; max-width: 90vw; text-align: center; }
+.qr-close { margin-top: 2.5rem; background: none; border: 1px solid rgba(201,168,76,0.3); color: var(--gold); padding: 0.6rem 2rem; border-radius: 20px; font-family: 'Inter', sans-serif; font-size: 0.85rem; letter-spacing: 0.1em; cursor: pointer; transition: all 0.2s; }
+.qr-close:hover { border-color: var(--gold); background: rgba(201,168,76,0.08); }
 
 /* ─── TELA PRINCIPAL ─── */
 #main-screen {
@@ -360,6 +383,12 @@ select option { background: #13131f; }
       <p class="api-hint">Selecione a entrada da mesa de som (ex: "CABLE Output", "USB Audio", "Scarlett") ou o microfone.</p>
     </div>
 
+    <div class="field-group">
+      <label>Código da sala (para o QR code dos celulares)</label>
+      <input type="text" id="sala-input" value="ABUNDANTE" placeholder="EX: ABUNDANTE">
+      <p class="api-hint">Código fixo desta igreja. A congregação escaneia o QR code para ler a tradução no próprio celular. Use um código único por igreja.</p>
+    </div>
+
     <button class="btn-start" onclick="startApp()">INICIAR TRADUÇÃO</button>
   </div>
 </div>
@@ -372,6 +401,7 @@ select option { background: #13131f; }
       <div id="status-dot"></div>
       <button class="btn-pause" id="btn-pause" onclick="togglePause()" title="Pausar/retomar a tradução">⏸ Pausar</button>
       <button class="btn-clear" onclick="clearPrompter()" title="Limpar telão">⌫ Limpar</button>
+      <button class="btn-settings" onclick="showQR()" title="Mostrar QR code">📱 QR</button>
       <button class="btn-settings" onclick="showSetup()">⚙ Configurar</button>
     </div>
   </div>
@@ -395,6 +425,15 @@ select option { background: #13131f; }
   <div id="error-msg"></div>
 </div>
 
+<div id="qr-overlay" onclick="hideQR(event)">
+  <div class="qr-title">Tradução ao Vivo</div>
+  <div class="qr-sub">Aponte a câmera do celular para ler a tradução</div>
+  <div id="qr-box"><div id="qr-canvas"></div></div>
+  <div class="qr-room" id="qr-room">—</div>
+  <div class="qr-url" id="qr-url"></div>
+  <button class="qr-close" onclick="hideQR(event)">Fechar</button>
+</div>
+
 <script>
 // ══════════════════════════════════════════════════════════════
 // ESTADO E CONFIGURAÇÃO
@@ -403,6 +442,7 @@ let targetLang = 'en';
 let sourceLang = 'pt-BR';
 let churchName = '';
 let selectedDeviceId = '';
+let salaCode = '';
 let isRunning = false;
 let isPaused = false;
 let savedBadgeText = '';
@@ -484,6 +524,19 @@ function appendPrompterLine(text) {
   if (prompterLines.length > PROMPTER_HISTORY_SIZE) prompterLines.shift();
 
   renderPrompter();
+  broadcastToRoom(text.trim());
+}
+
+// Envia a linha traduzida para a sala dos celulares (best-effort: nunca derruba o telão).
+function broadcastToRoom(text) {
+  if (!salaCode || !text) return;
+  try {
+    fetch('https://traducao-culto-broadcast.leandrobisp-s.workers.dev/send?sala=' + encodeURIComponent(salaCode), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    }).catch(() => {});
+  } catch (e) {}
 }
 
 function renderPrompter() {
@@ -577,6 +630,8 @@ function loadSavedApiKey() {
     if (savedSource) $('source-lang').value = savedSource;
     const savedTarget = localStorage.getItem('traducao_culto_target');
     if (savedTarget) $('target-lang').value = savedTarget;
+    const savedSala = localStorage.getItem('traducao_culto_sala');
+    if (savedSala) $('sala-input').value = savedSala;
   } catch {}
 }
 
@@ -585,6 +640,7 @@ function savePreferences() {
     localStorage.setItem('traducao_culto_church', churchName);
     localStorage.setItem('traducao_culto_source', sourceLang);
     localStorage.setItem('traducao_culto_target', targetLang);
+    localStorage.setItem('traducao_culto_sala', salaCode);
   } catch {}
 }
 
@@ -598,11 +654,41 @@ function showSetup() {
   isRunning = false;
 }
 
+function showQR() {
+  if (!salaCode) { showError('Defina um código de sala em Configurar.'); return; }
+  const url = `https://leo-bispo.github.io/Traducao-Culto/celular.html?sala=${encodeURIComponent(salaCode)}`;
+  $('qr-room').textContent = salaCode;
+  $('qr-url').textContent = url;
+  const canvas = $('qr-canvas');
+  canvas.innerHTML = '';
+  try {
+    new QRCode(canvas, {
+      text: url,
+      width: 320,
+      height: 320,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  } catch (e) {
+    canvas.textContent = 'Erro ao gerar QR code.';
+  }
+  $('qr-overlay').classList.add('visible');
+}
+
+function hideQR(event) {
+  // Fecha ao clicar no fundo ou no botão Fechar, mas não ao clicar no próprio QR.
+  if (event && event.target.id === 'qr-box') return;
+  if (event && event.target.id === 'qr-canvas') return;
+  $('qr-overlay').classList.remove('visible');
+}
+
 async function startApp() {
   targetLang = $('target-lang').value;
   sourceLang = $('source-lang').value;
   churchName = $('church-input').value.trim() || 'Igreja ao Vivo';
   selectedDeviceId = $('audio-device').value;
+  salaCode = $('sala-input').value.trim().toUpperCase();
 
   savePreferences();
 
