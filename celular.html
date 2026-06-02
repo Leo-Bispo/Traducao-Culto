@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Live Translation</title>
+<title>Atos2 · Live Translation</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%230f0f17'/%3E%3Ctext%20x='16'%20y='24'%20font-family='Georgia,serif'%20font-weight='600'%20font-size='22'%20fill='%23e8c97a'%20text-anchor='middle'%3E2%3C/text%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -33,7 +34,10 @@
     font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase;
     z-index: 10;
   }
-  #room-label { color: var(--gold); }
+  #room-label { color: var(--muted); font-size: 0.6rem; }
+  .topbar-left { display: flex; flex-direction: column; gap: 1px; line-height: 1.05; }
+  .brand-mark { font-family: 'Cormorant Garamond', serif; font-size: 1rem; letter-spacing: 0.06em; color: var(--gold); text-transform: none; }
+  .brand-mark b { color: var(--gold2); font-weight: 500; }
   #status { display: flex; align-items: center; gap: 0.45rem; color: var(--muted); }
   #dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); transition: background 0.3s; }
   #dot.on { background: var(--green); box-shadow: 0 0 8px rgba(76,175,117,0.6); }
@@ -98,7 +102,10 @@
 </head>
 <body>
   <div id="topbar">
-    <span id="room-label">—</span>
+    <span class="topbar-left">
+      <span class="brand-mark"><b>Atos</b>2</span>
+      <span id="room-label">—</span>
+    </span>
     <button id="listen-btn">🔊 Listen</button>
     <span id="status"><span id="dot"></span><span id="status-text">Connecting…</span></span>
   </div>
