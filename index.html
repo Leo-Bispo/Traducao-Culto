@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tradução ao Vivo — Culto</title>
+<title>Atos2 · Live Translation</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%230f0f17'/%3E%3Ctext%20x='16'%20y='24'%20font-family='Georgia,serif'%20font-weight='600'%20font-size='22'%20fill='%23e8c97a'%20text-anchor='middle'%3E2%3C/text%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600&family=Inter:wght@300;400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
@@ -62,6 +63,9 @@ body::before {
   margin: auto;
 }
 .ornament { text-align: center; color: var(--gold); font-size: 1.2rem; letter-spacing: 0.4em; margin-bottom: 0.4rem; opacity: 0.5; }
+.setup-logo { display: block; width: 320px; max-width: 82%; height: auto; margin: 0 auto 1rem; }
+.brand-mark { font-family: 'Cinzel', serif; font-size: 0.8rem; letter-spacing: 0.18em; color: var(--gold); opacity: 0.85; }
+.brand-mark b { color: var(--gold2); font-weight: 600; }
 .setup-title { font-family: 'Cinzel', serif; font-size: 1.5rem; font-weight: 600; color: var(--gold2); text-align: center; letter-spacing: 0.1em; margin-bottom: 0.3rem; }
 .setup-subtitle { text-align: center; color: var(--muted); font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 2.5rem; }
 .field-group { margin-bottom: 1.4rem; }
@@ -339,74 +343,73 @@ select option { background: #13131f; }
 
 <div id="setup-screen">
   <div class="setup-card">
-    <div class="ornament">✦ ✦ ✦</div>
-    <h1 class="setup-title">Tradução ao Vivo</h1>
-    <p class="setup-subtitle">Configuração do culto</p>
+    <img src="atos2-logo.svg" class="setup-logo" alt="Atos2 — Live Translation">
+    <p class="setup-subtitle">Service Setup</p>
 
     <div class="field-group">
-      <label>Nome da Igreja (aparece no telão)</label>
+      <label>Church name (shown on screen)</label>
       <input type="text" id="church-input" value="Igreja Brasileira de Londres">
     </div>
 
     <div class="field-group">
-      <label>Idioma de origem (quem fala)</label>
+      <label>Source language (the speaker)</label>
       <select id="source-lang">
-        <option value="auto">🔍 Detectar automaticamente</option>
-        <option value="pt-BR" selected>🇧🇷 Português (Brasil)</option>
-        <option value="pt-PT">🇵🇹 Português (Portugal)</option>
-        <option value="en-GB">🇬🇧 Inglês (UK)</option>
-        <option value="en-US">🇺🇸 Inglês (EUA)</option>
-        <option value="es">🇪🇸 Espanhol</option>
-        <option value="fr">🇫🇷 Francês</option>
+        <option value="auto">🔍 Auto-detect</option>
+        <option value="pt-BR" selected>🇧🇷 Portuguese (Brazil)</option>
+        <option value="pt-PT">🇵🇹 Portuguese (Portugal)</option>
+        <option value="en-GB">🇬🇧 English (UK)</option>
+        <option value="en-US">🇺🇸 English (US)</option>
+        <option value="es">🇪🇸 Spanish</option>
+        <option value="fr">🇫🇷 French</option>
       </select>
     </div>
 
     <div class="field-group">
-      <label>Idioma de destino (tradução exibida)</label>
+      <label>Target language (translation shown)</label>
       <select id="target-lang">
-        <option value="en" selected>🇬🇧 Inglês</option>
-        <option value="pt">🇧🇷 Português</option>
-        <option value="es">🇪🇸 Espanhol</option>
-        <option value="fr">🇫🇷 Francês</option>
-        <option value="de">🇩🇪 Alemão</option>
-        <option value="it">🇮🇹 Italiano</option>
-        <option value="ja">🇯🇵 Japonês</option>
-        <option value="zh">🇨🇳 Mandarim</option>
-        <option value="ko">🇰🇷 Coreano</option>
-        <option value="ru">🇷🇺 Russo</option>
-        <option value="ro">🇷🇴 Romeno</option>
-        <option value="pl">🇵🇱 Polonês</option>
-        <option value="uk">🇺🇦 Ucraniano</option>
-        <option value="nl">🇳🇱 Holandês</option>
-        <option value="id">🇮🇩 Indonésio</option>
-        <option value="vi">🇻🇳 Vietnamita</option>
+        <option value="en" selected>🇬🇧 English</option>
+        <option value="pt">🇧🇷 Portuguese</option>
+        <option value="es">🇪🇸 Spanish</option>
+        <option value="fr">🇫🇷 French</option>
+        <option value="de">🇩🇪 German</option>
+        <option value="it">🇮🇹 Italian</option>
+        <option value="ja">🇯🇵 Japanese</option>
+        <option value="zh">🇨🇳 Mandarin</option>
+        <option value="ko">🇰🇷 Korean</option>
+        <option value="ru">🇷🇺 Russian</option>
+        <option value="ro">🇷🇴 Romanian</option>
+        <option value="pl">🇵🇱 Polish</option>
+        <option value="uk">🇺🇦 Ukrainian</option>
+        <option value="nl">🇳🇱 Dutch</option>
+        <option value="id">🇮🇩 Indonesian</option>
+        <option value="vi">🇻🇳 Vietnamese</option>
         <option value="tl">🇵🇭 Filipino (Tagalog)</option>
         <option value="hi">🇮🇳 Hindi</option>
-        <option value="tr">🇹🇷 Turco</option>
+        <option value="tr">🇹🇷 Turkish</option>
       </select>
     </div>
 
     <div class="field-group">
-      <label>Entrada de áudio (microfone / mesa de som)</label>
+      <label>Audio input (microphone / sound desk)</label>
       <select id="audio-device">
-        <option value="">⏳ Carregando dispositivos...</option>
+        <option value="">⏳ Loading devices...</option>
       </select>
-      <p class="api-hint">Selecione a entrada da mesa de som (ex: "CABLE Output", "USB Audio", "Scarlett") ou o microfone.</p>
+      <p class="api-hint">Select the sound desk input (e.g. "CABLE Output", "USB Audio", "Scarlett") or the microphone.</p>
     </div>
 
     <div class="field-group">
-      <label>Código da sala (para o QR code dos celulares)</label>
-      <input type="text" id="sala-input" value="ABUNDANTE" placeholder="EX: ABUNDANTE">
-      <p class="api-hint">Código fixo desta igreja. A congregação escaneia o QR code para ler a tradução no próprio celular. Use um código único por igreja.</p>
+      <label>Room code (for the phone QR code)</label>
+      <input type="text" id="sala-input" value="ABUNDANTE" placeholder="E.G. ABUNDANTE">
+      <p class="api-hint">Fixed code for this church. The congregation scans the QR code to read the translation on their own phones. Use a unique code per church.</p>
     </div>
 
     <div class="field-group">
-      <label>Termos da igreja (opcional — melhora a precisão)</label>
-      <input type="text" id="context-input" placeholder="Ex: Pastor Silva, Igreja Abundante Vida, Ministério Ágape">
-      <p class="api-hint">Nomes próprios que aparecem no culto (pastor, igreja, ministérios, pregadores). Ajuda a transcrever e traduzir esses nomes corretamente.</p>
+      <label>Church terms (optional — improves accuracy)</label>
+      <input type="text" id="context-input" placeholder="E.g. Pastor Silva, Abundant Life Church, Agape Ministry">
+      <p class="api-hint">Proper names that come up during the service (pastor, church, ministries, preachers). Helps transcribe and translate these names correctly.</p>
     </div>
 
-    <button class="btn-start" onclick="startApp()">INICIAR TRADUÇÃO</button>
+    <button class="btn-start" onclick="startApp()">START TRANSLATION</button>
   </div>
 </div>
 
@@ -416,10 +419,11 @@ select option { background: #13131f; }
     <div class="status-row">
       <span id="lang-badge">PT → EN</span>
       <div id="status-dot"></div>
-      <button class="btn-pause" id="btn-pause" onclick="togglePause()" title="Pausar/retomar a tradução">⏸ Pausar</button>
-      <button class="btn-clear" onclick="clearPrompter()" title="Limpar telão">⌫ Limpar</button>
-      <button class="btn-settings" onclick="showQR()" title="Mostrar QR code">📱 QR</button>
-      <button class="btn-settings" onclick="showSetup()">⚙ Configurar</button>
+      <button class="btn-pause" id="btn-pause" onclick="togglePause()" title="Pause/resume translation">⏸ Pause</button>
+      <button class="btn-clear" onclick="clearPrompter()" title="Clear screen">⌫ Clear</button>
+      <button class="btn-settings" onclick="showQR()" title="Show QR code">📱 QR</button>
+      <button class="btn-settings" onclick="showSetup()">⚙ Setup</button>
+      <span class="brand-mark"><b>Atos</b>2</span>
     </div>
   </div>
 
@@ -435,7 +439,7 @@ select option { background: #13131f; }
   </div>
 
   <div id="source-strip">
-    <div id="source-text" class="source-placeholder">Aguardando áudio…</div>
+    <div id="source-text" class="source-placeholder">Waiting for audio…</div>
   </div>
 
   <div id="waveform"></div>
@@ -443,12 +447,12 @@ select option { background: #13131f; }
 </div>
 
 <div id="qr-overlay" onclick="hideQR(event)">
-  <div class="qr-title">Tradução ao Vivo</div>
-  <div class="qr-sub">Aponte a câmera do celular para ler a tradução</div>
+  <div class="qr-title">Live Translation</div>
+  <div class="qr-sub">Point your phone camera here to read the translation</div>
   <div id="qr-box"><div id="qr-canvas"></div></div>
   <div class="qr-room" id="qr-room">—</div>
   <div class="qr-url" id="qr-url"></div>
-  <button class="qr-close" onclick="hideQR(event)">Fechar</button>
+  <button class="qr-close" onclick="hideQR(event)">Close</button>
 </div>
 
 <script>
@@ -501,14 +505,14 @@ function togglePause() {
 
   if (isPaused) {
     savedBadgeText = $('lang-badge').textContent;
-    $('lang-badge').textContent = '⏸ PAUSADO';
-    btn.textContent = '▶ Retomar';
+    $('lang-badge').textContent = '⏸ PAUSED';
+    btn.textContent = '▶ Resume';
     btn.classList.add('is-paused');
     setStatus('paused');
     animateWave(false);
   } else {
     $('lang-badge').textContent = savedBadgeText || $('lang-badge').textContent;
-    btn.textContent = '⏸ Pausar';
+    btn.textContent = '⏸ Pause';
     btn.classList.remove('is-paused');
     setStatus('listening');
     animateWave(true);
@@ -624,7 +628,7 @@ async function loadAudioDevices() {
     inputs.forEach((d, i) => {
       const opt = document.createElement('option');
       opt.value = d.deviceId;
-      opt.textContent = d.label || `Microfone ${i + 1}`;
+      opt.textContent = d.label || `Microphone ${i + 1}`;
       if (/cable|vb-audio|virtual|blackhole|loopback/i.test(d.label)) {
         opt.textContent = '🔌 ' + opt.textContent;
       } else if (/usb|line|scarlett|behringer|focusrite|aux|interface|hw:/i.test(d.label)) {
@@ -634,9 +638,9 @@ async function loadAudioDevices() {
       }
       sel.appendChild(opt);
     });
-    if (inputs.length === 0) sel.innerHTML = '<option value="">Nenhum dispositivo encontrado</option>';
+    if (inputs.length === 0) sel.innerHTML = '<option value="">No device found</option>';
   } catch (err) {
-    $('audio-device').innerHTML = '<option value="">Erro ao listar dispositivos</option>';
+    $('audio-device').innerHTML = '<option value="">Error listing devices</option>';
   }
 }
 
@@ -676,7 +680,7 @@ function showSetup() {
 }
 
 function showQR() {
-  if (!salaCode) { showError('Defina um código de sala em Configurar.'); return; }
+  if (!salaCode) { showError('Set a room code in Setup.'); return; }
   const url = `https://leo-bispo.github.io/Traducao-Culto/celular.html?sala=${encodeURIComponent(salaCode)}&lang=${encodeURIComponent(targetLang)}`;
   $('qr-room').textContent = salaCode;
   $('qr-url').textContent = url;
@@ -692,7 +696,7 @@ function showQR() {
       correctLevel: QRCode.CorrectLevel.H
     });
   } catch (e) {
-    canvas.textContent = 'Erro ao gerar QR code.';
+    canvas.textContent = 'Error generating QR code.';
   }
   $('qr-overlay').classList.add('visible');
 }
@@ -753,12 +757,12 @@ async function startRealtimeSession() {
     });
     if (!tokenRes.ok) {
       const errText = await tokenRes.text();
-      throw new Error('Falha ao obter token de transcrição (' + tokenRes.status + '): ' + errText);
+      throw new Error('Failed to get transcription token (' + tokenRes.status + '): ' + errText);
     }
     const tokenData = await tokenRes.json();
     const ephemeralKey = tokenData?.client_secret?.value || tokenData?.value;
     if (!ephemeralKey) {
-      throw new Error('Token efêmero ausente na resposta do Worker: ' + JSON.stringify(tokenData));
+      throw new Error('Ephemeral token missing in Worker response: ' + JSON.stringify(tokenData));
     }
 
     ws = new WebSocket(
@@ -808,7 +812,7 @@ async function startRealtimeSession() {
     ws.onclose = (e) => { if (isRunning) scheduleReconnect(e.code, e.reason); };
   } catch (err) {
     setStatus('error');
-    showError('Não foi possível acessar o microfone: ' + err.message, true);
+    showError('Could not access the microphone: ' + err.message, true);
     console.error(err);
   }
 }
@@ -816,7 +820,7 @@ async function startRealtimeSession() {
 function scheduleReconnect(code, reason) {
   if (code === 1008 || code === 4001 || code === 4003) {
     setStatus('error');
-    showError('Erro de autenticação. Verifique sua chave da API.', true);
+    showError('Authentication error. Please contact support.', true);
     isRunning = false;
     return;
   }
@@ -825,7 +829,7 @@ function scheduleReconnect(code, reason) {
   const delaySeconds = Math.round(delay / 1000);
 
   setStatus('reconnecting');
-  showError(`Conexão perdida. Reconectando em ${delaySeconds}s... (tentativa ${reconnectAttempts})`, true);
+  showError(`Connection lost. Reconnecting in ${delaySeconds}s... (attempt ${reconnectAttempts})`, true);
 
   if (processorNode) { try { processorNode.disconnect(); } catch {} processorNode = null; }
   if (audioContext) { try { audioContext.close(); } catch {} audioContext = null; }
@@ -833,7 +837,7 @@ function scheduleReconnect(code, reason) {
 
   if (reconnectAttempts > 8) {
     setStatus('error');
-    showError('Não foi possível reconectar. Clique em Configurar.', true);
+    showError('Could not reconnect. Click Setup.', true);
     isRunning = false;
     return;
   }
@@ -884,8 +888,8 @@ function handleRealtimeEvent(msg) {
     case 'error':
       console.error('Realtime API error:', msg.error);
       const errMsg = msg.error?.message || 'desconhecido';
-      if (msg.error?.code === 'session_expired') showError('Sessão expirada. Reconectando...');
-      else showError('Erro da API: ' + errMsg);
+      if (msg.error?.code === 'session_expired') showError('Session expired. Reconnecting...');
+      else showError('API error: ' + errMsg);
       break;
   }
 }
@@ -962,9 +966,9 @@ async function translateChunk(sourceFragment) {
     if (!res.ok) {
       const entry = pendingChunks.get(myId);
       if (entry) entry.status = 'error';
-      if (res.status === 401) showError('Erro de autenticação no servidor de tradução.', true);
-      else if (res.status === 429) showError('Limite de uso atingido. Aguarde alguns segundos.');
-      else showError(`Erro na tradução (${res.status})`);
+      if (res.status === 401) showError('Authentication error on the translation server.', true);
+      else if (res.status === 429) showError('Usage limit reached. Please wait a few seconds.');
+      else showError(`Translation error (${res.status})`);
       tryFlushOrdered();
       return;
     }
