@@ -7,6 +7,8 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%230f0f17'/%3E%3Ctext%20x='16'%20y='24'%20font-family='Georgia,serif'%20font-weight='600'%20font-size='22'%20fill='%23e8c97a'%20text-anchor='middle'%3E2%3C/text%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600&family=Inter:wght@300;400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.4.9/mammoth.browser.min.js"></script>
 <style>
 :root {
   --bg: #0a0a0f;
@@ -90,6 +92,32 @@ select:focus, input[type="text"]:focus, input[type="password"]:focus {
 select option { background: #13131f; }
 .api-hint { font-size: 0.7rem; color: var(--muted); margin-top: 0.4rem; line-height: 1.5; }
 .api-hint a { color: var(--gold); text-decoration: none; }
+input[type="file"] {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(201,168,76,0.2);
+  border-radius: 2px;
+  color: var(--text);
+  padding: 0.55rem 0.7rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  outline: none;
+  cursor: pointer;
+}
+input[type="file"]::file-selector-button {
+  background: rgba(201,168,76,0.12);
+  border: 1px solid rgba(201,168,76,0.3);
+  color: var(--gold2);
+  border-radius: 2px;
+  padding: 0.35rem 0.8rem;
+  margin-right: 0.8rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+.sermon-ok { color: #6fcf97 !important; opacity: 1 !important; }
+.sermon-err { color: #e07070 !important; opacity: 1 !important; }
+.sermon-loading { color: var(--gold2) !important; opacity: 1 !important; }
 .btn-start {
   width: 100%;
   margin-top: 2rem;
@@ -409,6 +437,12 @@ select option { background: #13131f; }
       <p class="api-hint">Proper names that come up during the service (pastor, church, ministries, preachers). Helps transcribe and translate these names correctly.</p>
     </div>
 
+    <div class="field-group">
+      <label>Sermon (optional — supercharges accuracy)</label>
+      <input type="file" id="sermon-file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onchange="handleSermonUpload(event)">
+      <p class="api-hint" id="sermon-status">Upload the sermon as PDF or Word (.docx). The AI reads it once before the service to learn names, key terms, Bible references and the theme — for a sharper, more natural translation. Leave empty to run exactly as today.</p>
+    </div>
+
     <button class="btn-start" onclick="startApp()">START TRANSLATION</button>
   </div>
 </div>
@@ -465,6 +499,8 @@ let churchName = '';
 let selectedDeviceId = '';
 let salaCode = '';
 let customContext = '';
+let sermonTerms = '';      // termos/nomes/versículos destilados do sermão
+let sermonSummary = '';    // mini-resumo do tema do sermão
 let isRunning = false;
 let isPaused = false;
 let savedBadgeText = '';
@@ -670,6 +706,129 @@ function savePreferences() {
 }
 
 // ══════════════════════════════════════════════════════════════
+// SERMÃO — leitura PDF/Word + porteiro + destilação (Opção B)
+// ══════════════════════════════════════════════════════════════
+if (window.pdfjsLib) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+function setSermonStatus(text, cls) {
+  const el = $('sermon-status');
+  el.textContent = text;
+  el.className = 'api-hint' + (cls ? ' ' + cls : '');
+}
+
+async function extractPdfText(arrayBuffer) {
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  let out = '';
+  for (let p = 1; p <= pdf.numPages; p++) {
+    const page = await pdf.getPage(p);
+    const content = await page.getTextContent();
+    out += content.items.map(i => i.str).join(' ') + '\n';
+  }
+  return out;
+}
+
+async function extractDocxText(arrayBuffer) {
+  const result = await mammoth.extractRawText({ arrayBuffer });
+  return result.value || '';
+}
+
+async function handleSermonUpload(event) {
+  // Se o operador trocar/limpar o arquivo, zera o abastecimento (sem regresso).
+  sermonTerms = '';
+  sermonSummary = '';
+
+  const file = event.target.files && event.target.files[0];
+  if (!file) {
+    setSermonStatus('Upload the sermon as PDF or Word (.docx). Leave empty to run exactly as today.', null);
+    return;
+  }
+
+  const name = file.name.toLowerCase();
+  const isPdf = name.endsWith('.pdf') || file.type === 'application/pdf';
+  const isDocx = name.endsWith('.docx');
+
+  if (name.endsWith('.doc') && !isDocx) {
+    setSermonStatus('⚠ The old .doc format is not supported. Save it as .docx or PDF and try again.', 'sermon-err');
+    return;
+  }
+  if (!isPdf && !isDocx) {
+    setSermonStatus('⚠ Unsupported file. Please upload a PDF or Word (.docx) file.', 'sermon-err');
+    return;
+  }
+
+  setSermonStatus('⏳ Reading the sermon…', 'sermon-loading');
+
+  try {
+    const buffer = await file.arrayBuffer();
+    let text = isPdf ? await extractPdfText(buffer) : await extractDocxText(buffer);
+    text = (text || '').replace(/\s+/g, ' ').trim();
+
+    // PORTEIRO: confere se saiu texto de verdade (PDF escaneado vem quase vazio).
+    const wordCount = text ? text.split(' ').length : 0;
+    if (text.length < 200 || wordCount < 40) {
+      setSermonStatus('⚠ This file looks like a scanned image or is empty. Send a PDF or Word with selectable text.', 'sermon-err');
+      return;
+    }
+
+    setSermonStatus('⏳ The AI is studying the sermon…', 'sermon-loading');
+    const ok = await distillSermon(text);
+    setSermonStatus(
+      ok ? '✓ Sermon loaded — translation supercharged for this service.'
+         : '⚠ Could not process the sermon now. The service will run normally without it.',
+      ok ? 'sermon-ok' : 'sermon-err'
+    );
+  } catch (err) {
+    console.error('Erro ao ler sermão:', err);
+    setSermonStatus('⚠ Could not read this file. Try another PDF or Word, or leave it empty.', 'sermon-err');
+  }
+}
+
+async function distillSermon(sermonText) {
+  // Sermões longos: ~12k caracteres cobrem uma pregação inteira com folga.
+  const clipped = sermonText.slice(0, 12000);
+  const distillSystem = `You prepare context for a LIVE sermon interpreter. Read the sermon and return ONLY valid JSON, no markdown, no preamble, in this exact shape:
+{"terms":["..."],"refs":["..."],"summary":"..."}
+- "terms": proper nouns, people, places, ministries, and key theological terms that could be misheard or mistranslated (max 40 items, short).
+- "refs": every Bible reference mentioned, normalized (e.g. "John 3:16").
+- "summary": ONE or TWO sentences naming the central theme of the sermon.
+Return nothing except the JSON object.`;
+
+  try {
+    const res = await fetch('https://traducao-culto-api.leandrobisp-s.workers.dev/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        max_tokens: 700,
+        temperature: 0.1,
+        messages: [
+          { role: 'system', content: distillSystem },
+          { role: 'user', content: clipped }
+        ]
+      })
+    });
+    if (!res.ok) return false;
+    const json = await res.json();
+    let raw = json.choices?.[0]?.message?.content?.trim() || '';
+    raw = raw.replace(/^```json\s*|^```\s*|\s*```$/g, '').trim();
+    const data = JSON.parse(raw);
+
+    const terms = Array.isArray(data.terms) ? data.terms : [];
+    const refs = Array.isArray(data.refs) ? data.refs : [];
+    sermonSummary = typeof data.summary === 'string' ? data.summary.trim() : '';
+    sermonTerms = [...terms, ...refs].filter(Boolean).join(', ');
+
+    return !!(sermonTerms || sermonSummary);
+  } catch (err) {
+    console.error('Erro ao destilar sermão:', err);
+    return false;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
 // SETUP → START
 // ══════════════════════════════════════════════════════════════
 function showSetup() {
@@ -781,7 +940,7 @@ async function startRealtimeSession() {
               transcription: {
                 model: 'gpt-4o-transcribe',
                 ...(langParam ? { language: langParam } : {}),
-                prompt: 'Contexto: culto evangélico cristão tradicional (batista/presbiteriana), Bíblia NVI. Termos comuns: Jesus, Cristo, Senhor, Deus, Espírito Santo, evangelho, salvação, graça, fé, oração, aleluia, amém, igreja, pastor, irmão, irmã, glória, louvor, adoração, ministério, comunhão, arrependimento, santificação, redenção, unção, ungido, Reino dos Céus, aliança, justificação. Livros bíblicos: Gênesis, Êxodo, Salmos, Provérbios, Isaías, Jeremias, Mateus, Marcos, Lucas, João, Atos, Romanos, Coríntios, Gálatas, Efésios, Hebreus, Apocalipse.' + (customContext ? ' Nomes próprios desta igreja: ' + customContext + '.' : '')
+                prompt: 'Contexto: culto evangélico cristão tradicional (batista/presbiteriana), Bíblia NVI. Termos comuns: Jesus, Cristo, Senhor, Deus, Espírito Santo, evangelho, salvação, graça, fé, oração, aleluia, amém, igreja, pastor, irmão, irmã, glória, louvor, adoração, ministério, comunhão, arrependimento, santificação, redenção, unção, ungido, Reino dos Céus, aliança, justificação. Livros bíblicos: Gênesis, Êxodo, Salmos, Provérbios, Isaías, Jeremias, Mateus, Marcos, Lucas, João, Atos, Romanos, Coríntios, Gálatas, Efésios, Hebreus, Apocalipse.' + (customContext ? ' Nomes próprios desta igreja: ' + customContext + '.' : '') + (sermonTerms ? ' Termos e nomes deste sermão: ' + sermonTerms + '.' : '')
               },
               turn_detection: {
                 type: 'server_vad',
@@ -923,7 +1082,8 @@ CRITICAL RULES:
 9. If the fragment is filler only ("hum", "então", "tipo", "né"), return an empty string.
 10. NEVER use quotation marks around your output. NEVER prefix with "Translation:". Return ONLY the translated text.
 11. NATURALNESS: Render the meaning as a native simultaneous interpreter would actually speak it in the target language — idiomatic and fluent, NOT word-for-word. When the target is British English, prefer how a British speaker would naturally phrase the idea over a literal calque of the Portuguese construction. Restructure freely for fluency.
-12. Naturalness must NEVER alter meaning, Bible references, theological terms, or the reverent pastoral tone. Translate faithfully in sense — fluently in form.${customContext ? `\n13. Church-specific proper nouns (keep them accurate and natural in the target language): ${customContext}.` : ''}`;
+12. Naturalness must NEVER alter meaning, Bible references, theological terms, or the reverent pastoral tone. Translate faithfully in sense — fluently in form. This faithfulness rule is SOVEREIGN: it always wins over naturalness.
+13. Aim for the phrasing a skilled HUMAN interpreter would actually speak aloud in ${targetName}: natural rhythm, natural word order, natural connectors — never a stiff, word-by-word echo of the Portuguese. It should read as if originally spoken in the target language, while always obeying rule 12.${customContext ? `\n14. Church-specific proper nouns (keep them accurate and natural in the target language): ${customContext}.` : ''}${sermonSummary ? `\n15. This service's sermon is about: ${sermonSummary} Use this only to resolve ambiguity and pick the right sense — never inject it into the output.` : ''}${sermonTerms ? `\n16. Names and terms that appear in this sermon (translate them consistently and correctly): ${sermonTerms}.` : ''}`;
 }
 
 async function translateChunk(sourceFragment) {
