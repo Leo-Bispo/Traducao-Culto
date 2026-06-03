@@ -177,7 +177,7 @@
   async function fetchAhead() {
     if (!speakEnabled || fetching) return;
     if (pendingTexts.length === 0) return;
-    if (readyAudios.length >= 2) return; // basta manter UMA linha adiantada e pronta
+    if (readyAudios.length >= 2) return; // basta manter DUAS linha adiantada e pronta
     fetching = true;
     const text = pendingTexts.shift();
     try {
