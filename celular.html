@@ -139,8 +139,10 @@
   const listenBtn = document.getElementById("listen-btn");
   const player = new Audio();
   let speakEnabled = false;
-  let ttsQueue = [];
-  let ttsBusy = false;
+  let pendingTexts = [];   // linhas ainda não convertidas em áudio
+  let readyAudios = [];    // áudios já prontos, esperando para tocar
+  let fetching = false;
+  let playing = false;
   let currentUrl = null;
 
   player.addEventListener("ended", onSegmentDone);
@@ -148,10 +150,10 @@
 
   function onSegmentDone() {
     if (currentUrl) { try { URL.revokeObjectURL(currentUrl); } catch (e) {} currentUrl = null; }
-    ttsBusy = false;
-    pumpTts();
+    playing = false;
+    playNext();
+    fetchAhead();
   }
-
   listenBtn.addEventListener("click", () => {
     speakEnabled = !speakEnabled;
     listenBtn.classList.toggle("on", speakEnabled);
@@ -167,39 +169,57 @@
   // Enfileira uma linha para virar voz (só se o Listen estiver ligado).
   function enqueueSpeak(text) {
     if (!speakEnabled || !text) return;
-    ttsQueue.push(text);
-    pumpTts();
+    pendingTexts.push(text);
+    fetchAhead();
   }
 
-  // Toca uma linha de cada vez, sem sobrepor. Busca o áudio só na hora.
-  async function pumpTts() {
-    if (ttsBusy || !speakEnabled || ttsQueue.length === 0) return;
-    ttsBusy = true;
-    const text = ttsQueue.shift();
+  // Busca o áudio da PRÓXIMA linha enquanto a atual ainda toca — é isso que mata a pausa entre frases.
+  async function fetchAhead() {
+    if (!speakEnabled || fetching) return;
+    if (pendingTexts.length === 0) return;
+    if (readyAudios.length >= 1) return; // basta manter UMA linha adiantada e pronta
+    fetching = true;
+    const text = pendingTexts.shift();
     try {
       const res = await fetch("https://" + TTS_HOST + "/tts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text }),
       });
-      if (!speakEnabled) { ttsBusy = false; ttsQueue = []; return; }
-      if (!res.ok) { ttsBusy = false; pumpTts(); return; } // pula linha com erro
-      const blob = await res.blob();
-      if (!speakEnabled) { ttsBusy = false; ttsQueue = []; return; }
-      currentUrl = URL.createObjectURL(blob);
-      player.src = currentUrl;
-      await player.play();
-      // ao terminar, o evento "ended" chama onSegmentDone, que toca a próxima
+      fetching = false;
+      if (!speakEnabled) return;
+      if (res.ok) {
+        const blob = await res.blob();
+        if (!speakEnabled) return;
+        readyAudios.push(URL.createObjectURL(blob));
+        playNext();
+        fetchAhead();
+      } else {
+        fetchAhead(); // pula linha com erro e tenta a próxima
+      }
     } catch (e) {
-      ttsBusy = false;
-      pumpTts();
+      fetching = false;
+      fetchAhead();
     }
   }
 
-  // Parar = parar de pedir: limpa a fila e silencia na hora.
+  // Toca a próxima linha já pronta; ao terminar, a seguinte normalmente já está pronta (sem espera).
+  function playNext() {
+    if (!speakEnabled || playing || readyAudios.length === 0) return;
+    playing = true;
+    currentUrl = readyAudios.shift();
+    player.src = currentUrl;
+    player.play().catch(() => { playing = false; onSegmentDone(); });
+    fetchAhead();
+  }
+
+  // Parar = parar de pedir: limpa tudo e silencia na hora.
   function stopSpeaking() {
-    ttsQueue = [];
-    ttsBusy = false;
+    pendingTexts = [];
+    readyAudios.forEach(u => { try { URL.revokeObjectURL(u); } catch (e) {} });
+    readyAudios = [];
+    fetching = false;
+    playing = false;
     try { player.pause(); } catch (e) {}
     if (currentUrl) { try { URL.revokeObjectURL(currentUrl); } catch (e) {} currentUrl = null; }
   }
