@@ -132,45 +132,76 @@
   let ws = null;
   let reconnectTimer = null;
 
-  // ── Áudio (Text-to-Speech) — lê a tradução em voz alta no próprio celular ──
-  const lang = (params.get("lang") || "en").trim().toLowerCase();
-  const BCP47 = {
-    en:'en-GB', pt:'pt-BR', es:'es-ES', fr:'fr-FR', de:'de-DE', it:'it-IT',
-    ja:'ja-JP', zh:'zh-CN', ko:'ko-KR', ru:'ru-RU', ro:'ro-RO', pl:'pl-PL',
-    uk:'uk-UA', nl:'nl-NL', id:'id-ID', vi:'vi-VN', tl:'fil-PH', hi:'hi-IN', tr:'tr-TR'
-  };
-  const speechLang = BCP47[lang] || 'en-GB';
-  const synth = window.speechSynthesis;
+  // ── Áudio (voz neural sob demanda) — pede o MP3 ao Worker e toca no celular ──
+  // Custo: só gera áudio quando alguém liga o "Listen". Ninguém ouvindo = custo zero.
+  const TTS_HOST = "traducao-culto-api.leandrobisp-s.workers.dev";
+  const SILENT_CLIP = "data:audio/wav;base64,UklGRvQHAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YdAHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==";
   const listenBtn = document.getElementById("listen-btn");
+  const player = new Audio();
   let speakEnabled = false;
+  let ttsQueue = [];
+  let ttsBusy = false;
+  let currentUrl = null;
 
-  if (!synth) {
-    listenBtn.style.display = "none"; // navegador sem suporte a voz
-  } else {
-    listenBtn.addEventListener("click", () => {
-      speakEnabled = !speakEnabled;
-      listenBtn.classList.toggle("on", speakEnabled);
-      listenBtn.textContent = speakEnabled ? "🔊 On" : "🔊 Listen";
-      try {
-        synth.cancel();
-        if (speakEnabled) {
-          // desbloqueia o áudio (necessário no iOS) usando o toque do usuário
-          const u = new SpeechSynthesisUtterance(" ");
-          u.lang = speechLang;
-          synth.speak(u);
-        }
-      } catch (e) {}
-    });
+  player.addEventListener("ended", onSegmentDone);
+  player.addEventListener("error", onSegmentDone);
+
+  function onSegmentDone() {
+    if (currentUrl) { try { URL.revokeObjectURL(currentUrl); } catch (e) {} currentUrl = null; }
+    ttsBusy = false;
+    pumpTts();
   }
 
-  function speak(text) {
-    if (!speakEnabled || !synth || !text) return;
+  listenBtn.addEventListener("click", () => {
+    speakEnabled = !speakEnabled;
+    listenBtn.classList.toggle("on", speakEnabled);
+    listenBtn.textContent = speakEnabled ? "🔊 On" : "🔊 Listen";
+    if (speakEnabled) {
+      // Desbloqueia o áudio no iOS tocando um silêncio dentro do toque do usuário.
+      try { player.src = SILENT_CLIP; player.play().catch(() => {}); } catch (e) {}
+    } else {
+      stopSpeaking();
+    }
+  });
+
+  // Enfileira uma linha para virar voz (só se o Listen estiver ligado).
+  function enqueueSpeak(text) {
+    if (!speakEnabled || !text) return;
+    ttsQueue.push(text);
+    pumpTts();
+  }
+
+  // Toca uma linha de cada vez, sem sobrepor. Busca o áudio só na hora.
+  async function pumpTts() {
+    if (ttsBusy || !speakEnabled || ttsQueue.length === 0) return;
+    ttsBusy = true;
+    const text = ttsQueue.shift();
     try {
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = speechLang;
-      u.rate = 1.0;
-      synth.speak(u);
-    } catch (e) {}
+      const res = await fetch("https://" + TTS_HOST + "/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      if (!speakEnabled) { ttsBusy = false; ttsQueue = []; return; }
+      if (!res.ok) { ttsBusy = false; pumpTts(); return; } // pula linha com erro
+      const blob = await res.blob();
+      if (!speakEnabled) { ttsBusy = false; ttsQueue = []; return; }
+      currentUrl = URL.createObjectURL(blob);
+      player.src = currentUrl;
+      await player.play();
+      // ao terminar, o evento "ended" chama onSegmentDone, que toca a próxima
+    } catch (e) {
+      ttsBusy = false;
+      pumpTts();
+    }
+  }
+
+  // Parar = parar de pedir: limpa a fila e silencia na hora.
+  function stopSpeaking() {
+    ttsQueue = [];
+    ttsBusy = false;
+    try { player.pause(); } catch (e) {}
+    if (currentUrl) { try { URL.revokeObjectURL(currentUrl); } catch (e) {} currentUrl = null; }
   }
 
   roomLabel.textContent = sala ? ("Room " + sala) : "No room";
@@ -221,7 +252,7 @@
     div.textContent = text;
     feed.appendChild(div);
 
-    speak(text);
+    enqueueSpeak(text);
 
     // Só acompanha automaticamente se a pessoa estiver lendo ao vivo (no fim).
     if (following) {
