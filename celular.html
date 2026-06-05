@@ -186,15 +186,16 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text }),
       });
-      fetching = false;
-      if (!speakEnabled) return;
+      if (!speakEnabled) { fetching = false; return; }
       if (res.ok) {
         const blob = await res.blob();
-        if (!speakEnabled) return;
-        readyAudios.push(URL.createObjectURL(blob));
+        if (!speakEnabled) { fetching = false; return; }
+        readyAudios.push(URL.createObjectURL(blob)); // guarda a linha PRIMEIRO, na ordem
+        fetching = false;                            // só agora libera a próxima busca
         playNext();
         fetchAhead();
       } else {
+        fetching = false;
         fetchAhead(); // pula linha com erro e tenta a próxima
       }
     } catch (e) {
