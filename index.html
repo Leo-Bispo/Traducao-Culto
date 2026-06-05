@@ -560,8 +560,28 @@ function showError(msg, persistent = false) {
   el.textContent = msg;
   el.classList.add('visible');
   if (!persistent) setTimeout(() => el.classList.remove('visible'), 7000);
+  logEvent('client_error', msg);
 }
 function hideError() { $('error-msg').classList.remove('visible'); }
+
+// Log central leve: manda o erro para o Worker guardar. É "dispare e esqueça":
+// se o envio falhar, NUNCA atrapalha o culto.
+function logEvent(type, detail) {
+  try {
+    fetch('https://traducao-culto-api.leandrobisp-s.workers.dev/log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      keepalive: true,
+      body: JSON.stringify({
+        type: type,
+        detail: String(detail || '').slice(0, 300),
+        sala: salaCode || '',
+        ts: new Date().toISOString(),
+        ua: navigator.userAgent.slice(0, 120)
+      })
+    }).catch(() => {});
+  } catch (e) {}
+}
 
 function setSourceText(text, isPlaceholder = false) {
   const el = $('source-text');
