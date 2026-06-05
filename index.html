@@ -497,6 +497,7 @@ let targetLang = 'en';
 let sourceLang = 'pt-BR';
 let churchName = '';
 let selectedDeviceId = '';
+let isLineInput = true; // true = cabo/mesa/interface (sinal validado, intocado); false = microfone (aplica redução de ruído)
 let salaCode = '';
 let customContext = '';
 let sermonTerms = '';      // termos/nomes/versículos destilados do sermão
@@ -892,6 +893,10 @@ async function startApp() {
   sourceLang = $('source-lang').value;
   churchName = $('church-input').value.trim() || 'Igreja ao Vivo';
   selectedDeviceId = $('audio-device').value;
+  // Identifica o tipo de captação a partir do rótulo do dispositivo escolhido (mesma regra dos ícones).
+  // Cabo/mesa/interface = sinal limpo e já validado → não mexe. Microfone = aplica redução de ruído.
+  const selLabel = $('audio-device').selectedOptions[0] ? $('audio-device').selectedOptions[0].textContent : '';
+  isLineInput = /cable|vb-audio|virtual|blackhole|loopback/i.test(selLabel) || /usb|line|scarlett|behringer|focusrite|aux|interface|hw:/i.test(selLabel);
   salaCode = $('sala-input').value.trim().toUpperCase();
   customContext = $('context-input').value.trim();
 
@@ -921,9 +926,13 @@ async function startApp() {
 // ══════════════════════════════════════════════════════════════
 async function startRealtimeSession() {
   try {
+    // Cabo/mesa (validado): sinal cru, sem processamento. Microfone: liga limpeza de ruído do navegador.
+    const cleanup = isLineInput
+      ? { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+      : { echoCancellation: false, noiseSuppression: true,  autoGainControl: true };
     const audioConstraints = selectedDeviceId
-      ? { deviceId: { exact: selectedDeviceId }, sampleRate: 24000, channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false }
-      : { sampleRate: 24000, channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false };
+      ? { deviceId: { exact: selectedDeviceId }, sampleRate: 24000, channelCount: 1, ...cleanup }
+      : { sampleRate: 24000, channelCount: 1, ...cleanup };
 
     activeStream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
     const langParam = sourceLang !== 'auto' ? sourceLang.split('-')[0] : '';
@@ -962,9 +971,10 @@ async function startRealtimeSession() {
                 ...(langParam ? { language: langParam } : {}),
                 prompt: 'Contexto: culto evangélico cristão tradicional (batista/presbiteriana), Bíblia NVI. Termos comuns: Jesus, Cristo, Senhor, Deus, Espírito Santo, evangelho, salvação, graça, fé, oração, aleluia, amém, igreja, pastor, irmão, irmã, glória, louvor, adoração, ministério, comunhão, arrependimento, santificação, redenção, unção, ungido, Reino dos Céus, aliança, justificação. Livros bíblicos: Gênesis, Êxodo, Salmos, Provérbios, Isaías, Jeremias, Mateus, Marcos, Lucas, João, Atos, Romanos, Coríntios, Gálatas, Efésios, Hebreus, Apocalipse.' + (customContext ? ' Nomes próprios desta igreja: ' + customContext + '.' : '') + (sermonTerms ? ' Termos e nomes deste sermão: ' + sermonTerms + '.' : '')
               },
+              ...(isLineInput ? {} : { noise_reduction: { type: 'far_field' } }),
               turn_detection: {
                 type: 'server_vad',
-                threshold: 0.5,
+                threshold: isLineInput ? 0.5 : 0.7,
                 prefix_padding_ms: 300,
                 silence_duration_ms: SILENCE_DURATION_MS
               }
