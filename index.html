@@ -637,8 +637,13 @@ async function collectSnapshot() {
   try {
     if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
       const h = await navigator.userAgentData.getHighEntropyValues(['platform', 'platformVersion', 'architecture', 'bitness', 'model']);
-      snap.os = ((h.platform || '') + ' ' + (h.platformVersion || '')).trim();
-      snap.arch = ((h.architecture || '') + (h.bitness ? 'x' + h.bitness : '')).trim();
+      let osLabel = ((h.platform || '') + ' ' + (h.platformVersion || '')).trim();
+      if (h.platform === 'Windows') {
+        const major = parseInt((h.platformVersion || '0').split('.')[0], 10) || 0;
+        osLabel = 'Windows ' + (major >= 13 ? '11' : major >= 1 ? '10' : '7/8');
+      }
+      snap.os = osLabel;
+      snap.arch = ((h.architecture || '') + (h.bitness ? '-' + h.bitness + 'bit' : '')).trim();
       if (h.model) snap.model = h.model;
     }
   } catch (e) {}
