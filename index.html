@@ -584,6 +584,114 @@ function logEvent(type, detail) {
   } catch (e) {}
 }
 
+// ═══════════════════════════════════════════════════════════
+// TELEMETRIA / CAIXA-PRETA  (diagnóstico remoto — A+B)
+// Tudo "dispare e esqueça": NUNCA pode atrapalhar o culto.
+// ═══════════════════════════════════════════════════════════
+const HEARTBEAT_MS = 20000; // batimento de saúde a cada 20s
+let tele = { start: 0, longTasks: 0, longTaskMs: 0, loafMs: 0, maxQueue: 0, lastUploadMs: null };
+let _ltObs = null, _loafObs = null, _hbTimer = null;
+
+// Envia E cronometra o próprio POST (mede o upload real — parte B).
+function logTelemetry(type, obj) {
+  const t0 = performance.now();
+  try {
+    fetch('https://traducao-culto-api.leandrobisp-s.workers.dev/log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      keepalive: true,
+      body: JSON.stringify({
+        type: type,
+        detail: JSON.stringify(obj).slice(0, 1400),
+        sala: salaCode || '',
+        ts: new Date().toISOString(),
+        ua: navigator.userAgent.slice(0, 120)
+      })
+    }).then(() => { tele.lastUploadMs = Math.round(performance.now() - t0); }).catch(() => {});
+  } catch (e) {}
+}
+
+// Foto do sistema (uma vez, no início): SO, CPU, RAM, áudio, rede.
+async function collectSnapshot() {
+  const c = navigator.connection || {};
+  const snap = {
+    cores: navigator.hardwareConcurrency || null,
+    ramGB: navigator.deviceMemory || null,
+    inputType: (typeof isLineInput !== 'undefined' && isLineInput) ? 'linha/mesa' : 'microfone',
+    device: ((($('audio-device').selectedOptions || [])[0] || {}).textContent || '').slice(0, 60),
+    src: sourceLang, tgt: targetLang,
+    net: c.effectiveType ? (c.effectiveType + '/' + c.downlink + 'Mbps/' + c.rtt + 'ms') : null,
+    lang: navigator.language,
+    tz: (Intl.DateTimeFormat().resolvedOptions().timeZone) || null,
+    screen: screen.width + 'x' + screen.height,
+    online: navigator.onLine
+  };
+  if (performance.memory) {
+    snap.heapMB = Math.round(performance.memory.usedJSHeapSize / 1048576);
+    snap.heapLimitMB = Math.round(performance.memory.jsHeapSizeLimit / 1048576);
+  }
+  if (audioContext) {
+    snap.audioRate = audioContext.sampleRate;
+    snap.audioLatency = +((audioContext.baseLatency || 0).toFixed(3));
+  }
+  try {
+    if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+      const h = await navigator.userAgentData.getHighEntropyValues(['platform', 'platformVersion', 'architecture', 'bitness', 'model']);
+      snap.os = ((h.platform || '') + ' ' + (h.platformVersion || '')).trim();
+      snap.arch = ((h.architecture || '') + (h.bitness ? 'x' + h.bitness : '')).trim();
+      if (h.model) snap.model = h.model;
+    }
+  } catch (e) {}
+  return snap;
+}
+
+function startTelemetry() {
+  tele = { start: performance.now(), longTasks: 0, longTaskMs: 0, loafMs: 0, maxQueue: 0, lastUploadMs: tele.lastUploadMs };
+  // Travamentos da thread principal = termômetro de CPU (sem ler a CPU).
+  try {
+    _ltObs = new PerformanceObserver((list) => {
+      for (const e of list.getEntries()) { tele.longTasks++; tele.longTaskMs += e.duration; }
+    });
+    _ltObs.observe({ type: 'longtask', buffered: true });
+  } catch (e) {}
+  // Long Animation Frames (Chrome 123+): detalhe extra de travamento.
+  try {
+    _loafObs = new PerformanceObserver((list) => {
+      for (const e of list.getEntries()) { tele.loafMs += (e.blockingDuration || 0); }
+    });
+    _loafObs.observe({ type: 'long-animation-frame', buffered: true });
+  } catch (e) {}
+  collectSnapshot().then((snap) => logTelemetry('session_snapshot', snap));
+  clearInterval(_hbTimer);
+  _hbTimer = setInterval(sendHeartbeat, HEARTBEAT_MS);
+}
+
+function sendHeartbeat() {
+  const c = navigator.connection || {};
+  const depth = (typeof translationOrder !== 'undefined') ? translationOrder.length : 0;
+  if (depth > tele.maxQueue) tele.maxQueue = depth;
+  const hb = {
+    upMin: +(((performance.now() - tele.start) / 60000).toFixed(1)),
+    longTasks: tele.longTasks,
+    longTaskMs: Math.round(tele.longTaskMs),
+    loafMs: Math.round(tele.loafMs),
+    queue: depth,
+    maxQueue: tele.maxQueue,
+    uploadMs: tele.lastUploadMs,
+    net: c.effectiveType ? (c.effectiveType + '/' + c.downlink + 'Mbps/' + c.rtt + 'ms') : null,
+    heapMB: performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1048576) : null,
+    reconn: reconnectAttempts
+  };
+  tele.longTasks = 0; tele.longTaskMs = 0; tele.loafMs = 0;
+  logTelemetry('heartbeat', hb);
+}
+
+function stopTelemetry() {
+  clearInterval(_hbTimer); _hbTimer = null;
+  try { _ltObs && _ltObs.disconnect(); } catch (e) {}
+  try { _loafObs && _loafObs.disconnect(); } catch (e) {}
+}
+  
 function setSourceText(text, isPlaceholder = false) {
   const el = $('source-text');
   el.textContent = text;
@@ -989,6 +1097,7 @@ async function startRealtimeSession() {
       hideError();
       animateWave(true);
       startAudioStreaming();
+      startTelemetry();
     };
 
     ws.onmessage = (event) => {
@@ -998,10 +1107,14 @@ async function startRealtimeSession() {
 
     ws.onerror = (err) => { console.error('WS error:', err); };
 
-    ws.onclose = (e) => { if (isRunning) scheduleReconnect(e.code, e.reason); };
+    ws.onclose = (e) => {
+      logTelemetry('ws_close', { code: e.code, reason: (e.reason || '').slice(0, 80), upMin: +(((performance.now() - tele.start) / 60000).toFixed(1)), attempt: reconnectAttempts });
+      if (isRunning) scheduleReconnect(e.code, e.reason);
+    };
   } catch (err) {
     setStatus('error');
     showError('Could not access the microphone: ' + err.message, true);
+    logTelemetry('mic_error', { name: err.name || '', msg: (err.message || '').slice(0, 120), busyHint: err.name === 'NotReadableError' });
     console.error(err);
   }
 }
@@ -1120,6 +1233,7 @@ async function translateChunk(sourceFragment) {
   translationCounter++;
   const myId = translationCounter;
   translationOrder.push(myId);
+  if (typeof tele !== 'undefined' && translationOrder.length > tele.maxQueue) tele.maxQueue = translationOrder.length;
   pendingChunks.set(myId, { status: 'pending', text: null });
 
   const context = prompterLines.slice(-CONTEXT_LINES_FOR_TRANSLATION).map(l => l.text).join(' ');
@@ -1205,6 +1319,7 @@ function stopAll() {
   if (processorNode) { try { processorNode.disconnect(); } catch {} processorNode = null; }
   if (audioContext) { try { audioContext.close(); } catch {} audioContext = null; }
   if (activeStream) { activeStream.getTracks().forEach(t => t.stop()); activeStream = null; }
+  stopTelemetry();
   animateWave(false);
   setStatus('idle');
 }
