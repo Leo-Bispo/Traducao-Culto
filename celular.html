@@ -121,6 +121,7 @@
 
   const params = new URLSearchParams(location.search);
   const sala = (params.get("sala") || "").trim().toUpperCase();
+  const lang = (params.get("lang") || "").trim().toLowerCase();
 
   const feed = document.getElementById("feed");
   const liveBtn = document.getElementById("live-btn");
@@ -184,7 +185,7 @@
       const res = await fetch("https://" + TTS_HOST + "/tts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text, lang }),
       });
       if (!speakEnabled) { fetching = false; return; }
       if (res.ok) {
