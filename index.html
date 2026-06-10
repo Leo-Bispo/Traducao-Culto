@@ -1037,6 +1037,35 @@ async function startApp() {
 // ══════════════════════════════════════════════════════════════
 // REALTIME API — transcrição streaming
 // ══════════════════════════════════════════════════════════════
+// ── Idiomas: nomes de origem + contexto de transcrição por idioma (universal) ──
+// Permite que QUALQUER par funcione (en→pt, es→en, etc.), não só português→outro.
+const SOURCE_LANG_NAMES = {
+  'pt-BR':'Brazilian Portuguese','pt-PT':'European Portuguese','pt':'Portuguese',
+  'en-GB':'British English','en-US':'American English','en':'English',
+  'es':'Spanish','fr':'French','de':'German','it':'Italian',
+  'ja':'Japanese','zh':'Mandarin Chinese','ko':'Korean','ru':'Russian',
+  'ro':'Romanian','pl':'Polish','uk':'Ukrainian','nl':'Dutch',
+  'id':'Indonesian','vi':'Vietnamese','tl':'Tagalog','hi':'Hindi','tr':'Turkish',
+  'auto':'the spoken language (auto-detected)'
+};
+
+// Contexto bíblico que enviesa o reconhecimento de fala — na PRÓPRIA língua de origem.
+// Sem entrada específica, usa um contexto genérico (nunca força português).
+const TRANSCRIBE_CONTEXT = {
+  pt: 'Contexto: culto evangélico cristão. Termos: Jesus, Cristo, Senhor, Deus, Espírito Santo, evangelho, salvação, graça, fé, oração, aleluia, amém, igreja, pastor, glória, louvor, adoração, ministério, arrependimento, santificação, redenção, unção, ungido, Reino dos Céus, aliança. Livros: Gênesis, Êxodo, Salmos, Provérbios, Isaías, Mateus, Marcos, Lucas, João, Atos, Romanos, Coríntios, Hebreus, Apocalipse.',
+  en: 'Context: an evangelical Christian church service. Terms: Jesus, Christ, the Lord, God, Holy Spirit, gospel, salvation, grace, faith, prayer, hallelujah, amen, church, pastor, glory, praise, worship, ministry, repentance, sanctification, redemption, anointing, anointed, Kingdom of Heaven, covenant. Books: Genesis, Exodus, Psalms, Proverbs, Isaiah, Matthew, Mark, Luke, John, Acts, Romans, Corinthians, Hebrews, Revelation.',
+  es: 'Contexto: un culto cristiano evangélico. Términos: Jesús, Cristo, el Señor, Dios, Espíritu Santo, evangelio, salvación, gracia, fe, oración, aleluya, amén, iglesia, pastor, gloria, alabanza, adoración, ministerio, arrepentimiento, santificación, redención, unción, ungido, Reino de los Cielos, pacto. Libros: Génesis, Éxodo, Salmos, Proverbios, Isaías, Mateo, Marcos, Lucas, Juan, Hechos, Romanos, Corintios, Hebreos, Apocalipsis.',
+  fr: 'Contexte : un culte chrétien évangélique. Termes : Jésus, Christ, le Seigneur, Dieu, Saint-Esprit, évangile, salut, grâce, foi, prière, alléluia, amen, église, pasteur, gloire, louange, adoration, ministère, repentance, sanctification, rédemption, onction, Royaume des Cieux, alliance.'
+};
+
+function transcriptionContext() {
+  const base = (sourceLang || '').split('-')[0]; // 'pt', 'en', 'es'...
+  const ctx = TRANSCRIBE_CONTEXT[base] || 'Context: an evangelical Christian church service, with common biblical terms, names of Bible books, and chapter:verse references.';
+  return ctx
+    + (customContext ? ' Proper nouns for this church/event: ' + customContext + '.' : '')
+    + (sermonTerms ? ' Terms and names from this sermon: ' + sermonTerms + '.' : '');
+}
+
 async function startRealtimeSession() {
   try {
     // Cabo/mesa (validado): sinal cru, sem processamento. Microfone: liga limpeza de ruído do navegador.
@@ -1082,7 +1111,7 @@ async function startRealtimeSession() {
               transcription: {
                 model: 'gpt-4o-transcribe',
                 ...(langParam ? { language: langParam } : {}),
-                prompt: 'Contexto: culto evangélico cristão tradicional (batista/presbiteriana), Bíblia NVI. Termos comuns: Jesus, Cristo, Senhor, Deus, Espírito Santo, evangelho, salvação, graça, fé, oração, aleluia, amém, igreja, pastor, irmão, irmã, glória, louvor, adoração, ministério, comunhão, arrependimento, santificação, redenção, unção, ungido, Reino dos Céus, aliança, justificação. Livros bíblicos: Gênesis, Êxodo, Salmos, Provérbios, Isaías, Jeremias, Mateus, Marcos, Lucas, João, Atos, Romanos, Coríntios, Gálatas, Efésios, Hebreus, Apocalipse.' + (customContext ? ' Nomes próprios desta igreja: ' + customContext + '.' : '') + (sermonTerms ? ' Termos e nomes deste sermão: ' + sermonTerms + '.' : '')
+                prompt: transcriptionContext()
               },
               ...(isLineInput ? {} : { noise_reduction: { type: 'far_field' } }),
               turn_detection: {
@@ -1215,23 +1244,22 @@ function buildSystemPrompt() {
     tl: 'Tagalog (Filipino)', hi: 'Hindi', tr: 'Turkish'
   };
   const targetName = langNames[targetLang] || targetLang;
+  const sourceName = SOURCE_LANG_NAMES[sourceLang] || sourceLang;
 
-  return `You are a professional simultaneous interpreter for an Evangelical Christian church service (Brazilian Portuguese to ${targetName}).
+  return `You are a professional simultaneous interpreter for an Evangelical Christian church service, translating from ${sourceName} to ${targetName}.
 
 CRITICAL RULES:
 1. Translate ONLY. Never explain, answer questions, or add commentary.
 2. The input is a fragment from a live sermon. Translate it AS A CONTINUATION of what came before — do NOT restart the sentence or repeat earlier context in your output.
 3. Output should be 1-3 short lines, suitable for a teleprompter. Break naturally at clause boundaries.
-4. Preserve reverent pastoral tone. Use NIV-style English when target is English.
-5. Bible book names: João→John, Tiago→James, Davi→David, Isaías→Isaiah, Salmos→Psalms, Apocalipse→Revelation, etc.
-6. Bible verse refs: keep numbers ("João 3:16" → "John 3:16", never spell out).
-7. Theological terms: santificação→sanctification, unção→anointing, arrebatamento→rapture, graça→grace, salvação→salvation, ungido→anointed, Espírito Santo→Holy Spirit, Reino dos Céus→Kingdom of Heaven, Aliança→Covenant.
-8. Exclamations: "Glória a Deus!"→"Glory to God!", "Aleluia!"→"Hallelujah!", "Amém!"→"Amen!".
-9. If the fragment is filler only ("hum", "então", "tipo", "né"), return an empty string.
-10. NEVER use quotation marks around your output. NEVER prefix with "Translation:". Return ONLY the translated text.
-11. NATURALNESS: Render the meaning as a native simultaneous interpreter would actually speak it in the target language — idiomatic and fluent, NOT word-for-word. When the target is British English, prefer how a British speaker would naturally phrase the idea over a literal calque of the Portuguese construction. Restructure freely for fluency.
-12. Naturalness must NEVER alter meaning, Bible references, theological terms, or the reverent pastoral tone. Translate faithfully in sense — fluently in form. This faithfulness rule is SOVEREIGN: it always wins over naturalness.
-13. Aim for the phrasing a skilled HUMAN interpreter would actually speak aloud in ${targetName}: natural rhythm, natural word order, natural connectors — never a stiff, word-by-word echo of the Portuguese. It should read as if originally spoken in the target language, while always obeying rule 12.${customContext ? `\n14. Church-specific proper nouns (keep them accurate and natural in the target language): ${customContext}.` : ''}${sermonSummary ? `\n15. This service's sermon is about: ${sermonSummary} Use this only to resolve ambiguity and pick the right sense — never inject it into the output.` : ''}${sermonTerms ? `\n16. Names and terms that appear in this sermon (translate them consistently and correctly): ${sermonTerms}.` : ''}`;
+4. Preserve a reverent pastoral tone, matching how Scripture and worship are spoken in ${targetName}.
+5. Bible book names and verse references: render them in the conventional form of ${targetName}, keeping the numbers exactly (a reference like "3:16" stays "3:16", never spelled out).
+6. Theological terms (sanctification, anointing, grace, salvation, Holy Spirit, Kingdom of Heaven, covenant, etc.): use the established ${targetName} equivalent.
+7. Worship exclamations ("Glory to God!", "Hallelujah!", "Amen!" and the like): use the natural ${targetName} form.
+8. If the fragment is filler only (hesitations or fillers), return an empty string.
+9. NEVER use quotation marks around your output. NEVER prefix with "Translation:". Return ONLY the translated text.
+10. NATURALNESS: Render the meaning as a native ${targetName} interpreter would actually speak it — idiomatic and fluent, NOT word-for-word. Restructure freely for fluency; never produce a literal calque of the ${sourceName} construction.
+11. Naturalness must NEVER alter meaning, Bible references, theological terms, or the reverent pastoral tone. Translate faithfully in sense — fluently in form. This faithfulness rule is SOVEREIGN: it always wins over naturalness.${customContext ? `\n12. Proper nouns specific to this church/event (keep accurate and natural in ${targetName}): ${customContext}.` : ''}${sermonSummary ? `\n13. This service's sermon is about: ${sermonSummary} Use this only to resolve ambiguity and pick the right sense — never inject it into the output.` : ''}${sermonTerms ? `\n14. Names and terms that appear in this sermon (translate them consistently and correctly): ${sermonTerms}.` : ''}`;
 }
 
 async function translateChunk(sourceFragment) {
