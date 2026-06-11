@@ -347,10 +347,8 @@ async function doLogout(){
 
 // ── Tela de boas-vindas ────────────────────────────────────────
 function showWelcome(title, text){
-  $('welcome-title').textContent = title;
-  $('welcome-text').textContent = text;
-  $('forms').classList.add('hidden');
-  $('welcome').classList.remove('hidden');
+  // Login/cadastro concluído → leva direto ao painel da igreja
+  window.location.href = 'painel.html';
 }
 
 // ── Traduz mensagens de erro comuns do Supabase ────────────────
