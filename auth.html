@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atos2 — Entrar</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Cormorant+Garamond:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#f8f4ea;          /* fundo quente claro */
+  --cream2:#f1ead9;
+  --card:#ffffff;
+  --gold:#c9a84c;
+  --gold-d:#b8943a;
+  --gold-l:#e8c97a;
+  --ink:#2c2820;            /* texto principal */
+  --muted:#8c8470;          /* texto secundário */
+  --line:#e7e0cf;           /* bordas suaves */
+  --red:#c0392b;
+  --green:#3f7d54;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Inter',sans-serif;color:var(--ink);
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% -10%, rgba(201,168,76,0.18), transparent 60%),
+    radial-gradient(ellipse 50% 40% at 90% 110%, rgba(201,168,76,0.10), transparent 60%),
+    var(--cream);
+}
+.card{
+  width:100%;max-width:440px;background:var(--card);
+  border:1px solid var(--line);border-radius:18px;
+  box-shadow:0 12px 40px rgba(120,100,50,0.10), 0 2px 8px rgba(120,100,50,0.06);
+  padding:2.4rem 2.2rem;
+}
+
+/* ── Cabeçalho da marca ── */
+.brand{text-align:center;margin-bottom:1.6rem}
+.emblem{
+  width:56px;height:56px;margin:0 auto .8rem;border-radius:50%;
+  background:linear-gradient(140deg,var(--gold-l),var(--gold),var(--gold-d));
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 14px rgba(201,168,76,0.35);
+}
+.emblem svg{width:26px;height:26px}
+.wordmark{font-family:'Cinzel',serif;font-weight:600;font-size:1.5rem;letter-spacing:.06em;color:var(--ink)}
+.eyebrow{font-size:.68rem;letter-spacing:.28em;text-transform:uppercase;color:var(--gold-d);margin-top:.15rem}
+
+/* ── Abas Entrar / Criar conta ── */
+.tabs{display:flex;background:var(--cream2);border-radius:12px;padding:4px;margin-bottom:1.5rem}
+.tab{
+  flex:1;text-align:center;padding:.6rem;border-radius:9px;border:none;background:none;cursor:pointer;
+  font-family:'Inter',sans-serif;font-size:.85rem;font-weight:600;color:var(--muted);transition:.2s;
+}
+.tab.active{background:var(--card);color:var(--ink);box-shadow:0 1px 4px rgba(120,100,50,0.12)}
+
+/* ── Campos ── */
+.field{margin-bottom:1rem}
+label{display:block;font-size:.74rem;font-weight:600;letter-spacing:.04em;color:var(--ink);margin-bottom:.4rem}
+input{
+  width:100%;padding:.75rem .9rem;border:1px solid var(--line);border-radius:10px;
+  font-family:'Inter',sans-serif;font-size:.92rem;color:var(--ink);background:#fcfaf4;outline:none;transition:.2s;
+}
+input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,0.14);background:#fff}
+input.invalid{border-color:var(--red)}
+.hint{font-size:.72rem;color:var(--red);margin-top:.32rem;min-height:.9rem;display:block}
+
+/* ── Igreja / Evento ── */
+.segmented{display:flex;gap:.6rem;margin-bottom:1rem}
+.seg{
+  flex:1;padding:.75rem;border:1.5px solid var(--line);border-radius:10px;background:#fcfaf4;cursor:pointer;
+  text-align:center;font-size:.88rem;font-weight:600;color:var(--muted);transition:.2s;
+}
+.seg.active{border-color:var(--gold);background:rgba(201,168,76,0.10);color:var(--ink)}
+.seg small{display:block;font-weight:400;font-size:.68rem;color:var(--muted);margin-top:.15rem}
+
+/* ── Botões ── */
+.btn-primary{
+  width:100%;padding:.85rem;border:none;border-radius:11px;cursor:pointer;margin-top:.4rem;
+  background:linear-gradient(135deg,var(--gold-d),var(--gold),var(--gold-l));
+  color:#fff;font-family:'Inter',sans-serif;font-size:.92rem;font-weight:600;letter-spacing:.02em;
+  box-shadow:0 4px 14px rgba(201,168,76,0.32);transition:.15s;
+}
+.btn-primary:hover{filter:brightness(1.04)}
+.btn-primary:active{transform:translateY(1px)}
+.btn-primary:disabled{opacity:.6;cursor:default}
+
+.divider{display:flex;align-items:center;gap:.8rem;margin:1.1rem 0;color:var(--muted);font-size:.74rem}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--line)}
+
+.btn-google{
+  width:100%;padding:.8rem;border:1px solid var(--line);border-radius:11px;cursor:pointer;background:#fff;
+  display:flex;align-items:center;justify-content:center;gap:.6rem;
+  font-family:'Inter',sans-serif;font-size:.88rem;font-weight:600;color:var(--ink);transition:.15s;
+}
+.btn-google:hover{background:#fcfaf4;border-color:var(--gold)}
+.btn-google svg{width:18px;height:18px}
+
+.foot{text-align:center;margin-top:1.2rem;font-size:.82rem;color:var(--muted)}
+.link{color:var(--gold-d);font-weight:600;cursor:pointer;text-decoration:none}
+.link:hover{text-decoration:underline}
+.forgot{text-align:right;margin:-.4rem 0 .6rem}
+.forgot .link{font-size:.76rem}
+
+/* ── Mensagem global (sucesso/erro) ── */
+.msg{border-radius:10px;padding:.7rem .9rem;font-size:.82rem;margin-bottom:1rem;display:none;line-height:1.4}
+.msg.show{display:block}
+.msg.err{background:rgba(192,57,43,0.08);border:1px solid rgba(192,57,43,0.3);color:var(--red)}
+.msg.ok{background:rgba(63,125,84,0.08);border:1px solid rgba(63,125,84,0.3);color:var(--green)}
+
+.hidden{display:none!important}
+
+/* ── Tela de boas-vindas (sucesso) ── */
+.welcome{text-align:center}
+.welcome h2{font-family:'Cinzel',serif;font-size:1.3rem;color:var(--ink);margin-bottom:.6rem}
+.welcome p{color:var(--muted);font-size:.9rem;line-height:1.6;margin-bottom:1.4rem}
+.welcome .tag{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem;color:var(--gold-d)}
+</style>
+</head>
+<body>
+<div class="card">
+
+  <!-- Marca -->
+  <div class="brand">
+    <div class="emblem">
+      <!-- microfone estilizado (emblema Atos2) -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="2" width="6" height="11" rx="3"></rect>
+        <path d="M5 10a7 7 0 0 0 14 0"></path>
+        <line x1="12" y1="19" x2="12" y2="22"></line>
+      </svg>
+    </div>
+    <div class="wordmark">Atos2</div>
+    <div class="eyebrow">Live Translation</div>
+  </div>
+
+  <!-- Conteúdo principal (formulários) -->
+  <div id="forms">
+    <div class="tabs">
+      <button class="tab active" id="tab-login" onclick="showView('login')">Entrar</button>
+      <button class="tab" id="tab-signup" onclick="showView('signup')">Criar conta</button>
+    </div>
+
+    <div id="global-msg" class="msg"></div>
+
+    <!-- ENTRAR -->
+    <div id="view-login">
+      <div class="field">
+        <label for="li-email">E-mail</label>
+        <input type="email" id="li-email" autocomplete="email" placeholder="voce@igreja.com">
+        <span class="hint" id="li-email-hint"></span>
+      </div>
+      <div class="field">
+        <label for="li-pass">Senha</label>
+        <input type="password" id="li-pass" autocomplete="current-password" placeholder="••••••••">
+        <span class="hint" id="li-pass-hint"></span>
+      </div>
+      <div class="forgot"><span class="link" onclick="forgotPassword()">Esqueci a senha</span></div>
+      <button class="btn-primary" id="li-btn" onclick="doLogin()">Entrar</button>
+
+      <div class="divider">ou</div>
+      <button class="btn-google" onclick="doGoogle()">
+        <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1A11 11 0 0 0 2.18 7.06l3.66 2.84C6.71 7.3 9.14 5.38 12 5.38z"/></svg>
+        Entrar com Google
+      </button>
+
+      <div class="foot">Não tem conta? <span class="link" onclick="showView('signup')">Criar conta</span></div>
+    </div>
+
+    <!-- CRIAR CONTA -->
+    <div id="view-signup" class="hidden">
+      <label>Tipo de conta</label>
+      <div class="segmented">
+        <div class="seg active" id="seg-church" onclick="setType('church')">Igreja<small>cultos e ministérios</small></div>
+        <div class="seg" id="seg-event" onclick="setType('event')">Evento<small>conferências</small></div>
+      </div>
+
+      <div class="field">
+        <label for="su-org">Nome da organização</label>
+        <input type="text" id="su-org" placeholder="Igreja Brasileira de Londres">
+        <span class="hint" id="su-org-hint"></span>
+      </div>
+      <div class="field">
+        <label for="su-name">Seu nome</label>
+        <input type="text" id="su-name" autocomplete="name" placeholder="Seu nome completo">
+        <span class="hint" id="su-name-hint"></span>
+      </div>
+      <div class="field">
+        <label for="su-email">E-mail</label>
+        <input type="email" id="su-email" autocomplete="email" placeholder="voce@igreja.com">
+        <span class="hint" id="su-email-hint"></span>
+      </div>
+      <div class="field">
+        <label for="su-pass">Senha</label>
+        <input type="password" id="su-pass" autocomplete="new-password" placeholder="Mínimo de 6 caracteres">
+        <span class="hint" id="su-pass-hint"></span>
+      </div>
+      <button class="btn-primary" id="su-btn" onclick="doSignup()">Criar conta</button>
+
+      <div class="divider">ou</div>
+      <button class="btn-google" onclick="doGoogle()">
+        <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1A11 11 0 0 0 2.18 7.06l3.66 2.84C6.71 7.3 9.14 5.38 12 5.38z"/></svg>
+        Continuar com Google
+      </button>
+
+      <div class="foot">Já tem conta? <span class="link" onclick="showView('login')">Entrar</span></div>
+    </div>
+  </div>
+
+  <!-- Tela de boas-vindas (aparece após sucesso) -->
+  <div id="welcome" class="welcome hidden">
+    <h2 id="welcome-title">Bem-vindo!</h2>
+    <p id="welcome-text"></p>
+    <p class="tag">A casa está pronta. O painel é o próximo passo.</p>
+    <button class="btn-primary" onclick="doLogout()">Sair</button>
+  </div>
+
+</div>
+
+<!-- Ferramenta oficial do Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ══════════════════════════════════════════════════════════════
+// CONFIGURAÇÃO (endereços públicos do projeto — seguros no navegador)
+// ══════════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://zqhvlsgkddmowsgdmemr.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_HUkWCkCDIDO4a7jo2mVmBQ_YYbFy3ay';
+
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let accountType = 'church'; // padrão: Igreja
+
+// ── Helpers de UI ──────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+function showView(v){
+  $('view-login').classList.toggle('hidden', v !== 'login');
+  $('view-signup').classList.toggle('hidden', v !== 'signup');
+  $('tab-login').classList.toggle('active', v === 'login');
+  $('tab-signup').classList.toggle('active', v === 'signup');
+  hideMsg();
+}
+function setType(t){
+  accountType = t;
+  $('seg-church').classList.toggle('active', t === 'church');
+  $('seg-event').classList.toggle('active', t === 'event');
+}
+function showMsg(text, kind){
+  const el = $('global-msg');
+  el.textContent = text;
+  el.className = 'msg show ' + (kind === 'ok' ? 'ok' : 'err');
+}
+function hideMsg(){ $('global-msg').className = 'msg'; }
+function setHint(id, text){
+  $(id + '-hint').textContent = text || '';
+  $(id).classList.toggle('invalid', !!text);
+}
+function validEmail(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+// ── Cadastro ───────────────────────────────────────────────────
+async function doSignup(){
+  const org = $('su-org').value.trim();
+  const name = $('su-name').value.trim();
+  const email = $('su-email').value.trim();
+  const pass = $('su-pass').value;
+
+  // Validação na hora
+  let ok = true;
+  setHint('su-org', org ? '' : 'Informe o nome da organização.'); if(!org) ok=false;
+  setHint('su-name', name ? '' : 'Informe o seu nome.'); if(!name) ok=false;
+  setHint('su-email', validEmail(email) ? '' : 'E-mail inválido.'); if(!validEmail(email)) ok=false;
+  setHint('su-pass', pass.length >= 6 ? '' : 'A senha precisa de pelo menos 6 caracteres.'); if(pass.length < 6) ok=false;
+  if(!ok) return;
+
+  $('su-btn').disabled = true; $('su-btn').textContent = 'Criando...';
+  hideMsg();
+
+  const { data, error } = await sb.auth.signUp({
+    email, password: pass,
+    options: { data: { org_name: org, account_type: accountType, full_name: name } }
+  });
+
+  $('su-btn').disabled = false; $('su-btn').textContent = 'Criar conta';
+
+  if(error){ showMsg(translateError(error.message), 'err'); return; }
+
+  // Se já veio sessão = e-mail confirmado desligado → entrou direto
+  if(data.session){
+    showWelcome('Conta criada!', 'A sua organização e o seu acesso foram criados com sucesso.');
+  } else {
+    // E-mail de confirmação ligado
+    showMsg('Conta criada! Verifique o seu e-mail para confirmar o acesso e depois entre.', 'ok');
+    showView('login');
+  }
+}
+
+// ── Login ──────────────────────────────────────────────────────
+async function doLogin(){
+  const email = $('li-email').value.trim();
+  const pass = $('li-pass').value;
+
+  let ok = true;
+  setHint('li-email', validEmail(email) ? '' : 'E-mail inválido.'); if(!validEmail(email)) ok=false;
+  setHint('li-pass', pass ? '' : 'Informe a sua senha.'); if(!pass) ok=false;
+  if(!ok) return;
+
+  $('li-btn').disabled = true; $('li-btn').textContent = 'Entrando...';
+  hideMsg();
+
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+
+  $('li-btn').disabled = false; $('li-btn').textContent = 'Entrar';
+
+  if(error){ showMsg(translateError(error.message), 'err'); return; }
+  showWelcome('Login realizado!', 'Você entrou com sucesso na sua conta.');
+}
+
+// ── Google ─────────────────────────────────────────────────────
+async function doGoogle(){
+  hideMsg();
+  const { error } = await sb.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin + window.location.pathname }
+  });
+  if(error) showMsg(translateError(error.message), 'err');
+}
+
+// ── Esqueci a senha ────────────────────────────────────────────
+async function forgotPassword(){
+  const email = $('li-email').value.trim();
+  if(!validEmail(email)){ setHint('li-email', 'Digite o seu e-mail acima para enviarmos o link.'); return; }
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + window.location.pathname
+  });
+  if(error){ showMsg(translateError(error.message), 'err'); return; }
+  showMsg('Enviamos um link de redefinição para o seu e-mail.', 'ok');
+}
+
+// ── Sair ───────────────────────────────────────────────────────
+async function doLogout(){
+  await sb.auth.signOut();
+  $('welcome').classList.add('hidden');
+  $('forms').classList.remove('hidden');
+  showView('login');
+  hideMsg();
+}
+
+// ── Tela de boas-vindas ────────────────────────────────────────
+function showWelcome(title, text){
+  $('welcome-title').textContent = title;
+  $('welcome-text').textContent = text;
+  $('forms').classList.add('hidden');
+  $('welcome').classList.remove('hidden');
+}
+
+// ── Traduz mensagens de erro comuns do Supabase ────────────────
+function translateError(m){
+  if(/already registered|already been registered/i.test(m)) return 'Este e-mail já tem conta. Tente entrar.';
+  if(/Invalid login credentials/i.test(m)) return 'E-mail ou senha incorretos.';
+  if(/Email not confirmed/i.test(m)) return 'Confirme o seu e-mail antes de entrar (veja a caixa de entrada).';
+  if(/provider is not enabled|Unsupported provider/i.test(m)) return 'O acesso com Google ainda não foi ativado no Supabase.';
+  if(/rate limit|too many/i.test(m)) return 'Muitas tentativas. Aguarde um pouco e tente de novo.';
+  return m;
+}
+
+// ── Ao carregar: se já houver sessão (ex.: voltou do Google), mostra boas-vindas ──
+(async function(){
+  const { data } = await sb.auth.getSession();
+  if(data.session){
+    showWelcome('Você já está conectado', 'Sessão ativa encontrada neste navegador.');
+  }
+})();
+</script>
+</body>
+</html>
