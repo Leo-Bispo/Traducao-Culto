@@ -366,7 +366,6 @@ async function loadServices(){
     '<div class="qr-card" id="qr-'+esc(s.room_code)+'" style="display:none">'+
     '<div class="qr-box"><div class="qr-canvas" id="qrc-'+esc(s.room_code)+'"></div></div>'+
     '<div class="qr-info"><div class="qr-code-label">Sala '+esc(s.room_code)+'</div>'+
-    '<div class="qr-url-text" id="qru-'+esc(s.room_code)+'"></div>'+
     '<div class="qr-actions"><button class="btn-xs" onclick="downloadQR(\''+esc(s.room_code)+'\')">Baixar QR</button>'+
     '<button class="btn-xs" onclick="copyListener(\''+esc(s.room_code)+'\')">Copiar link</button></div></div></div>').join('');
 }
