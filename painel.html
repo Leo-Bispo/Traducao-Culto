@@ -124,7 +124,20 @@ body{font-family:'Inter',sans-serif;color:var(--ink);min-height:100vh;
 .modal-actions button{flex:1;padding:.75rem;border-radius:10px;font-family:'Inter',sans-serif;font-weight:600;font-size:.86rem;cursor:pointer;border:none}
 .btn-cancel{background:var(--cream2);color:var(--ink)}
 .btn-confirm{background:linear-gradient(135deg,var(--gold-d),var(--gold),var(--gold-l));color:#fff}
+.qr-card { display:flex; gap:1.2rem; align-items:center; margin-top:0.8rem; padding:1.1rem; background:#fcfaf4; border:1px solid var(--line,#e7e0cf); border-radius:14px; animation:qrfade 0.25s ease-out; }
+@keyframes qrfade { from{opacity:0; transform:translateY(-6px);} to{opacity:1; transform:translateY(0);} }
+.qr-box { background:#fff; padding:0.7rem; border-radius:12px; box-shadow:0 3px 12px rgba(120,100,50,0.10); flex-shrink:0; }
+.qr-canvas { width:200px; height:200px; position:relative; }
+.qr-canvas img, .qr-canvas canvas { display:block; width:200px; height:200px; }
+.qr-emblem { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:42px; height:42px; border-radius:50%; background:linear-gradient(140deg,#e8c97a,#c9a84c,#b8943a); display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.25); border:3px solid #fff; }
+.qr-emblem svg { width:20px; height:20px; }
+.qr-info { display:flex; flex-direction:column; gap:0.5rem; min-width:0; }
+.qr-code-label { font-family:'Cinzel',serif; font-size:1.1rem; color:var(--gold-d,#b8943a); letter-spacing:0.08em; }
+.qr-url-text { font-size:0.74rem; color:var(--muted,#8c8470); word-break:break-all; line-height:1.4; }
+.qr-actions { display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.3rem; }
+@media (max-width:560px){ .qr-card{ flex-direction:column; } }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -347,9 +360,15 @@ async function loadServices(){
   const STAT = { offline:'offline', live:'ao vivo', scheduled:'agendado' };
   box.innerHTML = data.map(s=>'<div class="svc"><div><div class="svc-name">'+esc(s.name)+'</div>'+
     '<div class="svc-meta">'+(STAT[s.status]||s.status)+' · sala <span class="svc-code">'+esc(s.room_code)+'</span> · '+(s.listener_count||0)+' ouvintes</div></div>'+
-    '<div class="svc-act"><button class="btn-xs" onclick="copyListener(\''+esc(s.room_code)+'\')">Copiar link do ouvinte</button>'+
+    '<div class="svc-act"><button class="btn-xs" onclick="toggleQR(\''+esc(s.room_code)+'\')">QR Code</button>'+
     '<a class="btn-xs" href="operador.html?service='+s.id+'" target="_blank">Abrir tradutor</a>'+
-    '<button class="btn-xs danger" onclick="deleteService(\''+s.id+'\',\''+esc(s.name)+'\')">Apagar</button></div></div>').join('');
+    '<button class="btn-xs danger" onclick="deleteService(\''+s.id+'\',\''+esc(s.name)+'\')">Apagar</button></div></div>'+
+    '<div class="qr-card" id="qr-'+esc(s.room_code)+'" style="display:none">'+
+    '<div class="qr-box"><div class="qr-canvas" id="qrc-'+esc(s.room_code)+'"></div></div>'+
+    '<div class="qr-info"><div class="qr-code-label">Sala '+esc(s.room_code)+'</div>'+
+    '<div class="qr-url-text" id="qru-'+esc(s.room_code)+'"></div>'+
+    '<div class="qr-actions"><button class="btn-xs" onclick="downloadQR(\''+esc(s.room_code)+'\')">Baixar QR</button>'+
+    '<button class="btn-xs" onclick="copyListener(\''+esc(s.room_code)+'\')">Copiar link</button></div></div></div>').join('');
 }
 function openNewService(){ $('svc-name-input').value=''; $('overlay').classList.add('show'); $('svc-name-input').focus(); }
 function closeModal(){ $('overlay').classList.remove('show'); }
@@ -373,6 +392,52 @@ async function deleteService(id, name){
 function copyListener(code){
   const url = window.location.origin + window.location.pathname.replace('painel.html','celular.html') + '?sala=' + code;
   navigator.clipboard.writeText(url).then(()=>toast('Link copiado.')).catch(()=>prompt('Copie o link:', url));
+}
+
+// ── QR Code do culto (mesmo link limpo do ouvinte; idioma escolhido no celular - Fio 4) ──
+function listenerUrl(code){
+  return window.location.origin + window.location.pathname.replace('painel.html','celular.html') + '?sala=' + code;
+}
+const _qrDrawn = {};
+function toggleQR(code){
+  const card = document.getElementById('qr-'+code);
+  if(!card) return;
+  const open = card.style.display === 'none';
+  document.querySelectorAll('.qr-card').forEach(c=>{ c.style.display='none'; });
+  if(!open){ return; }
+  card.style.display = 'flex';
+  const url = listenerUrl(code);
+  document.getElementById('qru-'+code).textContent = url;
+  if(!_qrDrawn[code]){
+    const holder = document.getElementById('qrc-'+code);
+    holder.innerHTML = '';
+    new QRCode(holder, { text:url, width:200, height:200,
+      colorDark:'#2c2820', colorLight:'#ffffff', correctLevel: QRCode.CorrectLevel.H });
+    setTimeout(()=>_addEmblem(holder), 60);
+    _qrDrawn[code] = true;
+  }
+}
+function _addEmblem(holder){
+  const img = holder.querySelector('img') || holder.querySelector('canvas');
+  if(!img) return;
+  const wrap = document.createElement('div');
+  wrap.className = 'qr-emblem';
+  wrap.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"></rect><path d="M5 10a7 7 0 0 0 14 0"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>';
+  holder.style.position = 'relative';
+  holder.appendChild(wrap);
+}
+function downloadQR(code){
+  const holder = document.getElementById('qrc-'+code);
+  const canvas = holder.querySelector('canvas');
+  const imgEl = holder.querySelector('img');
+  let dataUrl = null;
+  if(canvas){ dataUrl = canvas.toDataURL('image/png'); }
+  else if(imgEl){ dataUrl = imgEl.src; }
+  if(!dataUrl){ toast('Gere o QR primeiro.'); return; }
+  const a = document.createElement('a');
+  a.href = dataUrl; a.download = 'atos2-qr-'+code+'.png';
+  document.body.appendChild(a); a.click(); a.remove();
+  toast('QR baixado.');
 }
 
 /* ── Conta ── */
