@@ -197,7 +197,7 @@ input[type="file"]::file-selector-button {
 #prompter-track { display: flex; flex-direction: column; gap: 0.7rem; }
 .prompter-line {
   font-family: 'Cormorant Garamond', serif; font-size: clamp(1.5rem, 3.4vw, 2.5rem);
-  line-height: 1.32; color: var(--stage-text); opacity: 0.45; transition: opacity 0.4s, color 0.25s;
+  font-size: calc(clamp(1.5rem, 3.4vw, 2.5rem) * var(--stage-scale, 1)); line-height: 1.32; color: var(--stage-text); opacity: 0.45; transition: opacity 0.4s, color 0.25s, font-size 0.2s;
   animation: rise 0.45s ease-out;
 }
 .prompter-line.is-current { opacity: 1; color: var(--stage-current); }
@@ -354,6 +354,7 @@ input[type="file"]::file-selector-button {
         <button class="btn-pause" id="btn-pause" onclick="togglePause()" title="Pause/resume translation">⏸ Pause</button>
         <button class="btn-clear" onclick="clearPrompter()" title="Clear screen">⌫ Clear screen</button>
         <button class="btn-settings btn-dark" id="btn-dark" onclick="toggleDark()" title="Dark mode for the reading area">🌙 Dark mode</button>
+        <button class="btn-settings" id="btn-textsize" onclick="cycleTextSize()" title="Reading text size">🔠 Text size: Medium</button>
         <button class="btn-settings" onclick="showQR()" title="Show QR code">📱 QR code</button>
         <button class="btn-settings" onclick="showSetup()">⚙ Setup</button>
       </div>
@@ -455,6 +456,18 @@ function toggleDark() {
     btn.classList.toggle('active', on);
     btn.textContent = on ? '☀ Light mode' : '🌙 Dark mode';
   }
+}
+// Tamanho do texto do teleprompter (apenas visual). Médio = padrão.
+const TEXT_SIZES = ['small', 'medium', 'large'];
+const TEXT_SIZE_LABELS = { small: 'Small', medium: 'Medium', large: 'Large' };
+const TEXT_SIZE_SCALE = { small: 0.8, medium: 1, large: 1.25 };
+let textSizeIndex = 1; // começa em "medium"
+function cycleTextSize() {
+  textSizeIndex = (textSizeIndex + 1) % TEXT_SIZES.length;
+  const size = TEXT_SIZES[textSizeIndex];
+  document.documentElement.style.setProperty('--stage-scale', TEXT_SIZE_SCALE[size]);
+  const btn = $('btn-textsize');
+  if (btn) btn.textContent = '🔠 Text size: ' + TEXT_SIZE_LABELS[size];
 }
 
 function togglePause() {
