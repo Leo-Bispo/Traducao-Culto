@@ -162,7 +162,7 @@ body{font-family:'Inter',sans-serif;color:var(--ink);min-height:100vh;
       <div class="card">
         <div class="card-head"><span class="card-title">Cultos</span><button class="btn-gold" onclick="openNewService()">+ Novo culto</button></div>
         <div id="svc-list"></div>
-        <div class="note">Criar e nomear cultos já funciona. A ligação completa com o tradutor ao vivo (abrir um culto específico direto do painel) chega na próxima etapa de construção.</div>
+        <div class="note">Crie o culto, depois clique em "Abrir tradutor" para iniciar a tradução ao vivo já configurada com este culto.</div>
       </div>
 
       <div class="card">
@@ -348,7 +348,7 @@ async function loadServices(){
   box.innerHTML = data.map(s=>'<div class="svc"><div><div class="svc-name">'+esc(s.name)+'</div>'+
     '<div class="svc-meta">'+(STAT[s.status]||s.status)+' · sala <span class="svc-code">'+esc(s.room_code)+'</span> · '+(s.listener_count||0)+' ouvintes</div></div>'+
     '<div class="svc-act"><button class="btn-xs" onclick="copyListener(\''+esc(s.room_code)+'\')">Copiar link do ouvinte</button>'+
-    '<a class="btn-xs" href="index.html" target="_blank">Abrir tradutor</a>'+
+    '<a class="btn-xs" href="operador.html?service='+s.id+'" target="_blank">Abrir tradutor</a>'+
     '<button class="btn-xs danger" onclick="deleteService(\''+s.id+'\',\''+esc(s.name)+'\')">Apagar</button></div></div>').join('');
 }
 function openNewService(){ $('svc-name-input').value=''; $('overlay').classList.add('show'); $('svc-name-input').focus(); }
