@@ -47,17 +47,22 @@ body {
 }
 #setup-screen.hidden { display: none; }
 .setup-card {
-  width: 100%; max-width: 520px;
+  width: 100%; max-width: 860px;
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: 18px;
   box-shadow: 0 12px 40px rgba(120,100,50,0.10), 0 2px 8px rgba(120,100,50,0.06);
-  padding: 2.4rem 2.2rem;
+  padding: 2.4rem 2.4rem 2.2rem;
 }
-.setup-logo { display: block; width: 280px; max-width: 78%; height: auto; margin: 0 auto 0.8rem; }
-.setup-title { font-family: 'Cinzel', serif; font-size: 1.4rem; font-weight: 600; color: var(--ink); text-align: center; letter-spacing: 0.08em; margin-bottom: 0.3rem; }
-.setup-subtitle { text-align: center; color: var(--gold-d); font-size: 0.7rem; letter-spacing: 0.24em; text-transform: uppercase; margin-bottom: 2rem; }
-
+.setup-head { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.8rem; }
+.setup-emblem { width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(140deg, var(--gold-l), var(--gold), var(--gold-d));
+  display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(201,168,76,0.3); }
+.setup-emblem svg { width: 22px; height: 22px; }
+.setup-wordmark { font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 600; color: var(--ink); letter-spacing: 0.04em; }
+.setup-eyebrow { font-size: 0.66rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-d); margin-top: 0.1rem; }
+.setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1.4rem; }
+@media (max-width: 620px){ .setup-grid { grid-template-columns: 1fr; } .setup-card { max-width: 480px; } }
 .field-group { margin-bottom: 1.1rem; }
 label { display: block; font-size: 0.76rem; font-weight: 600; letter-spacing: 0.02em; color: var(--ink); margin-bottom: 0.4rem; }
 select, input[type="text"], input[type="password"] {
@@ -249,8 +254,12 @@ input[type="file"]::file-selector-button {
 
 <div id="setup-screen">
   <div class="setup-card">
-    <img src="atos2-logo.svg" class="setup-logo" alt="Atos2 — Live Translation">
-    <p class="setup-subtitle">Service Setup</p>
+    <div class="setup-head">
+      <div class="setup-emblem"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"></rect><path d="M5 10a7 7 0 0 0 14 0"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg></div>
+      <div><div class="setup-wordmark">Atos2</div><div class="setup-eyebrow">Live Translation · Service Setup</div></div>
+    </div>
+
+    <div class="setup-grid">
 
     <div class="field-group">
       <label>Church name (shown on screen)</label>
@@ -314,6 +323,8 @@ input[type="file"]::file-selector-button {
       <input type="text" id="context-input" placeholder="E.g. Pastor Silva, Abundant Life Church, Agape Ministry">
       <p class="api-hint">Proper names that come up during the service (pastor, church, ministries, preachers). Helps transcribe and translate these names correctly.</p>
     </div>
+
+    </div><!-- /setup-grid -->
 
     <div class="field-group">
       <label>Sermon (optional — supercharges accuracy)</label>
