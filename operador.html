@@ -701,6 +701,58 @@ function stopTelemetry() {
   try { _ltObs && _ltObs.disconnect(); } catch (e) {}
   try { _loafObs && _loafObs.disconnect(); } catch (e) {}
 }
+
+// ═══════════════════════════════════════════════════════════
+// MEDIDOR DE USO (Tábua 4) — minutos por culto/idioma → banco
+// Irmão da telemetria: "dispare e esqueça", NUNCA atrapalha o culto.
+// Só mede quando há um culto do banco (_serviceId). Modo avulso não grava.
+// ═══════════════════════════════════════════════════════════
+const USAGE_PULSE_MS = 5 * 60 * 1000; // pulso de uso a cada 5 min
+let usage = { start: 0, sessionId: '' };
+let _usageTimer = null;
+
+// Envia o total acumulado de minutos desta sessão (reescreve a linha no banco).
+function sendUsagePulse() {
+  if (!_serviceId || !usage.start) return;
+  const minutes = +(((performance.now() - usage.start) / 60000).toFixed(2));
+  try {
+    fetch('https://traducao-culto-api.leandrobisp-s.workers.dev/usage', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      keepalive: true,
+      body: JSON.stringify({
+        session_id: usage.sessionId,
+        service_id: _serviceId,
+        target_language: targetLang,
+        minutes: minutes
+      })
+    }).catch(() => {});
+  } catch (e) {}
+}
+
+// Começa a medir UMA vez por "rodar" (reconexão NÃO reinicia a contagem).
+function startUsage() {
+  if (!_serviceId) return;     // modo avulso: não mede
+  if (usage.start) return;     // já começou — reconexão não zera
+  usage.start = performance.now();
+  usage.sessionId = (window.crypto && crypto.randomUUID)
+    ? crypto.randomUUID()
+    : ('sess-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8));
+  sendUsagePulse();            // marco zero: cria a linha já no início
+  clearInterval(_usageTimer);
+  _usageTimer = setInterval(sendUsagePulse, USAGE_PULSE_MS);
+}
+
+// Acerto final ao encerrar (botão Setup) ou ao fechar a aba.
+function stopUsage() {
+  clearInterval(_usageTimer); _usageTimer = null;
+  if (!_serviceId || !usage.start) return;
+  sendUsagePulse();            // grava o número exato do fim
+  usage.start = 0;             // libera para um novo START gerar nova sessão
+}
+
+// Rede de segurança: se fecharem a aba sem clicar em Setup, grava o acerto.
+window.addEventListener('pagehide', stopUsage);
   
 function setSourceText(text, isPlaceholder = false) {
   const el = $('source-text');
@@ -1137,6 +1189,7 @@ async function startRealtimeSession() {
       animateWave(true);
       startAudioStreaming();
       startTelemetry();
+      startUsage();
     };
 
     ws.onmessage = (event) => {
@@ -1358,6 +1411,7 @@ function stopAll() {
   if (audioContext) { try { audioContext.close(); } catch {} audioContext = null; }
   if (activeStream) { activeStream.getTracks().forEach(t => t.stop()); activeStream = null; }
   stopTelemetry();
+  stopUsage();
   animateWave(false);
   setStatus('idle');
 }
