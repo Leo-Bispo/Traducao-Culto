@@ -406,7 +406,7 @@ function toggleQR(code){
   if(!open){ return; }
   card.style.display = 'flex';
   const url = listenerUrl(code);
-  document.getElementById('qru-'+code).textContent = url;
+  
   if(!_qrDrawn[code]){
     const holder = document.getElementById('qrc-'+code);
     holder.innerHTML = '';
