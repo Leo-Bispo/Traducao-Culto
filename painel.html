@@ -427,16 +427,41 @@ function _addEmblem(holder){
 }
 function downloadQR(code){
   const holder = document.getElementById('qrc-'+code);
-  const canvas = holder.querySelector('canvas');
-  const imgEl = holder.querySelector('img');
-  let dataUrl = null;
-  if(canvas){ dataUrl = canvas.toDataURL('image/png'); }
-  else if(imgEl){ dataUrl = imgEl.src; }
-  if(!dataUrl){ toast('Gere o QR primeiro.'); return; }
-  const a = document.createElement('a');
-  a.href = dataUrl; a.download = 'atos2-qr-'+code+'.png';
-  document.body.appendChild(a); a.click(); a.remove();
-  toast('QR baixado.');
+  const srcCanvas = holder.querySelector('canvas');
+  const srcImg = holder.querySelector('img');
+  const SIZE = 200;
+  const draw = (qrSource) => {
+    const out = document.createElement('canvas');
+    out.width = SIZE; out.height = SIZE;
+    const ctx = out.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, SIZE, SIZE);
+    ctx.drawImage(qrSource, 0, 0, SIZE, SIZE);
+    const r = 26, cx = SIZE/2, cy = SIZE/2;
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.arc(cx, cy, r+3, 0, Math.PI*2); ctx.fill();
+    const grad = ctx.createLinearGradient(cx-r, cy-r, cx+r, cy+r);
+    grad.addColorStop(0, '#e8c97a'); grad.addColorStop(0.5, '#c9a84c'); grad.addColorStop(1, '#b8943a');
+    ctx.fillStyle = grad;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#ffffff'; ctx.fillStyle = '#ffffff';
+    ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.beginPath();
+    const mw = 8, mh = 14, mx = cx - mw/2, my = cy - 11;
+    if (ctx.roundRect) { ctx.roundRect(mx, my, mw, mh, 4); } else { ctx.rect(mx, my, mw, mh); }
+    ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx, cy-1, 8, 0.15*Math.PI, 0.85*Math.PI); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx, cy+7); ctx.lineTo(cx, cy+11); ctx.stroke();
+    const a = document.createElement('a');
+    a.href = out.toDataURL('image/png');
+    a.download = 'atos2-qr-'+code+'.png';
+    document.body.appendChild(a); a.click(); a.remove();
+    toast('QR baixado.');
+  };
+  if (srcImg && srcImg.complete) { draw(srcImg); }
+  else if (srcCanvas) { draw(srcCanvas); }
+  else if (srcImg) { srcImg.onload = () => draw(srcImg); }
+  else { toast('Gere o QR primeiro.'); }
 }
 
 /* ── Conta ── */
