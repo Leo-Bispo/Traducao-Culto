@@ -339,3 +339,105 @@
     boot();
   }
 })();
+/* ═══════════════════════════════════════════════════════════════════
+   SELETOR DE IDIOMAS (dropdown) — componente do motor
+   Monte em qualquer página colocando:  <div data-i18n-dropdown></div>
+   Mostra os idiomas de SUPPORTED pelos nomes (lang.<código>).
+   Escala para quantos idiomas houver; pronto para busca no futuro.
+   ═══════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+  if (!window.Atos2I18N) return;
+  var I = window.Atos2I18N;
+
+  function injectCSS() {
+    if (document.getElementById('a2lang-css')) return;
+    var s = document.createElement('style');
+    s.id = 'a2lang-css';
+    s.textContent = [
+      ".a2lang{position:relative;display:inline-block;font-family:'Inter',sans-serif}",
+      ".a2lang-btn{display:inline-flex;align-items:center;gap:.45rem;cursor:pointer;background:var(--cream2,#f1ead9);border:1px solid var(--line,#e7e0cf);border-radius:9px;padding:.4rem .7rem;font-size:.82rem;font-weight:600;color:var(--ink,#2c2820);transition:.15s}",
+      ".a2lang-btn:hover{border-color:var(--gold,#c9a84c)}",
+      ".a2lang-btn svg{width:14px;height:14px;flex:none;stroke:currentColor}",
+      ".a2lang-chev{transition:transform .15s}",
+      ".a2lang.open .a2lang-chev{transform:rotate(180deg)}",
+      ".a2lang-menu{position:absolute;top:calc(100% + 6px);right:0;min-width:160px;z-index:60;background:#fff;border:1px solid var(--line,#e7e0cf);border-radius:11px;box-shadow:0 12px 30px rgba(120,100,50,.16);padding:.3rem;margin:0;list-style:none;max-height:300px;overflow:auto}",
+      ".a2lang-menu[hidden]{display:none}",
+      ".a2lang-opt{padding:.5rem .7rem;border-radius:8px;font-size:.88rem;color:var(--ink,#2c2820);cursor:pointer;white-space:nowrap}",
+      ".a2lang-opt:hover{background:var(--cream,#f8f4ea)}",
+      ".a2lang-opt.active{background:rgba(201,168,76,.14);font-weight:600}"
+    ].join('');
+    document.head.appendChild(s);
+  }
+
+  var GLOBE = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 0 20 15.3 15.3 0 0 1 0-20z"/></svg>';
+  var CHEV = '<svg class="a2lang-chev" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+
+  function build(mount) {
+    var wrap = document.createElement('div');
+    wrap.className = 'a2lang';
+    var btn = document.createElement('button');
+    btn.className = 'a2lang-btn';
+    btn.type = 'button';
+    btn.setAttribute('aria-haspopup', 'listbox');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.innerHTML = GLOBE + '<span class="a2lang-current"></span>' + CHEV;
+
+    var menu = document.createElement('ul');
+    menu.className = 'a2lang-menu';
+    menu.setAttribute('role', 'listbox');
+    menu.hidden = true;
+    menu.addEventListener('click', function (e) { e.stopPropagation(); });
+
+    function open() { menu.hidden = false; wrap.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); }
+    function close() { menu.hidden = true; wrap.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); }
+
+    I.supported.forEach(function (code) {
+      var li = document.createElement('li');
+      li.className = 'a2lang-opt';
+      li.setAttribute('role', 'option');
+      li.setAttribute('data-lang', code);
+      li.textContent = I.t('lang.' + code);
+      li.addEventListener('click', function () { I.setLang(code); close(); });
+      menu.appendChild(li);
+    });
+
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (menu.hidden) open(); else close();
+    });
+    document.addEventListener('click', close);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+
+    wrap.appendChild(btn);
+    wrap.appendChild(menu);
+    mount.innerHTML = '';
+    mount.appendChild(wrap);
+  }
+
+  function refresh() {
+    var cur = I.getLang();
+    Array.prototype.forEach.call(document.querySelectorAll('.a2lang'), function (wrap) {
+      var label = wrap.querySelector('.a2lang-current');
+      if (label) label.textContent = I.t('lang.' + cur);
+      Array.prototype.forEach.call(wrap.querySelectorAll('.a2lang-opt'), function (opt) {
+        opt.classList.toggle('active', opt.getAttribute('data-lang') === cur);
+      });
+    });
+  }
+
+  function mountAll() {
+    injectCSS();
+    Array.prototype.forEach.call(document.querySelectorAll('[data-i18n-dropdown]'), function (m) {
+      if (!m.querySelector('.a2lang')) build(m);
+    });
+    refresh();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', mountAll);
+  } else {
+    mountAll();
+  }
+  document.addEventListener('atos2:langchange', refresh);
+})();
