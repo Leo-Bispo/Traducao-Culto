@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atos2 — Sala de Comando</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Cormorant+Garamond:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#f8f4ea;--cream2:#f1ead9;--card:#ffffff;
+  --gold:#c9a84c;--gold-d:#b8943a;--gold-l:#e8c97a;
+  --ink:#2c2820;--muted:#8c8470;--line:#e7e0cf;
+  --red:#c0392b;--green:#3f7d54;--blue:#3d6b8c;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Inter',sans-serif;color:var(--ink);min-height:100vh;
+  background:
+    radial-gradient(ellipse 70% 40% at 50% -10%, rgba(201,168,76,0.14), transparent 60%),
+    var(--cream);
+  padding:2rem 1.2rem 4rem;
+}
+.wrap{max-width:980px;margin:0 auto}
+
+/* Cabeçalho */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:1rem}
+.brand{display:flex;align-items:center;gap:.75rem}
+.emblem{width:42px;height:42px;border-radius:50%;background:linear-gradient(140deg,var(--gold-l),var(--gold),var(--gold-d));
+  display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(201,168,76,0.3)}
+.emblem svg{width:20px;height:20px}
+.brand h1{font-family:'Cinzel',serif;font-size:1.2rem;font-weight:600;letter-spacing:.04em}
+.brand .sub{font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-d)}
+.btn-out{background:none;border:1px solid var(--line);color:var(--muted);padding:.5rem 1rem;border-radius:9px;
+  font-family:'Inter',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;transition:.2s}
+.btn-out:hover{border-color:var(--gold);color:var(--gold-d)}
+
+/* Estados de acesso */
+.gate{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:2.5rem 2rem;text-align:center;
+  max-width:440px;margin:3rem auto;box-shadow:0 8px 30px rgba(120,100,50,0.08)}
+.gate h2{font-family:'Cinzel',serif;font-size:1.2rem;margin-bottom:.6rem}
+.gate p{color:var(--muted);font-size:.9rem;line-height:1.6;margin-bottom:1.4rem}
+.btn-gold{background:linear-gradient(135deg,var(--gold-d),var(--gold),var(--gold-l));color:#fff;border:none;
+  padding:.75rem 1.6rem;border-radius:10px;font-family:'Inter',sans-serif;font-weight:600;font-size:.88rem;cursor:pointer;
+  box-shadow:0 4px 14px rgba(201,168,76,0.3);text-decoration:none;display:inline-block}
+.btn-gold:hover{filter:brightness(1.04)}
+
+/* Bloco 1 — números */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:1.1rem 1.2rem;
+  box-shadow:0 4px 16px rgba(120,100,50,0.05)}
+.stat .n{font-size:1.7rem;font-weight:600;color:var(--ink);line-height:1}
+.stat .l{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:.4rem}
+@media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}}
+
+/* Bloco 2 — lista de contas */
+.section-title{font-family:'Cinzel',serif;font-size:1rem;font-weight:600;margin-bottom:1rem;color:var(--ink)}
+.acc-list{display:flex;flex-direction:column;gap:.8rem}
+.acc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:1.1rem 1.3rem;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+  box-shadow:0 4px 16px rgba(120,100,50,0.05)}
+.acc-main{flex:1;min-width:180px}
+.acc-name{font-size:.98rem;font-weight:600;color:var(--ink)}
+.acc-meta{font-size:.76rem;color:var(--muted);margin-top:.25rem}
+.acc-meta .dot{margin:0 .4rem}
+.badge{display:inline-block;font-size:.68rem;font-weight:600;padding:.22rem .6rem;border-radius:20px;letter-spacing:.03em}
+.badge.trial{background:rgba(61,107,140,0.12);color:var(--blue)}
+.badge.active{background:rgba(63,125,84,0.12);color:var(--green)}
+.badge.courtesy{background:rgba(201,168,76,0.18);color:var(--gold-d)}
+.badge.past_due,.badge.canceled{background:rgba(192,57,43,0.1);color:var(--red)}
+.acc-action{display:flex;gap:.5rem;flex-wrap:wrap}
+.btn-sm{border:1px solid var(--line);background:#fcfaf4;color:var(--ink);padding:.5rem .9rem;border-radius:9px;
+  font-family:'Inter',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;transition:.15s}
+.btn-sm:hover{border-color:var(--gold);color:var(--gold-d)}
+.btn-sm.danger:hover{border-color:var(--red);color:var(--red)}
+
+.empty{text-align:center;color:var(--muted);font-style:italic;font-family:'Cormorant Garamond',serif;
+  font-size:1.2rem;padding:3rem 1rem}
+.loading{text-align:center;color:var(--muted);padding:3rem 1rem;font-size:.9rem}
+
+/* Modal cortesia */
+.overlay{position:fixed;inset:0;background:rgba(44,40,32,0.45);display:none;align-items:center;justify-content:center;
+  padding:1.5rem;z-index:50;backdrop-filter:blur(2px)}
+.overlay.show{display:flex}
+.modal{background:var(--card);border-radius:16px;padding:2rem;max-width:400px;width:100%;
+  box-shadow:0 20px 60px rgba(0,0,0,0.25)}
+.modal h3{font-family:'Cinzel',serif;font-size:1.1rem;margin-bottom:.4rem}
+.modal .who{font-size:.85rem;color:var(--muted);margin-bottom:1.2rem}
+.modal label{display:block;font-size:.74rem;font-weight:600;margin-bottom:.4rem}
+.modal input{width:100%;padding:.7rem .9rem;border:1px solid var(--line);border-radius:10px;
+  font-family:'Inter',sans-serif;font-size:.92rem;background:#fcfaf4;outline:none}
+.modal input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,0.14)}
+.modal-actions{display:flex;gap:.7rem;margin-top:1.4rem}
+.modal-actions button{flex:1;padding:.75rem;border-radius:10px;font-family:'Inter',sans-serif;font-weight:600;
+  font-size:.86rem;cursor:pointer;border:none}
+.btn-cancel{background:var(--cream2);color:var(--ink)}
+.btn-confirm{background:linear-gradient(135deg,var(--gold-d),var(--gold),var(--gold-l));color:#fff}
+
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;
+  padding:.8rem 1.4rem;border-radius:10px;font-size:.85rem;opacity:0;transition:.3s;pointer-events:none;z-index:60}
+.toast.show{opacity:1}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="emblem">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="2" width="6" height="11" rx="3"></rect><path d="M5 10a7 7 0 0 0 14 0"></path><line x1="12" y1="19" x2="12" y2="22"></line>
+        </svg>
+      </div>
+      <div>
+        <h1 data-i18n="sala.title">Sala de Comando</h1>
+        <div class="sub">Atos2 · Super-admin</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:.7rem"><div data-i18n-dropdown></div><button class="btn-out" id="logout-btn" onclick="doLogout()" style="display:none" data-i18n="auth.logout">Sair</button></div>
+  </div>
+
+  <!-- Estado: não logado -->
+  <div id="gate-login" class="gate hidden">
+    <h2 data-i18n="sala.restricted">Acesso restrito</h2>
+    <p data-i18n="sala.restricted_text">Você precisa entrar com a sua conta de super-admin para abrir a sala de comando.</p>
+    <a class="btn-gold" href="auth.html" data-i18n="sala.go_login">Ir para o login</a>
+  </div>
+
+  <!-- Estado: logado mas não é super-admin -->
+  <div id="gate-denied" class="gate hidden">
+    <h2 data-i18n="sala.denied">Sem permissão</h2>
+    <p data-i18n="sala.denied_text">Esta conta não é super-admin. A sala de comando é exclusiva da administração do Atos2.</p>
+    <button class="btn-out" onclick="doLogout()" data-i18n="auth.logout">Sair</button>
+  </div>
+
+  <!-- Painel (só super-admin) -->
+  <div id="panel" class="hidden">
+    <div class="stats" id="stats"></div>
+    <div class="section-title" data-i18n="sala.all_accounts">Todas as contas</div>
+    <div id="acc-list" class="acc-list"></div>
+  </div>
+
+  <div id="loading" class="loading" data-i18n="panel.loading">Carregando…</div>
+</div>
+
+<!-- Modal: liberar cortesia -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h3 data-i18n="sala.grant_courtesy">Liberar cortesia</h3>
+    <div class="who" id="modal-who"></div>
+    <label for="courtesy-date" data-i18n="sala.grant_until">Liberar acesso gratuito até:</label>
+    <input type="date" id="courtesy-date">
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()" data-i18n="panel.cancel">Cancelar</button>
+      <button class="btn-confirm" onclick="applyCourtesy()" data-i18n="sala.confirm">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="i18n.js"></script>
+<script>
+// ══════════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://zqhvlsgkddmowsgdmemr.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_HUkWCkCDIDO4a7jo2mVmBQ_YYbFy3ay';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const $ = id => document.getElementById(id);
+const T = (k) => (window.Atos2I18N ? Atos2I18N.t(k) : k);
+let planNames = {}; // id -> nome exibido
+let currentAccountId = null;
+
+function toast(msg){
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2600);
+}
+function showOnly(state){
+  ['gate-login','gate-denied','panel','loading'].forEach(id=>$(id).classList.add('hidden'));
+  $(state).classList.remove('hidden');
+  $('logout-btn').style.display = (state==='panel'||state==='gate-denied') ? 'block':'none';
+}
+
+// ── Inicialização: verifica login e papel ──────────────────────
+(async function init(){
+  const { data:{ session } } = await sb.auth.getSession();
+  if(!session){ showOnly('gate-login'); return; }
+
+  // Confere se este usuário é super-admin
+  const { data: profile } = await sb.from('profiles').select('role').eq('id', session.user.id).single();
+  if(!profile || profile.role !== 'superadmin'){ showOnly('gate-denied'); return; }
+
+  await loadPlans();
+  await loadAccounts();
+})();
+
+async function loadPlans(){
+  const { data } = await sb.from('plans').select('id,name');
+  if(data) data.forEach(p => planNames[p.id] = p.name);
+}
+
+// ── Carrega todas as contas + assinatura ───────────────────────
+async function loadAccounts(){
+  showOnly('loading');
+  const { data, error } = await sb
+    .from('accounts')
+    .select('id,name,type,created_at, subscriptions(plan_id,status,trial_hours_remaining,courtesy_until,rollover_hours,hours_used_period)')
+    .order('created_at', { ascending:false });
+
+  if(error){ showOnly('panel'); $('acc-list').innerHTML = '<div class="empty">'+T('sala.load_err')+': '+error.message+'</div>'; return; }
+
+  showOnly('panel');
+  renderStats(data);
+  renderAccounts(data);
+}
+
+function subOf(acc){
+  const s = acc.subscriptions;
+  return Array.isArray(s) ? (s[0]||{}) : (s||{});
+}
+
+// ── Bloco 1: números ───────────────────────────────────────────
+function renderStats(accs){
+  let total=accs.length, trial=0, active=0, courtesy=0;
+  accs.forEach(a=>{ const st=subOf(a).status; if(st==='trial')trial++; else if(st==='active')active++; else if(st==='courtesy')courtesy++; });
+  $('stats').innerHTML = `
+    <div class="stat"><div class="n">${total}</div><div class="l">${T('sala.accounts')}</div></div>
+    <div class="stat"><div class="n">${trial}</div><div class="l">${T('panel.st_trial')}</div></div>
+    <div class="stat"><div class="n">${active}</div><div class="l">${T('sala.paying')}</div></div>
+    <div class="stat"><div class="n">${courtesy}</div><div class="l">${T('panel.st_courtesy')}</div></div>`;
+}
+
+// ── Bloco 2 + 3: lista e ações ─────────────────────────────────
+const STATUS_LABEL = { trial:T('panel.st_trial'), active:T('panel.st_active'), courtesy:T('panel.st_courtesy'), past_due:T('panel.st_pastdue'), canceled:T('panel.st_canceled') };
+
+function renderAccounts(accs){
+  if(!accs.length){ $('acc-list').innerHTML = '<div class="empty">'+T('sala.no_accounts')+'</div>'; return; }
+  $('acc-list').innerHTML = accs.map(a=>{
+    const s = subOf(a);
+    const status = s.status || 'trial';
+    const plan = planNames[s.plan_id] || s.plan_id || '—';
+    const typeLabel = a.type === 'event' ? T('auth.event') : T('auth.church');
+    let validity = '';
+    if(status==='courtesy' && s.courtesy_until) validity = `<span class="dot">·</span>${T('sala.courtesy_until_low')} ${fmtDate(s.courtesy_until)}`;
+    else if(status==='trial') validity = `<span class="dot">·</span>${(s.trial_hours_remaining??0)}${T('sala.h_trial')}`;
+    const removeBtn = status==='courtesy'
+      ? `<button class="btn-sm danger" onclick="removeCourtesy('${a.id}','${esc(a.name)}')">${T('sala.remove_courtesy')}</button>` : '';
+    return `<div class="acc">
+      <div class="acc-main">
+        <div class="acc-name">${esc(a.name)}</div>
+        <div class="acc-meta">${typeLabel}<span class="dot">·</span>${T('sala.plan_label')}${esc(plan)}${validity}</div>
+      </div>
+      <div class="acc-action">
+        <span class="badge ${status}">${STATUS_LABEL[status]||status}</span>
+        <button class="btn-sm" onclick="openModal('${a.id}','${esc(a.name)}')">${T('sala.grant_courtesy')}</button>
+        ${removeBtn}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function fmtDate(d){ const x=new Date(d+'T00:00:00'); return x.toLocaleDateString('pt-BR'); }
+function esc(s){ return String(s).replace(/'/g,"\\'").replace(/</g,'&lt;'); }
+
+// ── Modal ──────────────────────────────────────────────────────
+function openModal(id,name){
+  currentAccountId = id;
+  $('modal-who').textContent = name;
+  // sugere 30 dias à frente
+  const d = new Date(); d.setDate(d.getDate()+30);
+  $('courtesy-date').value = d.toISOString().slice(0,10);
+  $('overlay').classList.add('show');
+}
+function closeModal(){ $('overlay').classList.remove('show'); currentAccountId=null; }
+
+async function applyCourtesy(){
+  const date = $('courtesy-date').value;
+  if(!date){ toast(T('sala.choose_date')); return; }
+  const { error } = await sb.from('subscriptions')
+    .update({ status:'courtesy', courtesy_until:date })
+    .eq('account_id', currentAccountId);
+  closeModal();
+  if(error){ toast(T('panel.error')+': '+error.message); return; }
+  toast(T('sala.courtesy_granted'));
+  loadAccounts();
+}
+
+async function removeCourtesy(id,name){
+  if(!confirm(T('sala.confirm_remove').replace('{name}', name))) return;
+  const { error } = await sb.from('subscriptions')
+    .update({ status:'trial', courtesy_until:null })
+    .eq('account_id', id);
+  if(error){ toast(T('panel.error')+': '+error.message); return; }
+  toast(T('sala.courtesy_removed'));
+  loadAccounts();
+}
+
+async function doLogout(){ await sb.auth.signOut(); showOnly('gate-login'); }
+</script>
+</body>
+</html>
