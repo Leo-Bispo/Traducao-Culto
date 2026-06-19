@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atos2 — Teste i18n</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Cormorant+Garamond:ital@1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#f8f4ea;--card:#fff;--gold:#c9a84c;--gold-d:#b8943a;--gold-l:#e8c97a;--ink:#2c2820;--muted:#8c8470;--line:#e7e0cf}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;color:var(--ink);background:var(--cream);min-height:100vh;
+  display:flex;align-items:center;justify-content:center;padding:1.5rem}
+.card{max-width:520px;width:100%;background:var(--card);border:1px solid var(--line);border-radius:18px;
+  padding:2.2rem;box-shadow:0 12px 40px rgba(120,100,50,.1)}
+.switch{display:flex;gap:.5rem;justify-content:flex-end;margin-bottom:1.6rem}
+.switch button{font-family:'Inter',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;
+  padding:.45rem .9rem;border-radius:9px;border:1.5px solid var(--line);background:#fcfaf4;color:var(--muted);transition:.15s}
+.switch button.active{border-color:var(--gold);background:rgba(201,168,76,.12);color:var(--ink)}
+.kicker{font-size:.7rem;letter-spacing:.22em;color:var(--gold-d);font-weight:600;margin-bottom:.8rem}
+h1{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:2rem;line-height:1.12;margin-bottom:1rem}
+.body{color:#5f594b;font-size:.95rem;margin-bottom:1.4rem}
+input{width:100%;padding:.75rem .9rem;border:1px solid var(--line);border-radius:10px;font-family:inherit;
+  font-size:.92rem;background:#fcfaf4;margin-bottom:1rem}
+.cta{width:100%;padding:.85rem;border:none;border-radius:11px;cursor:pointer;
+  background:linear-gradient(135deg,var(--gold-d),var(--gold),var(--gold-l));color:#fff;font-weight:600;font-size:.92rem}
+.status{margin-top:1.4rem;padding:.8rem;border-radius:10px;background:#fcfaf4;border:1px solid var(--line);
+  font-size:.78rem;color:var(--muted);line-height:1.6}
+.status b{color:var(--ink)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="switch">
+      <button data-i18n-switch="pt" data-i18n="lang.pt"></button>
+      <button data-i18n-switch="en" data-i18n="lang.en"></button>
+      <button data-i18n-switch="es" data-i18n="lang.es"></button>
+    </div>
+
+    <div class="kicker" data-i18n="test.kicker"></div>
+    <h1 data-i18n="test.title"></h1>
+    <p class="body" data-i18n="test.body"></p>
+
+    <input type="text" data-i18n-attr="placeholder:test.field">
+    <button class="cta" data-i18n="test.cta"></button>
+
+    <div class="status">
+      <span data-i18n="lang.pt"></span> / <span data-i18n="lang.en"></span> ·
+      <b id="cur"></b><br>
+      Idioma detectado na abertura / Detected on load · troque acima e recarregue para testar a memória.
+    </div>
+  </div>
+
+<script src="i18n.js"></script>
+<script>
+  function showCur(){ document.getElementById('cur').textContent = 'lang = ' + Atos2I18N.getLang(); }
+  showCur();
+  document.addEventListener('atos2:langchange', showCur);
+</script>
+</body>
+</html>
