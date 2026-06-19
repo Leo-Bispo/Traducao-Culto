@@ -31,6 +31,14 @@
     pt: {
       'lang.pt': 'Português', 'lang.en': 'English', 'lang.es': 'Español',
       'nav.login': 'Entrar', 'nav.signup': 'Criar conta',
+      'about.kicker': 'Quem somos',
+      'about.lema': 'Somos. Cremos. Fazemos.',
+      'about.lema_line': 'Só fazemos porque cremos naquilo que somos: irmãos que amam servir a Cristo.',
+      'about.why': 'A Palavra precisa ser compreendida para edificar. Em 1 Coríntios 14, Paulo ensina que, na igreja, de nada adianta falar se ninguém entende. Por muito tempo, a barreira do idioma calou parte da mensagem — e exigia do pregador anos de estudo para alcançar quem falava outra língua. Com o Atos2, essa barreira deixa de existir.',
+      'about.name_intro': 'No dia de Pentecostes, o Espírito desceu e cada pessoa ouviu as maravilhas de Deus em sua própria língua.',
+      'about.verse': '"cada um os ouvia falar em seu próprio idioma."',
+      'about.verse_ref': 'Atos 2.6',
+      'about.name_close': 'É desse milagre que vem o nosso nome — e é esse milagre que levamos para o culto de hoje: agora, todos podem ouvir as maravilhas de Deus em seu próprio idioma.',
 
       'test.kicker': 'TESTE DO MOTOR DE IDIOMAS',
       'test.title': 'Cada um irá ouvir em sua própria língua.',
@@ -41,6 +49,14 @@
     en: {
       'lang.pt': 'Português', 'lang.en': 'English', 'lang.es': 'Español',
       'nav.login': 'Sign in', 'nav.signup': 'Create account',
+      'about.kicker': 'Who we are',
+      'about.lema': 'We are. We believe. We do.',
+      'about.lema_line': 'We only do because we believe in who we are: brothers and sisters who love to serve Christ.',
+      'about.why': 'The Word must be understood to build people up. In 1 Corinthians 14, Paul teaches that, in church, speaking is worthless if no one understands. For too long, the language barrier silenced part of the message — and asked preachers for years of study to reach those who spoke another tongue. With Atos2, that barrier falls.',
+      'about.name_intro': 'On the day of Pentecost, the Spirit came and each person heard the wonders of God in their own language.',
+      'about.verse': '"each one heard them speaking in his own language."',
+      'about.verse_ref': 'Acts 2:6',
+      'about.name_close': 'That miracle is where our name comes from — and it is that miracle we bring to worship today: now everyone can hear the wonders of God in their own language.',
 
       'test.kicker': 'LANGUAGE ENGINE TEST',
       'test.title': 'Everyone will hear in their own language.',
@@ -51,6 +67,14 @@
     es: {
       'lang.pt': 'Português', 'lang.en': 'English', 'lang.es': 'Español',
       'nav.login': 'Iniciar sesión', 'nav.signup': 'Crear cuenta',
+      'about.kicker': 'Quiénes somos',
+      'about.lema': 'Somos. Creemos. Hacemos.',
+      'about.lema_line': 'Solo hacemos porque creemos en lo que somos: hermanos que aman servir a Cristo.',
+      'about.why': 'La Palabra necesita ser comprendida para edificar. En 1 Corintios 14, Pablo enseña que, en la iglesia, de nada sirve hablar si nadie entiende. Durante mucho tiempo, la barrera del idioma silenció parte del mensaje — y exigía del predicador años de estudio para alcanzar a quien hablaba otra lengua. Con Atos2, esa barrera deja de existir.',
+      'about.name_intro': 'En el día de Pentecostés, el Espíritu descendió y cada persona oyó las maravillas de Dios en su propia lengua.',
+      'about.verse': '"cada uno los oía hablar en su propio idioma."',
+      'about.verse_ref': 'Hechos 2:6',
+      'about.name_close': 'De ese milagro viene nuestro nombre — y es ese milagro el que llevamos al culto de hoy: ahora todos pueden oír las maravillas de Dios en su propia lengua.',
 
       'test.kicker': 'PRUEBA DEL MOTOR DE IDIOMAS',
       'test.title': 'Cada uno escuchará en su propio idioma.',
