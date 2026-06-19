@@ -94,6 +94,7 @@
       'cta.whatsapp': 'Falar no WhatsApp',
       'foot.tagline': 'Para que todos ouçam as maravilhas de Deus em seu próprio idioma.',
       'foot.rights': '© 2026 Atos2 · atos2live.com',
+      'proof.label': 'Em uso em',
 
       'test.kicker': 'TESTE DO MOTOR DE IDIOMAS',
       'test.title': 'Cada um irá ouvir em sua própria língua.',
@@ -167,6 +168,7 @@
       'cta.whatsapp': 'Chat on WhatsApp',
       'foot.tagline': 'So that everyone may hear the wonders of God in their own language.',
       'foot.rights': '© 2026 Atos2 · atos2live.com',
+      'proof.label': 'In use at',
 
       'test.kicker': 'LANGUAGE ENGINE TEST',
       'test.title': 'Everyone will hear in their own language.',
@@ -240,6 +242,7 @@
       'cta.whatsapp': 'Hablar por WhatsApp',
       'foot.tagline': 'Para que todos oigan las maravillas de Dios en su propio idioma.',
       'foot.rights': '© 2026 Atos2 · atos2live.com',
+      'proof.label': 'En uso en',
 
       'test.kicker': 'PRUEBA DEL MOTOR DE IDIOMAS',
       'test.title': 'Cada uno escuchará en su propio idioma.',
