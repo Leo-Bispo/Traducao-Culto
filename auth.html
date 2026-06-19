@@ -290,7 +290,7 @@ async function doSignup(){
 
   // Se já veio sessão = e-mail confirmado desligado → entrou direto
   if(data.session){
-    showWelcome(T('auth.created_title'), T('auth.created_text'));
+    window.location.href = 'painel.html';
   } else {
     // E-mail de confirmação ligado
     showMsg(T('auth.created_confirm'), 'ok');
@@ -316,7 +316,7 @@ async function doLogin(){
   $('li-btn').disabled = false; $('li-btn').textContent = T('nav.login');
 
   if(error){ showMsg(translateError(error.message), 'err'); return; }
-  showWelcome(T('auth.login_title'), T('auth.login_text'));
+  window.location.href = 'painel.html';
 }
 
 // ── Google ─────────────────────────────────────────────────────
@@ -371,7 +371,7 @@ function translateError(m){
 (async function(){
   const { data } = await sb.auth.getSession();
   if(data.session){
-    showWelcome(T('auth.session_title'), T('auth.session_text'));
+    window.location.href = 'painel.html';
   }
 })();
 </script>
