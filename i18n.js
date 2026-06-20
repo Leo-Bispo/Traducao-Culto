@@ -353,6 +353,10 @@
       'op.sermon_loaded': '✓ Sermão carregado — tradução turbinada para este culto.',
       'op.sermon_failed': '⚠ Não foi possível processar o sermão agora. O culto rodará normalmente sem ele.',
       'op.sermon_read_err': '⚠ Não foi possível ler este arquivo. Tente outro PDF ou Word, ou deixe vazio.',
+      'op.default_lang': 'Idioma padrão (telão)',
+      'op.default_lang_hint': 'É o idioma mostrado no telão e o padrão para os celulares que não escolherem um.',
+      'op.activated_langs': 'Idiomas ativados para os ouvintes',
+      'op.activated_langs_hint': 'Os ouvintes podem escolher qualquer um destes no celular. O padrão está sempre incluído. Um idioma só gera custo enquanto alguém estiver recebendo ele.',
 
       'test.kicker': 'TESTE DO MOTOR DE IDIOMAS',
       'test.title': 'Cada um irá ouvir em sua própria língua.',
@@ -685,6 +689,10 @@
       'op.sermon_loaded': '✓ Sermon loaded — translation supercharged for this service.',
       'op.sermon_failed': '⚠ Could not process the sermon now. The service will run normally without it.',
       'op.sermon_read_err': '⚠ Could not read this file. Try another PDF or Word, or leave it empty.',
+      'op.default_lang': 'Default language (projection screen)',
+      'op.default_lang_hint': 'This is the language shown on the projection screen and the fallback for phones that do not pick one.',
+      'op.activated_langs': 'Languages activated for listeners',
+      'op.activated_langs_hint': 'Listeners can choose any of these on their phones. The default is always included. A language only costs while someone is tuned to it.',
 
       'test.kicker': 'LANGUAGE ENGINE TEST',
       'test.title': 'Everyone will hear in their own language.',
@@ -1017,6 +1025,11 @@
       'op.sermon_loaded': '✓ Sermón cargado — traducción potenciada para este culto.',
       'op.sermon_failed': '⚠ No se pudo procesar el sermón ahora. El culto funcionará normalmente sin él.',
       'op.sermon_read_err': '⚠ No se pudo leer este archivo. Prueba otro PDF o Word, o déjalo vacío.',
+      'op.default_lang': 'Idioma predeterminado (pantalla)',
+      'op.default_lang_hint': 'Es el idioma que se muestra en la pantalla y el predeterminado para los móviles que no eligen uno.',
+      'op.activated_langs': 'Idiomas activados para los oyentes',
+      'op.activated_langs_hint': 'Los oyentes pueden elegir cualquiera de estos en su móvil. El predeterminado siempre está incluido. Un idioma solo genera coste mientras alguien lo está recibiendo.',
+       
 
       'test.kicker': 'PRUEBA DEL MOTOR DE IDIOMAS',
       'test.title': 'Cada uno escuchará en su propio idioma.',
