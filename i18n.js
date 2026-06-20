@@ -357,6 +357,10 @@
       'op.default_lang_hint': 'É o idioma mostrado no telão e o padrão para os celulares que não escolherem um.',
       'op.activated_langs': 'Idiomas ativados para os ouvintes',
       'op.activated_langs_hint': 'Os ouvintes podem escolher qualquer um destes no celular. O padrão está sempre incluído. Um idioma só gera custo enquanto alguém estiver recebendo ele.',
+      'op.manage_langs': 'Gerenciar idiomas',
+      'op.langmodal_title': 'Idiomas ativados',
+      'op.langmodal_search': 'Buscar idioma…',
+      'op.langmodal_done': 'Concluído',
 
       'test.kicker': 'TESTE DO MOTOR DE IDIOMAS',
       'test.title': 'Cada um irá ouvir em sua própria língua.',
@@ -693,6 +697,10 @@
       'op.default_lang_hint': 'This is the language shown on the projection screen and the fallback for phones that do not pick one.',
       'op.activated_langs': 'Languages activated for listeners',
       'op.activated_langs_hint': 'Listeners can choose any of these on their phones. The default is always included. A language only costs while someone is tuned to it.',
+      'op.manage_langs': 'Manage languages',
+      'op.langmodal_title': 'Activated languages',
+      'op.langmodal_search': 'Search language…',
+      'op.langmodal_done': 'Done',
 
       'test.kicker': 'LANGUAGE ENGINE TEST',
       'test.title': 'Everyone will hear in their own language.',
@@ -1029,6 +1037,10 @@
       'op.default_lang_hint': 'Es el idioma que se muestra en la pantalla y el predeterminado para los móviles que no eligen uno.',
       'op.activated_langs': 'Idiomas activados para los oyentes',
       'op.activated_langs_hint': 'Los oyentes pueden elegir cualquiera de estos en su móvil. El predeterminado siempre está incluido. Un idioma solo genera coste mientras alguien lo está recibiendo.',
+      'op.manage_langs': 'Gestionar idiomas',
+      'op.langmodal_title': 'Idiomas activados',
+      'op.langmodal_search': 'Buscar idioma…',
+      'op.langmodal_done': 'Hecho',
        
 
       'test.kicker': 'PRUEBA DEL MOTOR DE IDIOMAS',
