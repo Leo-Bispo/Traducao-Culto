@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -46,112 +47,116 @@
   #dot.on { background: var(--green); box-shadow: 0 0 8px rgba(63,125,84,0.5); }
   #dot.off { background: var(--red); }
 
-  #listen-btn {
-    background: none; border: 1px solid rgba(201,168,76,0.4); color: var(--gold-d);
-    font-family: 'Inter', sans-serif; font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase;
-    padding: 0.34rem 0.7rem; border-radius: 20px; cursor: pointer; transition: all 0.2s; white-space: nowrap;
-  }
-  #listen-btn.on { background: rgba(201,168,76,0.16); border-color: var(--gold); color: var(--gold-d); }
-  .icon-btn {
-    background: none; border: 1px solid var(--feed-line); color: var(--feed-ink);
-    width: 34px; height: 30px; border-radius: 9px; cursor: pointer; font-size: 0.95rem;
-    display: flex; align-items: center; justify-content: center; transition: border-color 0.2s, background 0.2s;
-  }
-  .icon-btn:hover, .icon-btn.active { border-color: var(--gold); background: rgba(201,168,76,0.12); }
+#listen-btn {
+background: none; border: 1px solid rgba(201,168,76,0.4); color: var(–gold-d);
+font-family: ‘Inter’, sans-serif; font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase;
+padding: 0.34rem 0.7rem; border-radius: 20px; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+#listen-btn.on { background: rgba(201,168,76,0.16); border-color: var(–gold); color: var(–gold-d); }
+.icon-btn {
+background: none; border: 1px solid var(–feed-line); color: var(–feed-ink);
+width: 34px; height: 30px; border-radius: 9px; cursor: pointer; font-size: 0.95rem;
+display: flex; align-items: center; justify-content: center; transition: border-color 0.2s, background 0.2s;
+}
+.icon-btn:hover, .icon-btn.active { border-color: var(–gold); background: rgba(201,168,76,0.12); }
 
-  /* menu de controles (engrenagem) */
-  #ctrl-menu {
-    position: absolute; top: 3rem; right: 0.8rem; background: var(--card);
-    border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 12px 36px rgba(120,100,50,0.18);
-    padding: 0.9rem; display: none; flex-direction: column; gap: 0.7rem; z-index: 30; min-width: 230px;
-  }
-  #ctrl-menu.open { display: flex; }
-  .ctrl-row { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; }
-  .ctrl-label { font-size: 0.74rem; font-weight: 600; color: var(--ink); }
-  .seg { display: flex; gap: 0.3rem; }
-  .seg button {
-    border: 1px solid var(--line); background: #fcfaf4; color: var(--muted); border-radius: 8px;
-    cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 600; padding: 0.3rem 0; width: 34px; transition: all 0.15s;
-  }
-  .seg button.active { border-color: var(--gold); background: rgba(201,168,76,0.12); color: var(--ink); }
-  .seg .a-s { font-size: 0.72rem; } .seg .a-m { font-size: 0.85rem; } .seg .a-l { font-size: 1rem; }
-  .toggle-btn {
-    border: 1px solid var(--line); background: #fcfaf4; color: var(--muted); border-radius: 8px;
-    cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.72rem; font-weight: 600; padding: 0.35rem 0.7rem; transition: all 0.15s;
-  }
-  .toggle-btn.active { border-color: var(--gold); background: rgba(201,168,76,0.12); color: var(--ink); }
-  .soon { font-size: 0.58rem; color: var(--muted); font-weight: 400; }
+/* menu de controles (engrenagem) */
+#ctrl-menu {
+position: absolute; top: 3rem; right: 0.8rem; background: var(–card);
+border: 1px solid var(–line); border-radius: 14px; box-shadow: 0 12px 36px rgba(120,100,50,0.18);
+padding: 0.9rem; display: none; flex-direction: column; gap: 0.7rem; z-index: 30; min-width: 230px;
+}
+#ctrl-menu.open { display: flex; }
+.ctrl-row { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; }
+.ctrl-label { font-size: 0.74rem; font-weight: 600; color: var(–ink); }
+.seg { display: flex; gap: 0.3rem; }
+.seg button {
+border: 1px solid var(–line); background: #fcfaf4; color: var(–muted); border-radius: 8px;
+cursor: pointer; font-family: ‘Inter’, sans-serif; font-weight: 600; padding: 0.3rem 0; width: 34px; transition: all 0.15s;
+}
+.seg button.active { border-color: var(–gold); background: rgba(201,168,76,0.12); color: var(–ink); }
+.seg .a-s { font-size: 0.72rem; } .seg .a-m { font-size: 0.85rem; } .seg .a-l { font-size: 1rem; }
+.toggle-btn {
+border: 1px solid var(–line); background: #fcfaf4; color: var(–muted); border-radius: 8px;
+cursor: pointer; font-family: ‘Inter’, sans-serif; font-size: 0.72rem; font-weight: 600; padding: 0.35rem 0.7rem; transition: all 0.15s;
+}
+.toggle-btn.active { border-color: var(–gold); background: rgba(201,168,76,0.12); color: var(–ink); }
+.soon { font-size: 0.58rem; color: var(–muted); font-weight: 400; }
 
-  #feed { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 1.6rem 1.2rem 2rem; }
-  .line {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: calc(1.7rem * var(--feed-scale));
-    font-weight: 400; line-height: 1.45; color: var(--feed-ink);
-    margin-bottom: 1.1rem; padding-left: 0.85rem; border-left: 2px solid rgba(201,168,76,0.5);
-    animation: fade 0.4s ease-out; transition: font-size 0.2s, color 0.25s;
-  }
-  .line .ts { display: none; font-family: 'Inter', sans-serif; font-size: 0.6rem; letter-spacing: 0.06em;
-    color: var(--feed-muted); text-transform: uppercase; margin-bottom: 0.2rem; }
-  body.show-history .line .ts { display: block; }
-  .line .orig { display: none; font-size: calc(1.05rem * var(--feed-scale)); font-style: italic; color: var(--feed-muted); margin-top: 0.25rem; }
-  @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-  .placeholder {
-    font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.3rem;
-    color: var(--feed-muted); text-align: center; margin-top: 30vh; padding: 0 1.5rem;
-  }
-  #live-btn {
-    position: fixed; bottom: 1.4rem; left: 50%; transform: translateX(-50%) translateY(2rem);
-    background: linear-gradient(135deg, var(--gold-d), var(--gold-l)); color: #fff;
-    font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.05em;
-    padding: 0.6rem 1.4rem; border: none; border-radius: 30px; box-shadow: 0 4px 18px rgba(201,168,76,0.4);
-    cursor: pointer; opacity: 0; pointer-events: none; transition: opacity 0.25s, transform 0.25s; z-index: 20;
-  }
-  #live-btn.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+#feed { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 1.6rem 1.2rem 2rem; }
+.line {
+font-family: ‘Cormorant Garamond’, serif;
+font-size: calc(1.7rem * var(–feed-scale));
+font-weight: 400; line-height: 1.45; color: var(–feed-ink);
+margin-bottom: 1.1rem; padding-left: 0.85rem; border-left: 2px solid rgba(201,168,76,0.5);
+animation: fade 0.4s ease-out; transition: font-size 0.2s, color 0.25s;
+}
+.line .ts { display: none; font-family: ‘Inter’, sans-serif; font-size: 0.6rem; letter-spacing: 0.06em;
+color: var(–feed-muted); text-transform: uppercase; margin-bottom: 0.2rem; }
+body.show-history .line .ts { display: block; }
+.line .orig { display: none; font-size: calc(1.05rem * var(–feed-scale)); font-style: italic; color: var(–feed-muted); margin-top: 0.25rem; }
+/* Caminho B: linha parcial (rascunho ao vivo, crescendo) */
+.line.partial { color: var(–feed-muted); border-left-color: rgba(201,168,76,0.28); opacity: 0.9; }
+.line.partial::after { content: ‘▌’; margin-left: 2px; color: var(–gold); animation: caret 1s steps(1) infinite; }
+@keyframes caret { 50% { opacity: 0; } }
+@keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.placeholder {
+font-family: ‘Cormorant Garamond’, serif; font-style: italic; font-size: 1.3rem;
+color: var(–feed-muted); text-align: center; margin-top: 30vh; padding: 0 1.5rem;
+}
+#live-btn {
+position: fixed; bottom: 1.4rem; left: 50%; transform: translateX(-50%) translateY(2rem);
+background: linear-gradient(135deg, var(–gold-d), var(–gold-l)); color: #fff;
+font-family: ‘Inter’, sans-serif; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.05em;
+padding: 0.6rem 1.4rem; border: none; border-radius: 30px; box-shadow: 0 4px 18px rgba(201,168,76,0.4);
+cursor: pointer; opacity: 0; pointer-events: none; transition: opacity 0.25s, transform 0.25s; z-index: 20;
+}
+#live-btn.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
 
-  /* ── MODO ESCURO do feed ── */
-  body.dark { --feed-bg: #14130f; --feed-ink: #f0ead6; --feed-muted: #8c8470; --feed-card: #1b1a14; --feed-line: #2a2820; }
+/* ── MODO ESCURO do feed ── */
+body.dark { –feed-bg: #14130f; –feed-ink: #f0ead6; –feed-muted: #8c8470; –feed-card: #1b1a14; –feed-line: #2a2820; }
 
-  /* ── Fio 4: barra de idioma + seletor (bottom sheet) ── */
-  #lang-bar {
-    display: flex; align-items: center; justify-content: space-between; width: 100%;
-    padding: 0.6rem 1rem; background: var(--feed-card); color: var(--feed-ink);
-    border: none; border-bottom: 1px solid var(--feed-line); cursor: pointer;
-    font-family: 'Inter', sans-serif; font-size: 0.92rem; font-weight: 500;
-    transition: background 0.25s, border-color 0.25s, color 0.25s;
-  }
-  #lang-bar .lb-left { display: flex; align-items: center; gap: 0.55rem; }
-  #lang-bar svg { width: 16px; height: 16px; flex: none; stroke: var(--gold-d); }
-  #lang-bar .lb-chev { stroke: var(--feed-muted); }
-  #lang-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100;
-    display: none; align-items: flex-end;
-  }
-  #lang-overlay.open { display: flex; }
-  .lang-sheet {
-    background: var(--feed-card); width: 100%; max-height: 82vh; border-radius: 18px 18px 0 0;
-    display: flex; flex-direction: column; padding: 1rem 1rem 1.4rem;
-    box-shadow: 0 -8px 30px rgba(0,0,0,0.25);
-  }
-  .lang-sheet-head {
-    display: flex; align-items: center; justify-content: space-between;
-    font-weight: 600; color: var(--feed-ink); margin-bottom: 0.8rem; font-size: 1rem;
-  }
-  #lang-close { background: none; border: none; font-size: 1.3rem; line-height: 1; color: var(--feed-muted); cursor: pointer; padding: 0.2rem 0.4rem; }
-  #lang-search {
-    width: 100%; padding: 0.7rem 0.9rem; border: 1px solid var(--feed-line); border-radius: 10px;
-    background: var(--feed-bg); color: var(--feed-ink); font-family: 'Inter', sans-serif; font-size: 0.95rem; margin-bottom: 0.5rem;
-  }
-  #lang-list { overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1; }
-  .lang-item {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0.85rem 0.7rem; border-radius: 10px; cursor: pointer; color: var(--feed-ink); font-size: 1rem;
-  }
-  .lang-item:active, .lang-item.active { background: rgba(201,168,76,0.16); }
-  .lang-item.active::after { content: "✓"; color: var(--gold-d); font-weight: 700; }
-  /* mostrar original (bilíngue empilhado) */
-  body.show-original .line .orig { display: block; }
-  .listener-count { font-size: 0.62rem; font-weight: 600; color: var(--feed-muted); background: var(--feed-card); border: 1px solid var(--feed-line); border-radius: 20px; padding: 0.1rem 0.45rem; white-space: nowrap; }
-  #room-label.is-church { text-transform: none; letter-spacing: normal; font-size: 0.72rem; font-weight: 600; color: var(--feed-ink); }
+/* ── Fio 4: barra de idioma + seletor (bottom sheet) ── */
+#lang-bar {
+display: flex; align-items: center; justify-content: space-between; width: 100%;
+padding: 0.6rem 1rem; background: var(–feed-card); color: var(–feed-ink);
+border: none; border-bottom: 1px solid var(–feed-line); cursor: pointer;
+font-family: ‘Inter’, sans-serif; font-size: 0.92rem; font-weight: 500;
+transition: background 0.25s, border-color 0.25s, color 0.25s;
+}
+#lang-bar .lb-left { display: flex; align-items: center; gap: 0.55rem; }
+#lang-bar svg { width: 16px; height: 16px; flex: none; stroke: var(–gold-d); }
+#lang-bar .lb-chev { stroke: var(–feed-muted); }
+#lang-overlay {
+position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100;
+display: none; align-items: flex-end;
+}
+#lang-overlay.open { display: flex; }
+.lang-sheet {
+background: var(–feed-card); width: 100%; max-height: 82vh; border-radius: 18px 18px 0 0;
+display: flex; flex-direction: column; padding: 1rem 1rem 1.4rem;
+box-shadow: 0 -8px 30px rgba(0,0,0,0.25);
+}
+.lang-sheet-head {
+display: flex; align-items: center; justify-content: space-between;
+font-weight: 600; color: var(–feed-ink); margin-bottom: 0.8rem; font-size: 1rem;
+}
+#lang-close { background: none; border: none; font-size: 1.3rem; line-height: 1; color: var(–feed-muted); cursor: pointer; padding: 0.2rem 0.4rem; }
+#lang-search {
+width: 100%; padding: 0.7rem 0.9rem; border: 1px solid var(–feed-line); border-radius: 10px;
+background: var(–feed-bg); color: var(–feed-ink); font-family: ‘Inter’, sans-serif; font-size: 0.95rem; margin-bottom: 0.5rem;
+}
+#lang-list { overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1; }
+.lang-item {
+display: flex; align-items: center; justify-content: space-between;
+padding: 0.85rem 0.7rem; border-radius: 10px; cursor: pointer; color: var(–feed-ink); font-size: 1rem;
+}
+.lang-item:active, .lang-item.active { background: rgba(201,168,76,0.16); }
+.lang-item.active::after { content: “✓”; color: var(–gold-d); font-weight: 700; }
+/* mostrar original (bilíngue empilhado) */
+body.show-original .line .orig { display: block; }
+.listener-count { font-size: 0.62rem; font-weight: 600; color: var(–feed-muted); background: var(–feed-card); border: 1px solid var(–feed-line); border-radius: 20px; padding: 0.1rem 0.45rem; white-space: nowrap; }
+#room-label.is-church { text-transform: none; letter-spacing: normal; font-size: 0.72rem; font-weight: 600; color: var(–feed-ink); }
 </style>
 
 </head>
@@ -207,7 +212,7 @@
     <div class="placeholder" id="placeholder" data-i18n="cel.waiting">Waiting for the live translation…</div>
   </div>
 
-  <button id="live-btn">▼ <span data-i18n="cel.live">Live</span></button>
+<button id="live-btn">▼ <span data-i18n="cel.live">Live</span></button>
 
 <div id="lang-overlay">
   <div class="lang-sheet">
@@ -221,6 +226,7 @@
 </div>
 
 <script src="i18n.js"></script>
+
 <script>
   const WORKER_HOST = "traducao-culto-broadcast.leandrobisp-s.workers.dev";
 
@@ -498,18 +504,64 @@
     el.textContent = '👥 ' + n;
     el.style.display = '';
   }
+  // Caminho B: estado dos dois níveis (confirmado + parcial)
+  let partialState = { id: null, revision: -1 };
+  let lastFinalId = null;
+
   function handlePackage(pkg) {
     if (pkg.church) setChurch(pkg.church);
     if (typeof pkg.count === 'number') setCount(pkg.count);
     if (pkg.unavailable) { // idioma escolhido ainda não foi ativado pelo operador
       feed.innerHTML = '<div class="placeholder" id="placeholder">' + T('cel.lang_unavailable') + '</div>';
+      partialState = { id: null, revision: -1 };
       return;
     }
     if (pkg.lang) {
       effectiveLang = pkg.lang;             // o áudio segue o idioma realmente recebido
       if (!selectedLang) updateLangBar();   // modo padrão: a barra mostra o idioma padrão da sala
     }
-    addLine(pkg.t, pkg.o || null);
+    const kind = pkg.kind || 'final';
+    const id = pkg.id || '';
+    const rev = (typeof pkg.revision === 'number') ? pkg.revision : 0;
+    if (kind === 'partial') handlePartial(id, rev, pkg.t);
+    else handleFinal(id, pkg.t, pkg.o || null);
+  }
+
+  // PARCIAL: rascunho ao vivo, atualizado no lugar (não fala, não vira histórico ainda)
+  function handlePartial(id, rev, t) {
+    if (!t) return;
+    if (id && id === lastFinalId) return;                 // pensamento já confirmado: ignora parcial atrasada
+    if (id !== partialState.id) partialState = { id: id, revision: -1 }; // novo pensamento
+    if (rev <= partialState.revision) return;             // parcial mais antiga: ignora
+    partialState.revision = rev;
+    renderPartial(t);
+    if (following) scrollToBottom(false); else liveBtn.classList.add('show');
+  }
+
+  // FINAL: alta qualidade -> confirma (linha firme), fala (TTS) e remove a parcial deste pensamento
+  function handleFinal(id, t, o) {
+    if (!t) return;
+    if (id && partialState.id === id) clearPartial();     // só limpa a parcial DESTE pensamento
+    if (id) lastFinalId = id;
+    if (partialState.id === id) partialState = { id: null, revision: -1 };
+    addLine(t, o);
+  }
+
+  function renderPartial(t) {
+    const ph = document.getElementById('placeholder'); if (ph) ph.remove();
+    let div = document.getElementById('partial-line');
+    if (!div) {
+      div = document.createElement('div');
+      div.className = 'line partial';
+      div.id = 'partial-line';
+      feed.appendChild(div);
+    }
+    div.textContent = t;
+  }
+
+  function clearPartial() {
+    const div = document.getElementById('partial-line');
+    if (div) div.remove();
   }
 
   function addLine(t, o) {
@@ -532,7 +584,9 @@
       orig.textContent = o;
       div.appendChild(orig);
     }
-    feed.appendChild(div);
+    const partialDiv = document.getElementById('partial-line');
+    if (partialDiv) feed.insertBefore(div, partialDiv); // confirmadas ficam ACIMA da parcial em andamento
+    else feed.appendChild(div);
 
     enqueueSpeak(t);
 
@@ -558,5 +612,6 @@
     ws.onerror = () => { try { ws.close(); } catch {} };
   }
 </script>
+
 </body>
 </html>
