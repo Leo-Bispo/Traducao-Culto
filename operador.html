@@ -1,0 +1,2005 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atos2 · Live Translation</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%230f0f17'/%3E%3Ctext%20x='16'%20y='24'%20font-family='Georgia,serif'%20font-weight='600'%20font-size='22'%20fill='%23e8c97a'%20text-anchor='middle'%3E2%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.4.9/mammoth.browser.min.js"></script>
+<style>
+:root {
+  --cream: #f8f4ea;
+  --cream2: #f1ead9;
+  --card: #ffffff;
+  --gold: #c9a84c;
+  --gold-d: #b8943a;
+  --gold-l: #e8c97a;
+  --ink: #2c2820;
+  --muted: #8c8470;
+  --line: #e7e0cf;
+  --accent: #3d6b8c;
+  --red: #c0392b;
+  --green: #3f7d54;
+  /* tema do teleprompter (claro por padrão; o dark mode troca estas) */
+  --stage-bg: #ffffff;
+  --stage-text: #2c2820;
+  --stage-current: #b8943a;
+  --stage-line: #e7e0cf;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background:
+    radial-gradient(ellipse 70% 45% at 50% -8%, rgba(201,168,76,0.14), transparent 60%),
+    var(--cream);
+  color: var(--ink);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* ─── TELA DE SETUP ─── */
+#setup-screen {
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 2rem 1.2rem;
+}
+#setup-screen.hidden { display: none; }
+.setup-card {
+  width: 100%; max-width: 860px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 12px 40px rgba(120,100,50,0.10), 0 2px 8px rgba(120,100,50,0.06);
+  padding: 2.4rem 2.4rem 2.2rem;
+}
+.setup-head { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.8rem; }
+.setup-emblem { width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(140deg, var(--gold-l), var(--gold), var(--gold-d));
+  display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(201,168,76,0.3); }
+.setup-emblem svg { width: 22px; height: 22px; }
+.setup-wordmark { font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 600; color: var(--ink); letter-spacing: 0.04em; }
+.setup-eyebrow { font-size: 0.66rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-d); margin-top: 0.1rem; }
+.setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1.4rem; }
+@media (max-width: 620px){ .setup-grid { grid-template-columns: 1fr; } .setup-card { max-width: 480px; } }
+.field-group { margin-bottom: 0.9rem; }
+label { display: block; font-size: 0.74rem; font-weight: 600; letter-spacing: 0; color: var(--ink); margin-bottom: 0.38rem; }
+select, input[type="text"], input[type="password"] {
+  width: 100%;
+  background: #fcfaf4;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--ink);
+  min-height: 38px;
+  padding: 0.52rem 0.8rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  -webkit-appearance: none;
+}
+select:focus, input[type="text"]:focus, input[type="password"]:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.14);
+  background: #fff;
+}
+select option { background: #fff; color: var(--ink); }
+.api-hint { font-size: 0.72rem; color: var(--muted); margin-top: 0.35rem; line-height: 1.45; }
+.api-hint a { color: var(--gold-d); text-decoration: none; }
+input[type="file"] {
+  width: 100%;
+  background: #fcfaf4;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--ink);
+  padding: 0.55rem 0.7rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  outline: none;
+  cursor: pointer;
+}
+input[type="file"]::file-selector-button {
+  background: rgba(201,168,76,0.12);
+  border: 1px solid rgba(201,168,76,0.35);
+  color: var(--gold-d);
+  border-radius: 8px;
+  padding: 0.4rem 0.8rem;
+  margin-right: 0.8rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.sermon-ok { color: var(--green) !important; opacity: 1 !important; }
+.sermon-err { color: var(--red) !important; opacity: 1 !important; }
+.sermon-loading { color: var(--gold-d) !important; opacity: 1 !important; }
+.pace-group { display: flex; gap: 0.5rem; }
+.pace-btn {
+  flex: 1; background: #fcfaf4; border: 1.5px solid var(--line);
+  border-radius: 10px; color: var(--muted); padding: 0.6rem 0.4rem; cursor: pointer;
+  font-family: 'Inter', sans-serif; font-size: 0.84rem; font-weight: 600; line-height: 1.2;
+  display: flex; flex-direction: column; gap: 0.15rem; transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.pace-btn small { font-weight: 400; font-size: 0.62rem; color: var(--muted); }
+.pace-btn.active { border-color: var(--gold); color: var(--ink); background: rgba(201,168,76,0.1); }
+
+.btn-start {
+  width: 100%;
+  background: linear-gradient(135deg,var(--gold-d),var(--gold),var(--gold-l));
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.68rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  cursor: pointer;
+  margin-top: 0.35rem;
+  box-shadow: 0 3px 10px rgba(201,168,76,0.3);
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+}
+.btn-start:hover { filter: brightness(1.04); }
+.btn-start:active { transform: translateY(1px); }
+
+/* ─── TELA AO VIVO ─── */
+#main-screen { display: block; height: 100vh; padding: 1.35rem 1.2rem 1.25rem; } /* cockpit sem scroll */
+#main-screen.visible { display: block; }
+.live-wrap { max-width: 1380px; height: 100%; margin: 0 auto; display: flex; flex-direction: column; }
+
+/* cabeçalho */
+#top-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 1rem; margin-bottom: 1.45rem;
+}
+.brand { display: flex; align-items: center; gap: 0.75rem; min-width: 0; }
+.emblem { width: 42px; height: 42px; border-radius: 50%; flex: none;
+  background: linear-gradient(140deg,var(--gold-l),var(--gold),var(--gold-d));
+  display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(201,168,76,0.3); }
+.emblem svg { width: 20px; height: 20px; }
+.church-name { font-family: 'Cinzel', serif; font-size: 1.15rem; color: var(--ink); letter-spacing: 0.01em; font-weight: 600; line-height: 1.1; }
+.brand-sub { font-size: 0.66rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-d); margin-top: 0.18rem; }
+.status-row { display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; }
+#lang-badge {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.05em; color: var(--gold-d);
+  background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.25);
+  padding: 0.3rem 0.7rem; border-radius: 20px;
+}
+#status-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); transition: background 0.3s; }
+#status-dot.connecting { background: var(--gold); animation: pulse 1s infinite; }
+#status-dot.live { background: var(--green); }
+#status-dot.error { background: var(--red); }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.btn-settings, .btn-clear, .btn-pause {
+  background: #fcfaf4; border: 1px solid var(--line); color: var(--ink);
+  border-radius: 9px; min-height: 36px; padding: 0.42rem 0.6rem; font-family: 'Inter', sans-serif;
+  font-size: 0.76rem; font-weight: 600; cursor: pointer; transition: border-color 0.2s, color 0.2s, background 0.2s;
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem; white-space: normal; line-height: 1.25;
+}
+.btn-settings:hover, .btn-clear:hover, .btn-pause:hover { background: #fff; border-color: var(--gold); color: var(--gold-d); }
+.btn-pause.is-paused { background: rgba(201,168,76,0.16); border-color: rgba(201,168,76,0.25); color: var(--gold-d); }
+.brand-mark { font-family: 'Cinzel', serif; font-size: 0.86rem; letter-spacing: 0.08em; color: var(--gold-d); display: none; }
+.brand-mark b { color: var(--gold-d); font-weight: 600; }
+
+/* layout em duas colunas (estilo Glossa) */
+.live-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 1.45rem; align-items: stretch; }
+@media (max-width: 820px){ body { overflow: auto; } #main-screen { height: auto; min-height: 100vh; } .live-wrap { height: auto; } .live-grid { grid-template-columns: 1fr; } }
+body.projection { background: var(--stage-bg); overflow: hidden; }
+body.projection #main-screen { height: 100vh; padding: 0; }
+body.projection .live-wrap { max-width: none; height: 100vh; }
+body.projection #top-bar,
+body.projection .control-card,
+body.projection #source-strip,
+body.projection #waveform { display: none !important; }
+body.projection .live-grid { height: 100vh; display: block; }
+body.projection .stage-card {
+  width: 100vw; height: 100vh; border: none; border-radius: 0; box-shadow: none;
+  padding: clamp(1.2rem, 2.4vw, 2.4rem); background: var(--stage-bg);
+}
+body.projection #prompter-stage { height: 100%; border: none; border-radius: 0; padding: clamp(1.2rem, 2.6vw, 3rem); }
+body.projection #prompter-window { height: 100%; }
+body.projection .prompter-line {
+  font-size: calc(clamp(2.1rem, 5.2vw, 4.8rem) * var(--stage-scale, 1));
+  line-height: 1.2;
+}
+body.projection .prompter-placeholder { font-size: clamp(1.8rem, 3vw, 2.8rem); }
+#projection-exit {
+  position: fixed; top: 1rem; right: 1rem; z-index: 90; display: none;
+  background: rgba(252,250,244,0.92); border: 1px solid var(--line); color: var(--ink);
+  border-radius: 999px; padding: 0.55rem 0.95rem; font-family: 'Inter', sans-serif;
+  font-size: 0.82rem; font-weight: 600; cursor: pointer; box-shadow: 0 6px 18px rgba(45,38,20,0.12);
+}
+body.projection #projection-exit { display: inline-flex; align-items: center; gap: 0.35rem; }
+body.projection #projection-exit:hover { border-color: var(--gold); color: var(--gold-d); }
+
+.control-card, .stage-card {
+  background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(120,100,50,0.05);
+}
+.control-card { min-height: 0; padding: 1.15rem 1.3rem; overflow: visible; }
+.control-card .cc-title { font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 600; margin-bottom: 0; color: var(--ink); }
+.control-card .cc-row { display: flex; flex-direction: column; gap: 0.55rem; }
+.control-card .cc-row .btn-settings, .control-card .cc-row .btn-clear, .control-card .cc-row .btn-pause { width: 100%; text-align: center; }
+
+/* área do teleprompter */
+.stage-card { min-height: 0; padding: 1.28rem 1.3rem; display: flex; flex-direction: column; }
+#prompter-stage {
+  flex: 1; min-height: 0;
+  background: var(--stage-bg); border: 1px solid var(--stage-line); border-radius: 12px;
+  padding: 1.1rem 1.25rem; position: relative; transition: background 0.25s, border-color 0.25s;
+  display: flex; flex-direction: column;
+}
+.deco-line { height: 2px; width: 42px; background: var(--gold); border-radius: 2px; margin-bottom: 0.75rem; opacity: 0.75; }
+#prompter-label {
+  font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted);
+  margin-bottom: 0.8rem; transition: color 0.25s;
+}
+#prompter-window { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; } /* altura fixa: palco estatico */
+#prompter-track { display: flex; flex-direction: column; gap: 0.7rem; }
+.prompter-line {
+  font-family: 'Cormorant Garamond', serif; font-size: clamp(1.35rem, 3vw, 2.25rem);
+  font-size: calc(clamp(1.35rem, 3vw, 2.25rem) * var(--stage-scale, 1)); line-height: 1.32; color: var(--stage-text); opacity: 0.42; transition: opacity 0.4s, color 0.25s, font-size 0.2s;
+  animation: rise 0.45s ease-out;
+}
+.prompter-line.is-current { opacity: 1; color: var(--stage-current); }
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+.prompter-placeholder {
+  font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.55rem;
+  color: var(--muted); text-align: center; margin: auto; transition: color 0.25s;
+}
+
+/* faixa do texto original + waveform */
+#source-strip { flex: none; margin-top: 0.9rem; padding: 0.7rem 0.95rem; background: #fcfaf4; border: 1px solid var(--line); border-radius: 10px; }
+#source-text { font-size: 0.82rem; color: var(--muted); line-height: 1.5; height: 3em; overflow: hidden; } /* altura fixa (~2 linhas): faixa estável */
+#source-text.source-placeholder { font-style: italic; opacity: 0.7; }
+#waveform { flex: none; display: flex; align-items: center; justify-content: center; gap: 3px; height: 18px; margin-top: 0.55rem; }
+.wave-bar { width: 2px; background: var(--gold); border-radius: 2px; opacity: 0.25; height: 4px; transition: height 0.12s, opacity 0.12s; }
+.wave-bar.active { opacity: 0.7; animation: wave-anim 0.6s ease-in-out infinite alternate; }
+@keyframes wave-anim { from { height: 3px; } to { height: 16px; } }
+
+/* ─── DARK MODE do teleprompter (botão) ─── */
+.stage-card.dark #prompter-stage { --stage-bg: #14130f; --stage-text: #f0ead6; --stage-current: #e8c97a; --stage-line: #2a2820; }
+.stage-card.dark #source-strip { background: #14130f; border-color: #2a2820; }
+.stage-card.dark #source-text { color: #8c8470; }
+.btn-dark.active { background: rgba(201,168,76,0.15); border-color: var(--gold); color: var(--gold-d); }
+
+/* ─── QR overlay ─── */
+#qr-overlay {
+  position: fixed; inset: 0; background: rgba(44,40,32,0.5); backdrop-filter: blur(4px);
+  display: none; flex-direction: column; align-items: center; justify-content: center; gap: 0.85rem; z-index: 100; padding: 1.5rem;
+}
+#qr-overlay.visible { display: flex; }
+.qr-title, .qr-sub, .qr-room, .qr-url { display: none; }
+#qr-box { background: #fff; padding: 0.7rem; border-radius: 12px; box-shadow: 0 3px 12px rgba(120,100,50,0.18); }
+#qr-canvas { width: 200px; height: 200px; position: relative; }
+#qr-canvas img, #qr-canvas canvas { display: block; width: 200px; height: 200px; }
+.qr-emblem { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:42px; height:42px; border-radius:50%; background:linear-gradient(140deg,#e8c97a,#c9a84c,#b8943a); display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.25); border:3px solid #fff; }
+.qr-emblem svg { width:20px; height:20px; }
+.qr-close { background: linear-gradient(135deg,var(--gold-d),var(--gold),var(--gold-l)); border: none; color: #fff; border-radius: 10px; padding: 0.65rem 1.45rem; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; box-shadow: 0 3px 10px rgba(201,168,76,0.28); }
+.qr-close:hover { filter: brightness(1.04); }
+
+/* ─── mensagem de erro ─── */
+#error-msg {
+  position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+  background: var(--red); color: #fff; padding: 0.8rem 1.4rem; border-radius: 10px;
+  font-size: 0.85rem; letter-spacing: 0.02em; display: none; text-align: center; max-width: 90vw; z-index: 200;
+}
+#error-msg.visible { display: block; }
+  /* ── Fio 4 (3a clean): idiomas ativados — resumo em etiquetas + modal ── */
+  .lang-summary { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.1rem 0 0.5rem; }
+  .lang-chip { font-size: 0.74rem; font-weight: 500; color: var(--ink); background: var(--cream2); border: 1px solid var(--line); border-radius: 20px; padding: 0.18rem 0.6rem; }
+  .lang-chip.is-default { color: var(--gold-d); border-color: var(--gold); background: rgba(201,168,76,0.12); font-weight: 600; }
+  .manage-langs-btn { font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 600; color: var(--gold-d); background: none; border: 1px solid var(--gold); border-radius: 9px; padding: 0.4rem 0.8rem; cursor: pointer; transition: background 0.15s; }
+  .manage-langs-btn:hover { background: rgba(201,168,76,0.12); }
+  #langmodal { position: fixed; inset: 0; background: rgba(30,26,18,0.45); z-index: 200; display: none; align-items: center; justify-content: center; padding: 1rem; }
+  #langmodal.open { display: flex; }
+  .langmodal-card { background: var(--card); border-radius: 16px; width: 100%; max-width: 520px; max-height: 80vh; display: flex; flex-direction: column; padding: 1.1rem 1.2rem 1.2rem; box-shadow: 0 18px 50px rgba(60,50,20,0.3); }
+  .langmodal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.7rem; }
+  .langmodal-head h3 { font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 600; color: var(--ink); margin: 0; }
+  .modal-close, #langmodal-close { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; background: #fcfaf4; border: 1px solid var(--line); border-radius: 9px; font-size: 1rem; line-height: 1; color: var(--muted); cursor: pointer; transition: border-color 0.15s, color 0.15s, background 0.15s; }
+  .modal-close:hover, #langmodal-close:hover { background: rgba(201,168,76,0.12); border-color: var(--gold); color: var(--gold-d); }
+  #langmodal-search { width: 100%; padding: 0.6rem 0.8rem; border: 1px solid var(--line); border-radius: 9px; font-family: 'Inter', sans-serif; font-size: 0.9rem; color: var(--ink); margin-bottom: 0.6rem; }
+  #langmodal-list { display: grid; grid-template-columns: 1fr 1fr; gap: 0.2rem 0.8rem; overflow-y: auto; flex: 1; padding-right: 0.2rem; }
+  @media (max-width: 480px){ #langmodal-list { grid-template-columns: 1fr; } }
+  .lang-check { display: flex; align-items: center; gap: 0.5rem; font-size: 0.84rem; font-weight: 500; color: var(--ink); margin: 0; cursor: pointer; padding: 0.3rem 0; }
+  .lang-check input { width: 16px; height: 16px; accent-color: var(--gold-d); cursor: pointer; flex: none; }
+  .lang-check.is-default { color: var(--gold-d); font-weight: 600; }
+  .langmodal-foot { margin-top: 0.8rem; text-align: right; }
+  .langmodal-foot button { font-family: 'Inter', sans-serif; font-size: 0.82rem; font-weight: 600; color: #fff; background: linear-gradient(135deg, var(--gold-d), var(--gold), var(--gold-l)); border: none; border-radius: 9px; padding: 0.55rem 1.25rem; cursor: pointer; box-shadow: 0 3px 10px rgba(201,168,76,0.22); }
+  .langmodal-foot button:hover { filter: brightness(1.04); }
+  /* painel único: config sempre visível (travada durante o culto) + ferramentas integradas */
+  .cc-head { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; margin-bottom: 0.85rem; }
+  #config-block .field-group { margin-bottom: 0.68rem; }
+  #config-block .api-hint { display: none; }
+  body.running #config-block { opacity: 0.62; pointer-events: none; }  /* trava a config durante o culto */
+  body.running #primary-btn { background: #c45f51; box-shadow: 0 6px 14px rgba(180,80,60,0.18); }  /* START -> STOP (avermelhado) */
+  .cc-tools { display: grid; grid-template-columns: 1fr 1fr; gap: 0.52rem; margin-top: 0.7rem; }
+  .cc-tools button { width: 100%; text-align: center; }
+  @media (max-width: 480px){ .cc-tools { grid-template-columns: 1fr; } }
+  /* modal Avançado: mesmo visual do modal de idiomas */
+  #advmodal { position: fixed; inset: 0; background: rgba(30,26,18,0.45); z-index: 200; display: none; align-items: center; justify-content: center; padding: 1rem; }
+  #advmodal.open { display: flex; }
+  #langmodal-done { font-family: 'Inter', sans-serif; font-size: 0.82rem; font-weight: 600; color: #fff; background: linear-gradient(135deg, var(--gold-d), var(--gold), var(--gold-l)); border: none; border-radius: 9px; padding: 0.55rem 1.25rem; cursor: pointer; }
+  .listener-count { font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 600; color: var(--gold-d); background: rgba(201,168,76,0.12); border-radius: 20px; padding: 0.15rem 0.6rem; white-space: nowrap; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="i18n.js"></script>
+</head>
+<body>
+
+<div id="main-screen">
+ <div class="live-wrap">
+  <div id="top-bar">
+    <div class="brand">
+      <div class="emblem"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"></rect><path d="M5 10a7 7 0 0 0 14 0"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg></div>
+      <div>
+        <h1 class="church-name" id="church-display">Igreja Brasileira de Londres</h1>
+        <div class="brand-sub">Atos2 · Live Translation</div>
+      </div>
+    </div>
+    <div class="status-row">
+      <span id="lang-badge">PT → EN</span>
+      <div id="status-dot"></div>
+      <span id="listener-count" class="listener-count">👥 0</span>
+      <span class="brand-mark"><b>Atos</b>2</span>
+    </div>
+  </div>
+
+  <div class="live-grid">
+    <!-- coluna esquerda: painel único (config sempre visível + ferramentas integradas) -->
+    <div class="control-card">
+      <div class="cc-head">
+        <div class="cc-title" data-i18n="op.setup_word">Setup</div>
+        <div data-i18n-dropdown></div>
+      </div>
+
+      <div id="config-block">
+        <div class="field-group">
+          <label data-i18n="op.audio_input">Audio input (microphone / sound desk)</label>
+          <select id="audio-device">
+            <option value="" data-i18n="op.loading_devices">⏳ Loading devices...</option>
+          </select>
+          <p class="api-hint" data-i18n="op.audio_hint">Select the sound desk input (e.g. "CABLE Output", "USB Audio", "Scarlett") or the microphone.</p>
+        </div>
+
+        <div class="field-group">
+          <label data-i18n="op.source_lang">Source language (the speaker)</label>
+          <select id="source-lang">
+            <option value="auto" data-i18n="op.auto_detect">🔍 Auto-detect</option>
+            <option value="pt-BR" selected>🇧🇷 Portuguese (Brazil)</option>
+            <option value="pt-PT">🇵🇹 Portuguese (Portugal)</option>
+            <option value="en-GB">🇬🇧 English (UK)</option>
+            <option value="en-US">🇺🇸 English (US)</option>
+            <option value="es">🇪🇸 Spanish</option>
+            <option value="fr">🇫🇷 French</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label data-i18n="op.default_lang">Default language (projection screen)</label>
+          <select id="target-lang">
+            <option value="en" selected>🇬🇧 English</option>
+            <option value="pt">🇧🇷 Portuguese</option>
+            <option value="es">🇪🇸 Spanish</option>
+            <option value="fr">🇫🇷 French</option>
+            <option value="de">🇩🇪 German</option>
+            <option value="it">🇮🇹 Italian</option>
+            <option value="ja">🇯🇵 Japanese</option>
+            <option value="zh">🇨🇳 Mandarin</option>
+            <option value="ko">🇰🇷 Korean</option>
+            <option value="ru">🇷🇺 Russian</option>
+            <option value="ro">🇷🇴 Romanian</option>
+            <option value="pl">🇵🇱 Polish</option>
+            <option value="uk">🇺🇦 Ukrainian</option>
+            <option value="nl">🇳🇱 Dutch</option>
+            <option value="id">🇮🇩 Indonesian</option>
+            <option value="vi">🇻🇳 Vietnamese</option>
+            <option value="tl">🇵🇭 Filipino (Tagalog)</option>
+            <option value="hi">🇮🇳 Hindi</option>
+            <option value="tr">🇹🇷 Turkish</option>
+          </select>
+          <p class="api-hint" data-i18n="op.default_lang_hint">This is the language shown on the projection screen and the fallback for phones that do not pick one.</p>
+        </div>
+      </div>
+
+      <button class="btn-start" id="primary-btn" onclick="togglePrimary()" data-i18n="op.start">START TRANSLATION</button>
+
+      <div class="cc-tools">
+        <button class="btn-pause" id="btn-pause" onclick="togglePause()" title="Pause/resume translation" data-i18n-attr="title:op.pause_title">⏸ <span data-i18n="op.pause_word">Pause</span></button>
+        <button class="btn-clear" onclick="clearPrompter()" title="Clear screen" data-i18n-attr="title:op.clear_title">⌫ <span data-i18n="op.clear_screen">Clear screen</span></button>
+        <button class="btn-settings btn-dark" id="btn-dark" onclick="toggleDark()" title="Dark mode for the reading area" data-i18n-attr="title:op.dark_title">🌙 <span data-i18n="op.dark_word">Dark mode</span></button>
+        <button class="btn-settings" id="btn-textsize" onclick="cycleTextSize()" title="Reading text size" data-i18n-attr="title:op.textsize_title">🔠 Text size: Medium</button>
+        <button class="btn-settings" onclick="showQR()" title="Show QR code" data-i18n-attr="title:op.qr_show_title">📱 <span data-i18n="op.qr_code">QR code</span></button>
+        <button class="btn-settings" onclick="toggleProjection()" title="Projection mode">⛶ Projeção</button>
+        <button class="btn-settings" onclick="openAdv()">⚙ Advanced</button>
+      </div>
+    </div>
+
+
+    <!-- coluna do teleprompter -->
+    <div class="stage-card" id="stage-card">
+      <div id="prompter-stage">
+        <div class="deco-line"></div>
+        <div id="prompter-label" data-i18n="op.translation">Translation</div>
+        <div id="prompter-window">
+          <div id="prompter-track">
+            <div class="prompter-placeholder" data-i18n="op.prompter_ph">The translation will appear here as the preacher speaks…</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="source-strip">
+        <div id="source-text" class="source-placeholder" data-i18n="op.waiting_audio">Waiting for audio…</div>
+      </div>
+
+      <div id="waveform"></div>
+    </div>
+  </div>
+
+  <div id="error-msg"></div>
+ </div>
+</div>
+<button id="projection-exit" type="button" onclick="toggleProjection()">× Sair da projeção</button>
+
+<!-- Modal AVANÇADO (configuração menos usada) -->
+<div id="advmodal">
+  <div class="langmodal-card">
+    <div class="langmodal-head">
+      <h3>Advanced</h3>
+      <button type="button" class="modal-close" onclick="closeAdv()" aria-label="Close">×</button>
+    </div>
+    <div style="overflow-y:auto;flex:1;padding-right:0.2rem">
+
+      <div class="field-group">
+        <label data-i18n="op.church_name">Church name (shown on screen)</label>
+        <input type="text" id="church-input" value="Igreja Brasileira de Londres">
+      </div>
+
+      <div class="field-group">
+        <label data-i18n="op.activated_langs">Languages activated for listeners</label>
+        <div id="activated-summary" class="lang-summary"></div>
+        <button type="button" id="manage-langs-btn" class="manage-langs-btn">Manage languages</button>
+        <p class="api-hint" data-i18n="op.activated_langs_hint">Listeners can choose any of these on their phones. The default is always included. A language only costs while someone is tuned to it.</p>
+      </div>
+
+      <div class="field-group">
+        <label data-i18n="op.terms">Church terms (optional — improves accuracy)</label>
+        <input type="text" id="context-input" placeholder="E.g. Pastor Silva, Abundant Life Church, Agape Ministry" data-i18n-attr="placeholder:op.terms_ph">
+        <p class="api-hint" data-i18n="op.terms_hint">Proper names that come up during the service (pastor, church, ministries, preachers). Helps transcribe and translate these names correctly.</p>
+      </div>
+
+      <div class="field-group">
+        <label data-i18n="op.sermon">Sermon (optional — supercharges accuracy)</label>
+        <input type="file" id="sermon-file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onchange="handleSermonUpload(event)">
+        <p class="api-hint" id="sermon-status" data-i18n="op.sermon_hint">Upload the sermon as PDF or Word (.docx). The AI reads it once before the service to learn names, key terms, Bible references and the theme — for a sharper, more natural translation. Leave empty to run exactly as today.</p>
+      </div>
+
+      <div class="field-group">
+        <label data-i18n="op.pace">Caption pace (sentence length)</label>
+        <div class="pace-group" id="pace-group">
+          <button type="button" class="pace-btn active" data-pace="short" onclick="setPace('short')"><span data-i18n="op.pace_short">Short</span><small data-i18n="op.pace_short_sub">Quick captions</small></button>
+          <button type="button" class="pace-btn" data-pace="medium" onclick="setPace('medium')"><span data-i18n="op.pace_medium">Medium</span><small data-i18n="op.pace_medium_sub">Balanced</small></button>
+          <button type="button" class="pace-btn" data-pace="long" onclick="setPace('long')"><span data-i18n="op.pace_long">Long</span><small data-i18n="op.pace_long_sub">Full sentences</small></button>
+        </div>
+        <p class="api-hint" data-i18n="op.pace_hint">How much the preacher pauses before a line is sent. Short = fast captions (as today). Long = fuller, smoother sentences.</p>
+      </div>
+
+      <div class="field-group" style="display:none">
+        <label data-i18n="op.room_code">Room code (for the phone QR code)</label>
+        <input type="text" id="sala-input" value="ABUNDANTE" placeholder="E.G. ABUNDANTE" data-i18n-attr="placeholder:op.room_ph">
+      </div>
+
+    </div>
+    <div class="langmodal-foot">
+      <button type="button" onclick="closeAdv()" data-i18n="op.langmodal_done">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de idiomas ativados (aberto pelo "Manage languages") -->
+<div id="langmodal">
+  <div class="langmodal-card">
+    <div class="langmodal-head">
+      <h3 data-i18n="op.langmodal_title">Activated languages</h3>
+      <button type="button" id="langmodal-close" aria-label="Close">✕</button>
+    </div>
+    <input type="text" id="langmodal-search" placeholder="Search language…" data-i18n-attr="placeholder:op.langmodal_search">
+    <div id="langmodal-list"></div>
+    <div class="langmodal-foot">
+      <button type="button" id="langmodal-done" data-i18n="op.langmodal_done">Done</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="qr-overlay" onclick="hideQR(event)">
+  <div class="qr-title" data-i18n="op.qr_title">Live Translation</div>
+  <div class="qr-sub" data-i18n="op.qr_sub">Point your phone camera here to read the translation</div>
+  <div id="qr-box"><div id="qr-canvas"></div></div>
+  <div class="qr-room" id="qr-room">—</div>
+  <div class="qr-url" id="qr-url"></div>
+  <button class="qr-close" onclick="hideQR(event)" data-i18n="op.close">Close</button>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+//  FIO 3 · TÁBUA 1 — Conexão ao banco (login + ler config do culto)
+//  A estrada velha continua: SEM ?service= o app cai no modo manual de hoje.
+// ════════════════════════════════════════════════════════════════
+const _SB_URL = 'https://zqhvlsgkddmowsgdmemr.supabase.co';
+const _SB_KEY = 'sb_publishable_HUkWCkCDIDO4a7jo2mVmBQ_YYbFy3ay';
+const _sb = window.supabase.createClient(_SB_URL, _SB_KEY);
+
+// Qual culto abrir (vem do "Abrir tradutor" do painel: operador.html?service=ID)
+const _serviceId = new URLSearchParams(location.search).get('service');
+
+// Roda assim que a página carrega, ANTES de o operador mexer na tela.
+async function _bootstrapFromDB() {
+  // Modo avulso: sem ?service=, mantém o comportamento manual de hoje (estrada velha intacta).
+  if (!_serviceId) return;
+
+  // 1) TÁBUA 2 (cadeado): exige login. Sem sessão, vai para a conta.
+  const { data: { session } } = await _sb.auth.getSession();
+  if (!session) { location.href = 'auth.html'; return; }
+
+  // 2) Lê a configuração do culto no banco.
+  const { data: svc, error } = await _sb.from('services').select('*').eq('id', _serviceId).single();
+  if (error || !svc) {
+    console.warn('Culto não encontrado; seguindo em modo manual.', error);
+    return; // não trava o operador: cai no modo manual
+  }
+
+  // 3) Lê dados da conta (nome da igreja, termos, instruções).
+  let acc = null;
+  const { data: prof } = await _sb.from('profiles').select('account_id').eq('id', session.user.id).single();
+  if (prof) {
+    const { data: a } = await _sb.from('accounts').select('*').eq('id', prof.account_id).single();
+    acc = a;
+  }
+
+  // 4) Preenche a tela de setup (editável — o operador pode ajustar na hora).
+  const setVal = (id, val) => { const el = document.getElementById(id); if (el != null && val != null && val !== '') el.value = val; };
+  const setSel = (id, val) => {
+    const el = document.getElementById(id); if (!el || val == null) return;
+    const opt = [...el.options].find(o => o.value === val);
+    if (opt) el.value = val; // só troca se o idioma existir na lista (senão mantém o padrão)
+  };
+
+  if (acc) {
+    setVal('church-input', acc.name);
+    const disp = document.getElementById('church-display'); if (disp && acc.name) disp.textContent = acc.name;
+    setVal('context-input', acc.church_terms);
+  }
+  setVal('sala-input', svc.room_code);                 // código da sala vem do banco (fonte única do QR)
+  setSel('source-lang', svc.source_language);
+  const tgt = Array.isArray(svc.target_languages) ? svc.target_languages[0] : svc.target_languages;
+  setSel('target-lang', tgt);
+  applyActivatedFromDB(acc && acc.enabled_target_languages);   // Fio 4: idiomas ativados vêm da conta (enabled_target_languages)
+}
+
+// Dispara o bootstrap (não bloqueia o resto do app se algo falhar).
+try { _bootstrapFromDB(); } catch (e) { console.warn('Bootstrap DB falhou; modo manual.', e); }
+
+// ── Fio 4 (3a): idiomas ativados para os ouvintes (resumo + modal) ──
+function renderSummary() {
+  const summary = document.getElementById('activated-summary');
+  if (!summary) return;
+  const def = document.getElementById('target-lang').value;
+  const checked = [...document.querySelectorAll('#langmodal-list input:checked')];
+  summary.innerHTML = '';
+  checked.forEach(cb => {
+    const chip = document.createElement('span');
+    chip.className = 'lang-chip' + (cb.value === def ? ' is-default' : '');
+    chip.textContent = (cb.dataset.label || cb.value) + (cb.value === def ? ' ★' : '');
+    summary.appendChild(chip);
+  });
+  const btn = document.getElementById('manage-langs-btn');
+  if (btn) { const lbl = (window.Atos2I18N ? Atos2I18N.t('op.manage_langs') : 'Manage languages'); btn.textContent = lbl + ' (' + checked.length + ')'; }
+}
+function buildActivatedLangs() {
+  const container = document.getElementById('langmodal-list');
+  if (!container || container.children.length) return; // já construído
+  const opts = [...document.getElementById('target-lang').options];
+  opts.forEach(o => {
+    const label = document.createElement('label');
+    label.className = 'lang-check';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox'; cb.value = o.value; cb.dataset.label = o.textContent;
+    cb.addEventListener('change', renderSummary);
+    const span = document.createElement('span');
+    span.textContent = o.textContent;          // bandeira + nome (mesma lista do seletor)
+    label.appendChild(cb); label.appendChild(span);
+    container.appendChild(label);
+  });
+}
+function syncDefaultCheck() {
+  const def = document.getElementById('target-lang').value;
+  [...document.querySelectorAll('#langmodal-list input')].forEach(cb => {
+    const wrap = cb.closest('.lang-check');
+    if (cb.value === def) { cb.checked = true; cb.disabled = true; wrap.classList.add('is-default'); }
+    else { cb.disabled = false; wrap.classList.remove('is-default'); }
+  });
+  renderSummary();
+}
+function applyActivatedFromDB(arr) {
+  buildActivatedLangs();
+  const list = Array.isArray(arr) ? arr : (arr ? [arr] : []);
+  if (list.length) {
+    [...document.querySelectorAll('#langmodal-list input')].forEach(cb => { cb.checked = list.indexOf(cb.value) >= 0; });
+  }
+  syncDefaultCheck();
+}
+function getActivatedLangs() {
+  const def = document.getElementById('target-lang').value;
+  const set = [def];
+  [...document.querySelectorAll('#langmodal-list input:checked')].forEach(cb => { if (set.indexOf(cb.value) < 0) set.push(cb.value); });
+  return set;
+}
+function openLangModal() {
+  buildActivatedLangs();
+  document.getElementById('langmodal').classList.add('open');
+  const sb = document.getElementById('langmodal-search');
+  if (sb) { sb.value = ''; filterLangModal(''); setTimeout(() => { try { sb.focus(); } catch (e) {} }, 60); }
+}
+function closeLangModal() { document.getElementById('langmodal').classList.remove('open'); }
+function filterLangModal(q) {
+  const fq = (q || '').trim().toLowerCase();
+  [...document.querySelectorAll('#langmodal-list .lang-check')].forEach(w => {
+    w.style.display = (!fq || w.textContent.toLowerCase().indexOf(fq) >= 0) ? '' : 'none';
+  });
+}
+buildActivatedLangs();
+syncDefaultCheck();
+renderSummary();
+document.getElementById('target-lang').addEventListener('change', syncDefaultCheck);
+document.getElementById('manage-langs-btn').addEventListener('click', openLangModal);
+document.getElementById('langmodal-close').addEventListener('click', closeLangModal);
+document.getElementById('langmodal-done').addEventListener('click', closeLangModal);
+document.getElementById('langmodal').addEventListener('click', (e) => { if (e.target.id === 'langmodal') closeLangModal(); });
+document.getElementById('langmodal-search').addEventListener('input', (e) => filterLangModal(e.target.value));
+window.addEventListener('atos2:langchange', renderSummary);
+
+// ══════════════════════════════════════════════════════════════
+// ESTADO E CONFIGURAÇÃO
+// ══════════════════════════════════════════════════════════════
+let targetLang = 'en';
+let defaultLang = 'en';        // Fio 4: idioma padrão (telão)
+let activatedLangs = [];       // Fio 4: idiomas ativados para os ouvintes
+let sourceLang = 'pt-BR';
+let churchName = '';
+let selectedDeviceId = '';
+let isLineInput = true; // true = cabo/mesa/interface (sinal validado, intocado); false = microfone (aplica redução de ruído)
+let salaCode = '';
+let customContext = '';
+let sermonTerms = '';      // termos/nomes/versículos destilados do sermão
+let sermonSummary = '';    // mini-resumo do tema do sermão
+let isRunning = false;
+let isPaused = false;
+let savedBadgeText = '';
+let ws = null;
+let activeStream = null;
+let audioContext = null;
+let processorNode = null;
+let reconnectAttempts = 0;
+let reconnectTimer = null;
+
+const MAX_RECONNECT_DELAY = 30000;
+const BASE_RECONNECT_DELAY = 3000;
+
+// Configurações do teleprompter
+const PROMPTER_MAX_LINES = 5;
+const PROMPTER_HISTORY_SIZE = 12;
+const CONTEXT_LINES_FOR_TRANSLATION = 3;
+const SILENCE_DURATION_MS = 500; // padrão (Short) — comportamento atual preservado
+const TRANSCRIBE_MODEL = 'gpt-realtime-whisper'; // TESTE: streaming ao vivo. Reverter = 'gpt-4o-transcribe'
+const COMMIT_INTERVAL_MS = { short: 4000, medium: 7000, long: 10000 }; // whisper: corte forçado por tempo (fala contínua) controlado pelo pace
+// ── Caminho B (legenda parcial + final). false = comportamento single-pass antigo ──
+const CAMINHO_B = true;
+const PARTIAL_DEBOUNCE_MS = 600;  // espera após o último delta para traduzir a parcial
+const HOLD_MAX_MS = 2500;         // teto de segurança do hold (não segura a final pra sempre)
+const LANG_NAMES = {
+  en: 'British English (NIV style — modern, clear, reverent)',
+  pt: 'Portuguese (NVI style)',
+  es: 'Spanish', fr: 'French', de: 'German',
+  it: 'Italian', ja: 'Japanese', zh: 'Mandarin Chinese (simplified)',
+  ko: 'Korean', ru: 'Russian', ro: 'Romanian', pl: 'Polish',
+  uk: 'Ukrainian', nl: 'Dutch', id: 'Indonesian', vi: 'Vietnamese',
+  tl: 'Tagalog (Filipino)', hi: 'Hindi', tr: 'Turkish'
+};
+// Fio 1 — ritmo da legenda (Short/Medium/Long). Short = 500ms = igual a hoje.
+const SENTENCE_LENGTH_MS = { short: 350, medium: 800, long: 1200 }; // Short reduzido 500→350ms (entrega mais rápida em pausas curtas)
+let sentenceLength = 'short'; // escolha do operador na tela de setup
+const TRANSLATION_TIMEOUT_MS = 15000;
+
+// Estado do teleprompter e da fila ordenada
+let prompterLines = [];
+let langHistory = {};          // Fio 4: contexto por idioma (Opção A)
+let translationCounter = 0;
+let pendingChunks = new Map();
+// Caminho B — estado do "pensamento" atual
+let thoughtId = null;     // id estável do pensamento (parcial e final compartilham)
+let thoughtBuffer = '';   // PT confirmado do pensamento (completeds mesclados via hold)
+let deltaBuffer = '';     // PT do segmento em andamento (deltas)
+let holdTimer = null;
+let partialTimer = null;
+let pkgRevision = 0;      // versão global crescente (ordena parcial/final no celular)
+let translationOrder = [];
+
+// ══════════════════════════════════════════════════════════════
+// HELPERS DE UI
+// ══════════════════════════════════════════════════════════════
+const $ = id => document.getElementById(id);
+const T = (k) => (window.Atos2I18N ? Atos2I18N.t(k) : k);
+function _opSyncDynLabels(){
+  var p=$('btn-pause'); if(p && !(typeof isPaused!=='undefined' && isPaused)) p.textContent='⏸ '+T('op.pause_word');
+  var d=$('btn-dark'), card=$('stage-card');
+  if(d) d.textContent=(card&&card.classList.contains('dark'))?('☀ '+T('op.light_word')):('🌙 '+T('op.dark_word'));
+  var t=$('btn-textsize'); if(t) t.textContent='🔠 '+T('op.text_size')+': '+T('op.size_'+TEXT_SIZES[textSizeIndex]);
+}
+document.addEventListener('DOMContentLoaded', _opSyncDynLabels);
+document.addEventListener('atos2:langchange', _opSyncDynLabels);
+const setStatus = (state) => { $('status-dot').className = state === 'idle' ? '' : state; };
+
+function setPace(p) {
+  sentenceLength = p;
+  document.querySelectorAll('.pace-btn').forEach(b => b.classList.toggle('active', b.dataset.pace === p));
+}
+
+function toggleDark() {
+  // Apenas visual: alterna o tema escuro só na área de leitura (teleprompter).
+  const card = $('stage-card');
+  const btn = $('btn-dark');
+  if (!card) return;
+  const on = card.classList.toggle('dark');
+  if (btn) {
+    btn.classList.toggle('active', on);
+    btn.textContent = on ? '☀ ' + T('op.light_word') : '🌙 ' + T('op.dark_word');
+  }
+}
+// Tamanho do texto do teleprompter (apenas visual). Médio = padrão.
+const TEXT_SIZES = ['small', 'medium', 'large'];
+const TEXT_SIZE_LABELS = { small: 'Small', medium: 'Medium', large: 'Large' };
+const TEXT_SIZE_SCALE = { small: 0.8, medium: 1, large: 1.25 };
+let textSizeIndex = 1; // começa em "medium"
+function cycleTextSize() {
+  textSizeIndex = (textSizeIndex + 1) % TEXT_SIZES.length;
+  const size = TEXT_SIZES[textSizeIndex];
+  document.documentElement.style.setProperty('--stage-scale', TEXT_SIZE_SCALE[size]);
+  const btn = $('btn-textsize');
+  if (btn) btn.textContent = '🔠 ' + T('op.text_size') + ': ' + T('op.size_' + size);
+}
+
+function togglePause() {
+  // Só funciona com a sessão ativa; não altera nenhuma configuração escolhida.
+  if (!isRunning) return;
+  isPaused = !isPaused;
+  const btn = $('btn-pause');
+
+  if (isPaused) {
+    savedBadgeText = $('lang-badge').textContent;
+    $('lang-badge').textContent = '⏸ ' + T('op.paused_badge');
+    btn.textContent = '▶ ' + T('op.resume_word');
+    btn.classList.add('is-paused');
+    setStatus('paused');
+    animateWave(false);
+  } else {
+    $('lang-badge').textContent = savedBadgeText || $('lang-badge').textContent;
+    btn.textContent = '⏸ ' + T('op.pause_word');
+    btn.classList.remove('is-paused');
+    setStatus('listening');
+    animateWave(true);
+  }
+}
+
+function showError(msg, persistent = false) {
+  const el = $('error-msg');
+  el.textContent = msg;
+  el.classList.add('visible');
+  if (!persistent) setTimeout(() => el.classList.remove('visible'), 7000);
+  logEvent('client_error', msg);
+}
+function hideError() { $('error-msg').classList.remove('visible'); }
+
+// Log central leve: manda o erro para o Worker guardar. É "dispare e esqueça":
+// se o envio falhar, NUNCA atrapalha o culto.
+function logEvent(type, detail) {
+  try {
+    fetch('https://traducao-culto-api.leandrobisp-s.workers.dev/log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      keepalive: true,
+      body: JSON.stringify({
+        type: type,
+        detail: String(detail || '').slice(0, 300),
+        sala: salaCode || '',
+        ts: new Date().toISOString(),
+        ua: navigator.userAgent.slice(0, 120)
+      })
+    }).catch(() => {});
+  } catch (e) {}
+}
+
+// ═══════════════════════════════════════════════════════════
+// TELEMETRIA / CAIXA-PRETA  (diagnóstico remoto — A+B)
+// Tudo "dispare e esqueça": NUNCA pode atrapalhar o culto.
+// ═══════════════════════════════════════════════════════════
+const HEARTBEAT_MS = 20000; // batimento de saúde a cada 20s
+let tele = { start: 0, longTasks: 0, longTaskMs: 0, loafMs: 0, maxQueue: 0, lastUploadMs: null };
+let _ltObs = null, _loafObs = null, _hbTimer = null;
+
+// Envia E cronometra o próprio POST (mede o upload real — parte B).
+function logTelemetry(type, obj) {
+  const t0 = performance.now();
+  try {
+    fetch('https://traducao-culto-api.leandrobisp-s.workers.dev/log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      keepalive: true,
+      body: JSON.stringify({
+        type: type,
+        detail: JSON.stringify(obj).slice(0, 1400),
+        sala: salaCode || '',
+        ts: new Date().toISOString(),
+        ua: navigator.userAgent.slice(0, 120)
+      })
+    }).then(() => { tele.lastUploadMs = Math.round(performance.now() - t0); }).catch(() => {});
+  } catch (e) {}
+}
+
+// Foto do sistema (uma vez, no início): SO, CPU, RAM, áudio, rede.
+async function collectSnapshot() {
+  const c = navigator.connection || {};
+  const snap = {
+    cores: navigator.hardwareConcurrency || null,
+    ramGB: navigator.deviceMemory || null,
+    inputType: (typeof isLineInput !== 'undefined' && isLineInput) ? 'linha/mesa' : 'microfone',
+    device: ((($('audio-device').selectedOptions || [])[0] || {}).textContent || '').slice(0, 60),
+    src: sourceLang, tgt: targetLang,
+    net: c.effectiveType ? (c.effectiveType + '/' + c.downlink + 'Mbps/' + c.rtt + 'ms') : null,
+    lang: navigator.language,
+    tz: (Intl.DateTimeFormat().resolvedOptions().timeZone) || null,
+    screen: screen.width + 'x' + screen.height,
+    online: navigator.onLine
+  };
+  if (performance.memory) {
+    snap.heapMB = Math.round(performance.memory.usedJSHeapSize / 1048576);
+    snap.heapLimitMB = Math.round(performance.memory.jsHeapSizeLimit / 1048576);
+  }
+  if (audioContext) {
+    snap.audioRate = audioContext.sampleRate;
+    snap.audioLatency = +((audioContext.baseLatency || 0).toFixed(3));
+  }
+  try {
+    if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+      const h = await navigator.userAgentData.getHighEntropyValues(['platform', 'platformVersion', 'architecture', 'bitness', 'model']);
+      let osLabel = ((h.platform || '') + ' ' + (h.platformVersion || '')).trim();
+      if (h.platform === 'Windows') {
+        const major = parseInt((h.platformVersion || '0').split('.')[0], 10) || 0;
+        osLabel = 'Windows ' + (major >= 13 ? '11' : major >= 1 ? '10' : '7/8');
+      }
+      snap.os = osLabel;
+      snap.arch = ((h.architecture || '') + (h.bitness ? '-' + h.bitness + 'bit' : '')).trim();
+      if (h.model) snap.model = h.model;
+    }
+  } catch (e) {}
+  return snap;
+}
+
+function startTelemetry() {
+  tele = { start: performance.now(), longTasks: 0, longTaskMs: 0, loafMs: 0, maxQueue: 0, lastUploadMs: tele.lastUploadMs };
+  // Travamentos da thread principal = termômetro de CPU (sem ler a CPU).
+  try {
+    _ltObs = new PerformanceObserver((list) => {
+      for (const e of list.getEntries()) { tele.longTasks++; tele.longTaskMs += e.duration; }
+    });
+    _ltObs.observe({ type: 'longtask', buffered: true });
+  } catch (e) {}
+  // Long Animation Frames (Chrome 123+): detalhe extra de travamento.
+  try {
+    _loafObs = new PerformanceObserver((list) => {
+      for (const e of list.getEntries()) { tele.loafMs += (e.blockingDuration || 0); }
+    });
+    _loafObs.observe({ type: 'long-animation-frame', buffered: true });
+  } catch (e) {}
+  collectSnapshot().then((snap) => logTelemetry('session_snapshot', snap));
+  clearInterval(_hbTimer);
+  _hbTimer = setInterval(sendHeartbeat, HEARTBEAT_MS);
+}
+
+function sendHeartbeat() {
+  const c = navigator.connection || {};
+  const depth = (typeof translationOrder !== 'undefined') ? translationOrder.length : 0;
+  if (depth > tele.maxQueue) tele.maxQueue = depth;
+  const hb = {
+    upMin: +(((performance.now() - tele.start) / 60000).toFixed(1)),
+    longTasks: tele.longTasks,
+    longTaskMs: Math.round(tele.longTaskMs),
+    loafMs: Math.round(tele.loafMs),
+    queue: depth,
+    maxQueue: tele.maxQueue,
+    uploadMs: tele.lastUploadMs,
+    net: c.effectiveType ? (c.effectiveType + '/' + c.downlink + 'Mbps/' + c.rtt + 'ms') : null,
+    heapMB: performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1048576) : null,
+    reconn: reconnectAttempts
+  };
+  tele.longTasks = 0; tele.longTaskMs = 0; tele.loafMs = 0;
+  logTelemetry('heartbeat', hb);
+}
+
+function stopTelemetry() {
+  clearInterval(_hbTimer); _hbTimer = null;
+  try { _ltObs && _ltObs.disconnect(); } catch (e) {}
+  try { _loafObs && _loafObs.disconnect(); } catch (e) {}
+}
+
+// ═══════════════════════════════════════════════════════════
+// MEDIDOR DE USO (Tábua 4) — minutos por culto/idioma → banco
+// Irmão da telemetria: "dispare e esqueça", NUNCA atrapalha o culto.
+// Só mede quando há um culto do banco (_serviceId). Modo avulso não grava.
+// ═══════════════════════════════════════════════════════════
+const USAGE_PULSE_MS = 5 * 60 * 1000; // pulso de uso a cada 5 min
+const INACTIVITY_LIMIT_MS = 15 * 60 * 1000; // 15 min sem voz -> auto-stop
+const LONG_SESSION_LIMIT_MS = 3 * 60 * 60 * 1000; // 3h -> alerta
+let usage = { start: 0, sessionId: '' };
+let _usageTimer = null;
+let _costGuardTimer = null;
+let activeVoiceMs = 0;
+let lastVoiceAt = 0;
+let longSessionWarned = false;
+
+// Envia o total acumulado de minutos desta sessão (reescreve a linha no banco).
+function sendUsagePulse() {
+  if (!_serviceId || !usage.start) return;
+  const minutes = +(((performance.now() - usage.start) / 60000).toFixed(2));
+  const active_minutes = +((activeVoiceMs) / 60000).toFixed(2);
+  try {
+    fetch('https://traducao-culto-api.leandrobisp-s.workers.dev/usage', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      keepalive: true,
+      body: JSON.stringify({
+        session_id: usage.sessionId,
+        service_id: _serviceId,
+        target_language: targetLang,
+        minutes: minutes,
+        active_minutes: active_minutes
+      })
+    }).catch(() => {});
+  } catch (e) {}
+  logTelemetry('voice_active', { active_minutes, wallclock_minutes: minutes });
+}
+
+// Começa a medir UMA vez por "rodar" (reconexão NÃO reinicia a contagem).
+function resetCostGuards() {
+  activeVoiceMs = 0;
+  lastVoiceAt = 0;
+  longSessionWarned = false;
+}
+
+function startCostGuard() {
+  stopCostGuard();
+  _costGuardTimer = setInterval(checkCostGuards, 30000);
+}
+
+function stopCostGuard() {
+  if (_costGuardTimer) { clearInterval(_costGuardTimer); _costGuardTimer = null; }
+}
+
+function checkCostGuards() {
+  const reconnecting = isRunning && reconnectAttempts > 0 && (!ws || ws.readyState !== WebSocket.OPEN);
+  if (!isRunning || isPaused || reconnecting) return;
+  const now = performance.now();
+  if (usage.start && !longSessionWarned && (now - usage.start) > LONG_SESSION_LIMIT_MS) {
+    longSessionWarned = true;
+    showError('Sessão rodando há mais de 3h — ainda em uso?', true);
+  }
+  if (lastVoiceAt > 0 && (now - lastVoiceAt) > INACTIVITY_LIMIT_MS) {
+    showSetup();
+    showError('Sessão encerrada por inatividade (sem áudio por 15 min).', true);
+  }
+}
+
+function startUsage() {
+  if (!_serviceId) return;     // modo avulso: não mede
+  if (usage.start) return;     // já começou — reconexão não zera
+  usage.start = performance.now();
+  usage.sessionId = (window.crypto && crypto.randomUUID)
+    ? crypto.randomUUID()
+    : ('sess-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8));
+  sendUsagePulse();            // marco zero: cria a linha já no início
+  clearInterval(_usageTimer);
+  _usageTimer = setInterval(sendUsagePulse, USAGE_PULSE_MS);
+}
+
+// Acerto final ao encerrar (botão Setup) ou ao fechar a aba.
+function stopUsage() {
+  clearInterval(_usageTimer); _usageTimer = null;
+  if (!_serviceId || !usage.start) return;
+  sendUsagePulse();            // grava o número exato do fim
+  usage.start = 0;             // libera para um novo START gerar nova sessão
+}
+
+// Rede de segurança: se fecharem a aba sem clicar em Setup, grava o acerto.
+window.addEventListener('pagehide', stopUsage);
+  
+function setSourceText(text, isPlaceholder = false) {
+  const el = $('source-text');
+  el.textContent = text;
+  el.classList.toggle('source-placeholder', isPlaceholder);
+}
+
+// ══════════════════════════════════════════════════════════════
+// TELEPROMPTER
+// ══════════════════════════════════════════════════════════════
+function appendPrompterLine(text) {
+  if (!text || !text.trim()) return;
+
+  const placeholder = $('prompter-track').querySelector('.prompter-placeholder');
+  if (placeholder) placeholder.remove();
+
+  prompterLines.push({ text: text.trim() });
+  if (prompterLines.length > PROMPTER_HISTORY_SIZE) prompterLines.shift();
+
+  renderPrompter();
+}
+
+// Envia a linha traduzida para a sala dos celulares (best-effort: nunca derruba o telão).
+function broadcastToRoom(text) {
+  if (!salaCode || !text) return;
+  try {
+    fetch('https://traducao-culto-broadcast.leandrobisp-s.workers.dev/send?sala=' + encodeURIComponent(salaCode), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    }).catch(() => {});
+  } catch (e) {}
+}
+
+// ── Fio 4 (3b): tradução sob demanda + pacote ──
+let statsTimer = null;
+let activeStatsLangs = new Set();
+let lastStatsTotal = 0, lastStatsCounts = {};
+const LANG_ACTIVE_GRACE_MS = 15000;
+let langLastSeenAt = {};
+
+function activeTargetLangs() {
+  const set = [defaultLang];                 // padrão sempre traduzido (telão + fallback)
+  const now = Date.now();
+  activatedLangs.forEach(L => {
+    const seenRecently = langLastSeenAt[L] && (now - langLastSeenAt[L] <= LANG_ACTIVE_GRACE_MS);
+    if (L !== defaultLang && (activeStatsLangs.has(L) || seenRecently) && set.indexOf(L) < 0) set.push(L);
+  });
+  return set;
+}
+
+function getContextFor(lang) {
+  if (lang === defaultLang) {
+    return prompterLines.slice(-CONTEXT_LINES_FOR_TRANSLATION).map(l => l.text).join(' ');
+  }
+  return (langHistory[lang] || []).slice(-CONTEXT_LINES_FOR_TRANSLATION).join(' ');
+}
+
+async function translateToLang(fragment, lang, mode) {
+  mode = mode || 'legacy';
+  const model = (mode === 'final') ? 'gpt-4o' : 'gpt-4o-mini';                 // final = qualidade; parcial/legacy = mini
+  const systemContent = (mode === 'partial') ? buildShortPrompt(lang) : buildSystemPrompt(lang); // parcial = prompt curto (custo)
+  const context = (mode === 'partial') ? '' : getContextFor(lang);            // parcial não carrega contexto (enxuta)
+  const contextPrompt = context
+    ? `Previous translated lines (for context only, do NOT repeat): "${context}"\n\nNew fragment to translate:`
+    : `New fragment to translate (start of sermon):`;
+  try {
+    const res = await fetch('https://traducao-culto-api.leandrobisp-s.workers.dev/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: model,
+        max_tokens: 200,
+        temperature: 0.2,
+        messages: [
+          { role: 'system', content: systemContent },
+          { role: 'user', content: `${contextPrompt}\n"${fragment}"` }
+        ]
+      })
+    });
+    if (!res.ok) return { ok: false, status: res.status, text: '' };
+    const json = await res.json();
+    let t = json.choices?.[0]?.message?.content?.trim() || '';
+    t = t.replace(/^["'`]+|["'`]+$/g, '').trim();
+    return { ok: true, status: 200, text: t };
+  } catch (e) {
+    return { ok: false, status: 0, text: '' };
+  }
+}
+
+// Envia o pacote (original + todas as traduções ativas) para a sala dos celulares.
+function broadcastPackage(entry, kind, id, revision) {
+  if (!salaCode) return;
+  try {
+    fetch('https://traducao-culto-broadcast.leandrobisp-s.workers.dev/send?sala=' + encodeURIComponent(salaCode), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'pkg', original: entry.original, default: defaultLang, langs: entry.langs, church: churchName,
+        kind: kind || 'final',
+        revision: (typeof revision === 'number') ? revision : 0,
+        id: id || ''
+      })
+    }).catch(() => {});
+  } catch (e) {}
+}
+
+function updateOperatorCount() {
+  const el = document.getElementById('listener-count');
+  if (!el) return;
+  const total = lastStatsTotal || 0;
+  const parts = [];
+  Object.keys(lastStatsCounts || {}).forEach(k => {
+    if (!lastStatsCounts[k]) return;
+    const label = (k === 'default' ? defaultLang : k).toUpperCase();
+    parts.push(label + ' ' + lastStatsCounts[k]);
+  });
+  el.textContent = '👥 ' + total + (parts.length ? '  (' + parts.join(' · ') + ')' : '');
+}
+
+// Censo da sala: descobre quais idiomas têm ouvinte (define o que traduzir sob demanda).
+function pollStats() {
+  if (!salaCode) return;
+  fetch('https://traducao-culto-broadcast.leandrobisp-s.workers.dev/stats?sala=' + encodeURIComponent(salaCode))
+    .then(r => r.ok ? r.json() : null)
+    .then(d => {
+      if (!d || !d.counts) return;
+      const set = new Set();
+      const now = Date.now();
+      Object.keys(d.counts).forEach(k => {
+        if (d.counts[k] > 0) {
+          const lang = (k === 'default' ? defaultLang : k);
+          set.add(lang);
+          langLastSeenAt[lang] = now;
+        }
+      });
+      activeStatsLangs = set;
+      lastStatsTotal = d.total || 0;
+      lastStatsCounts = d.counts || {};
+      updateOperatorCount();
+    })
+    .catch(() => {});
+}
+function startStatsPolling() { stopStatsPolling(); pollStats(); statsTimer = setInterval(pollStats, 4000); }
+function stopStatsPolling() { if (statsTimer) { clearInterval(statsTimer); statsTimer = null; } activeStatsLangs = new Set(); langLastSeenAt = {}; lastStatsTotal = 0; lastStatsCounts = {}; updateOperatorCount(); }
+
+function renderPrompter() {
+  const track = $('prompter-track');
+  const visibleLines = prompterLines.slice(-PROMPTER_MAX_LINES);
+  track.innerHTML = '';
+  visibleLines.forEach((line, index) => {
+    const div = document.createElement('div');
+    div.className = 'prompter-line';
+    if (index === visibleLines.length - 1) div.classList.add('is-current');
+    div.textContent = line.text;
+    track.appendChild(div);
+  });
+}
+
+function clearPrompter() {
+  prompterLines = [];
+  pendingChunks.clear();
+  clearTimeout(holdTimer); holdTimer = null;
+  clearTimeout(partialTimer); partialTimer = null;
+  thoughtId = null; thoughtBuffer = ''; deltaBuffer = '';
+  translationOrder = [];
+  const track = $('prompter-track');
+  track.innerHTML = '<div class="prompter-placeholder">'+T('op.prompter_ph')+'</div>';
+}
+
+// ══════════════════════════════════════════════════════════════
+// WAVEFORM
+// ══════════════════════════════════════════════════════════════
+const waveform = $('waveform');
+let waveBars = [];
+function buildWaveform(n = 18) {
+  waveform.innerHTML = '';
+  waveBars = [];
+  for (let i = 0; i < n; i++) {
+    const b = document.createElement('div');
+    b.className = 'wave-bar';
+    waveform.appendChild(b);
+    waveBars.push(b);
+  }
+}
+let waveAnimFrame = null;
+function animateWave(active) {
+  cancelAnimationFrame(waveAnimFrame);
+  if (!active) {
+    waveBars.forEach(b => { b.classList.remove('active'); b.style.height = '3px'; });
+    return;
+  }
+  function tick() {
+    waveBars.forEach(b => {
+      const h = 3 + Math.random() * 14;
+      b.style.setProperty('--h', h + 'px');
+      b.classList.add('active');
+    });
+    waveAnimFrame = requestAnimationFrame(() => setTimeout(tick, 90));
+  }
+  tick();
+}
+
+// ══════════════════════════════════════════════════════════════
+// DISPOSITIVOS E PREFERÊNCIAS
+// ══════════════════════════════════════════════════════════════
+async function loadAudioDevices() {
+  try {
+    await navigator.mediaDevices.getUserMedia({ audio: true });
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const inputs = devices.filter(d => d.kind === 'audioinput');
+    const sel = $('audio-device');
+    sel.innerHTML = '';
+    inputs.forEach((d, i) => {
+      const opt = document.createElement('option');
+      opt.value = d.deviceId;
+      opt.textContent = d.label || `Microphone ${i + 1}`;
+      if (/cable|vb-audio|virtual|blackhole|loopback/i.test(d.label)) {
+        opt.textContent = '🔌 ' + opt.textContent;
+      } else if (/usb|line|scarlett|behringer|focusrite|aux|interface|hw:/i.test(d.label)) {
+        opt.textContent = '🎚️ ' + opt.textContent;
+      } else {
+        opt.textContent = '🎙️ ' + opt.textContent;
+      }
+      sel.appendChild(opt);
+    });
+    if (inputs.length === 0) sel.innerHTML = '<option value="">No device found</option>';
+  } catch (err) {
+    $('audio-device').innerHTML = '<option value="">Error listing devices</option>';
+  }
+}
+
+function loadSavedApiKey() {
+  try {
+    const savedChurch = localStorage.getItem('traducao_culto_church');
+    if (savedChurch) $('church-input').value = savedChurch;
+    const savedSource = localStorage.getItem('traducao_culto_source');
+    if (savedSource) $('source-lang').value = savedSource;
+    const savedTarget = localStorage.getItem('traducao_culto_target');
+    if (savedTarget) $('target-lang').value = savedTarget;
+    try { buildActivatedLangs(); syncDefaultCheck(); } catch (e) {}
+    const savedSala = localStorage.getItem('traducao_culto_sala');
+    if (savedSala) $('sala-input').value = savedSala;
+    const savedContext = localStorage.getItem('traducao_culto_context');
+    if (savedContext) $('context-input').value = savedContext;
+  } catch {}
+}
+
+function savePreferences() {
+  try {
+    localStorage.setItem('traducao_culto_church', churchName);
+    localStorage.setItem('traducao_culto_source', sourceLang);
+    localStorage.setItem('traducao_culto_target', targetLang);
+    localStorage.setItem('traducao_culto_sala', salaCode);
+    localStorage.setItem('traducao_culto_context', customContext);
+  } catch {}
+}
+
+// ══════════════════════════════════════════════════════════════
+// SERMÃO — leitura PDF/Word + porteiro + destilação (Opção B)
+// ══════════════════════════════════════════════════════════════
+if (window.pdfjsLib) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+function setSermonStatus(text, cls) {
+  const el = $('sermon-status');
+  el.textContent = text;
+  el.className = 'api-hint' + (cls ? ' ' + cls : '');
+}
+
+async function extractPdfText(arrayBuffer) {
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  let out = '';
+  for (let p = 1; p <= pdf.numPages; p++) {
+    const page = await pdf.getPage(p);
+    const content = await page.getTextContent();
+    out += content.items.map(i => i.str).join(' ') + '\n';
+  }
+  return out;
+}
+
+async function extractDocxText(arrayBuffer) {
+  const result = await mammoth.extractRawText({ arrayBuffer });
+  return result.value || '';
+}
+
+async function handleSermonUpload(event) {
+  // Se o operador trocar/limpar o arquivo, zera o abastecimento (sem regresso).
+  sermonTerms = '';
+  sermonSummary = '';
+
+  const file = event.target.files && event.target.files[0];
+  if (!file) {
+    setSermonStatus(T('op.sermon_hint_short'), null);
+    return;
+  }
+
+  const name = file.name.toLowerCase();
+  const isPdf = name.endsWith('.pdf') || file.type === 'application/pdf';
+  const isDocx = name.endsWith('.docx');
+
+  if (name.endsWith('.doc') && !isDocx) {
+    setSermonStatus(T('op.sermon_old_doc'), 'sermon-err');
+    return;
+  }
+  if (!isPdf && !isDocx) {
+    setSermonStatus(T('op.sermon_unsupported'), 'sermon-err');
+    return;
+  }
+
+  setSermonStatus(T('op.sermon_reading'), 'sermon-loading');
+
+  try {
+    const buffer = await file.arrayBuffer();
+    let text = isPdf ? await extractPdfText(buffer) : await extractDocxText(buffer);
+    text = (text || '').replace(/\s+/g, ' ').trim();
+
+    // PORTEIRO: confere se saiu texto de verdade (PDF escaneado vem quase vazio).
+    const wordCount = text ? text.split(' ').length : 0;
+    if (text.length < 200 || wordCount < 40) {
+      setSermonStatus(T('op.sermon_scanned'), 'sermon-err');
+      return;
+    }
+
+    setSermonStatus(T('op.sermon_studying'), 'sermon-loading');
+    const ok = await distillSermon(text);
+    setSermonStatus(
+      ok ? T('op.sermon_loaded')
+         : T('op.sermon_failed'),
+      ok ? 'sermon-ok' : 'sermon-err'
+    );
+  } catch (err) {
+    console.error('Erro ao ler sermão:', err);
+    setSermonStatus(T('op.sermon_read_err'), 'sermon-err');
+  }
+}
+
+async function distillSermon(sermonText) {
+  // Sermões longos: ~12k caracteres cobrem uma pregação inteira com folga.
+  const clipped = sermonText.slice(0, 12000);
+  const distillSystem = `You prepare context for a LIVE sermon interpreter. Read the sermon and return ONLY valid JSON, no markdown, no preamble, in this exact shape:
+{"terms":["..."],"refs":["..."],"summary":"..."}
+- "terms": proper nouns, people, places, ministries, and key theological terms that could be misheard or mistranslated (max 40 items, short).
+- "refs": every Bible reference mentioned, normalized (e.g. "John 3:16").
+- "summary": ONE or TWO sentences naming the central theme of the sermon.
+Return nothing except the JSON object.`;
+
+  try {
+    const res = await fetch('https://traducao-culto-api.leandrobisp-s.workers.dev/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        max_tokens: 700,
+        temperature: 0.1,
+        messages: [
+          { role: 'system', content: distillSystem },
+          { role: 'user', content: clipped }
+        ]
+      })
+    });
+    if (!res.ok) return false;
+    const json = await res.json();
+    let raw = json.choices?.[0]?.message?.content?.trim() || '';
+    raw = raw.replace(/^```json\s*|^```\s*|\s*```$/g, '').trim();
+    const data = JSON.parse(raw);
+
+    const terms = Array.isArray(data.terms) ? data.terms : [];
+    const refs = Array.isArray(data.refs) ? data.refs : [];
+    sermonSummary = typeof data.summary === 'string' ? data.summary.trim() : '';
+    sermonTerms = [...terms, ...refs].filter(Boolean).join(', ');
+
+    return !!(sermonTerms || sermonSummary);
+  } catch (err) {
+    console.error('Erro ao destilar sermão:', err);
+    return false;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// SETUP → START
+// ══════════════════════════════════════════════════════════════
+function showSetup() {
+  stopAll();
+  document.body.classList.remove('running');   // destrava a config; sai do modo "rodando"
+  isRunning = false;
+  var pb = $('primary-btn'); if (pb) pb.textContent = (window.Atos2I18N ? Atos2I18N.t('op.start') : 'START TRANSLATION');
+}
+function togglePrimary() {
+  if (document.body.classList.contains('running')) showSetup();   // STOP
+  else startApp();                                                // START
+}
+function toggleProjection() {
+  document.body.classList.toggle('projection');
+}
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') document.body.classList.remove('projection');
+});
+function openAdv() { $('advmodal').classList.add('open'); }
+function closeAdv() { $('advmodal').classList.remove('open'); }
+
+function showQR() {
+  const code = (salaCode || ($('sala-input') && $('sala-input').value) || '').trim().toUpperCase();
+  if (!code) { showError(T('op.err_room')); return; }
+  salaCode = code;
+  const url = window.location.origin + window.location.pathname.replace('operador.html','celular.html') + '?sala=' + encodeURIComponent(code);
+  const canvas = $('qr-canvas');
+  canvas.innerHTML = '';
+  try {
+    new QRCode(canvas, {
+      text: url,
+      width: 200,
+      height: 200,
+      colorDark: '#2c2820',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+    setTimeout(() => addQREmblem(canvas), 60);
+  } catch (e) {
+    canvas.textContent = T('op.err_qr');
+  }
+  $('qr-overlay').classList.add('visible');
+}
+
+function addQREmblem(holder) {
+  const img = holder.querySelector('img') || holder.querySelector('canvas');
+  if (!img || holder.querySelector('.qr-emblem')) return;
+  const wrap = document.createElement('div');
+  wrap.className = 'qr-emblem';
+  wrap.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"></rect><path d="M5 10a7 7 0 0 0 14 0"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>';
+  holder.style.position = 'relative';
+  holder.appendChild(wrap);
+}
+
+function hideQR(event) {
+  // Fecha ao clicar no fundo ou no botão Fechar, mas não ao clicar no próprio QR.
+  if (event && event.target.closest && event.target.closest('#qr-box')) return;
+  $('qr-overlay').classList.remove('visible');
+}
+
+async function startApp() {
+  targetLang = $('target-lang').value;
+  defaultLang = targetLang;                 // Fio 4: idioma padrão (telão)
+  activatedLangs = getActivatedLangs();     // Fio 4: idiomas ativados
+  sourceLang = $('source-lang').value;
+  churchName = $('church-input').value.trim() || T('op.church_default');
+  selectedDeviceId = $('audio-device').value;
+  // Identifica o tipo de captação a partir do rótulo do dispositivo escolhido (mesma regra dos ícones).
+  // Cabo/mesa/interface = sinal limpo e já validado → não mexe. Microfone = aplica redução de ruído.
+  const selLabel = $('audio-device').selectedOptions[0] ? $('audio-device').selectedOptions[0].textContent : '';
+  isLineInput = /cable|vb-audio|virtual|blackhole|loopback/i.test(selLabel) || /usb|line|scarlett|behringer|focusrite|aux|interface|hw:/i.test(selLabel);
+  salaCode = $('sala-input').value.trim().toUpperCase();
+  customContext = $('context-input').value.trim();
+
+  savePreferences();
+  resetCostGuards();
+  startCostGuard();
+
+  $('church-display').textContent = churchName;
+  const langNames = { en:'EN', pt:'PT', es:'ES', fr:'FR', de:'DE', it:'IT', ja:'JA', zh:'ZH' };
+  const srcLabel = sourceLang === 'auto' ? 'AUTO' : sourceLang.split('-')[0].toUpperCase();
+  $('lang-badge').textContent = `${srcLabel} → ${langNames[targetLang] || targetLang.toUpperCase()}`;
+
+  prompterLines = [];
+  translationCounter = 0;
+  pendingChunks.clear();
+  translationOrder = [];
+  clearPrompter();
+  langHistory = {};
+  activeStatsLangs = new Set();
+  startStatsPolling();   // Fio 4: começa a ler quem está ouvindo em cada idioma
+
+  document.body.classList.add('running');   // entra no modo "rodando"
+  var _pb = $('primary-btn'); if (_pb) _pb.textContent = '■ Stop';
+
+  buildWaveform();
+  reconnectAttempts = 0;
+  await startRealtimeSession();
+}
+
+// ══════════════════════════════════════════════════════════════
+// REALTIME API — transcrição streaming
+// ══════════════════════════════════════════════════════════════
+// ── Idiomas: nomes de origem + contexto de transcrição por idioma (universal) ──
+// Permite que QUALQUER par funcione (en→pt, es→en, etc.), não só português→outro.
+const SOURCE_LANG_NAMES = {
+  'pt-BR':'Brazilian Portuguese','pt-PT':'European Portuguese','pt':'Portuguese',
+  'en-GB':'British English','en-US':'American English','en':'English',
+  'es':'Spanish','fr':'French','de':'German','it':'Italian',
+  'ja':'Japanese','zh':'Mandarin Chinese','ko':'Korean','ru':'Russian',
+  'ro':'Romanian','pl':'Polish','uk':'Ukrainian','nl':'Dutch',
+  'id':'Indonesian','vi':'Vietnamese','tl':'Tagalog','hi':'Hindi','tr':'Turkish',
+  'auto':'the spoken language (auto-detected)'
+};
+
+// Contexto bíblico que enviesa o reconhecimento de fala — na PRÓPRIA língua de origem.
+// Sem entrada específica, usa um contexto genérico (nunca força português).
+const TRANSCRIBE_CONTEXT = {
+  pt: 'Contexto: culto evangélico cristão. Termos: Jesus, Cristo, Senhor, Deus, Espírito Santo, evangelho, salvação, graça, fé, oração, aleluia, amém, igreja, pastor, glória, louvor, adoração, ministério, arrependimento, santificação, redenção, unção, ungido, Reino dos Céus, aliança. Livros: Gênesis, Êxodo, Salmos, Provérbios, Isaías, Mateus, Marcos, Lucas, João, Atos, Romanos, Coríntios, Hebreus, Apocalipse.',
+  en: 'Context: an evangelical Christian church service. Terms: Jesus, Christ, the Lord, God, Holy Spirit, gospel, salvation, grace, faith, prayer, hallelujah, amen, church, pastor, glory, praise, worship, ministry, repentance, sanctification, redemption, anointing, anointed, Kingdom of Heaven, covenant. Books: Genesis, Exodus, Psalms, Proverbs, Isaiah, Matthew, Mark, Luke, John, Acts, Romans, Corinthians, Hebrews, Revelation.',
+  es: 'Contexto: un culto cristiano evangélico. Términos: Jesús, Cristo, el Señor, Dios, Espíritu Santo, evangelio, salvación, gracia, fe, oración, aleluya, amén, iglesia, pastor, gloria, alabanza, adoración, ministerio, arrepentimiento, santificación, redención, unción, ungido, Reino de los Cielos, pacto. Libros: Génesis, Éxodo, Salmos, Proverbios, Isaías, Mateo, Marcos, Lucas, Juan, Hechos, Romanos, Corintios, Hebreos, Apocalipsis.',
+  fr: 'Contexte : un culte chrétien évangélique. Termes : Jésus, Christ, le Seigneur, Dieu, Saint-Esprit, évangile, salut, grâce, foi, prière, alléluia, amen, église, pasteur, gloire, louange, adoration, ministère, repentance, sanctification, rédemption, onction, Royaume des Cieux, alliance.'
+};
+
+function transcriptionContext() {
+  const base = (sourceLang || '').split('-')[0]; // 'pt', 'en', 'es'...
+  const ctx = TRANSCRIBE_CONTEXT[base] || 'Context: an evangelical Christian church service, with common biblical terms, names of Bible books, and chapter:verse references.';
+  return ctx
+    + (customContext ? ' Proper nouns for this church/event: ' + customContext + '.' : '')
+    + (sermonTerms ? ' Terms and names from this sermon: ' + sermonTerms + '.' : '');
+}
+
+async function startRealtimeSession() {
+  try {
+    // Cabo/mesa (validado): sinal cru, sem processamento. Microfone: liga limpeza de ruído do navegador.
+    const cleanup = isLineInput
+      ? { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+      : { echoCancellation: false, noiseSuppression: true,  autoGainControl: true };
+    const audioConstraints = selectedDeviceId
+      ? { deviceId: { exact: selectedDeviceId }, sampleRate: 24000, channelCount: 1, ...cleanup }
+      : { sampleRate: 24000, channelCount: 1, ...cleanup };
+
+    activeStream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
+    const langParam = sourceLang !== 'auto' ? sourceLang.split('-')[0] : '';
+
+    // Pede um token efêmero ao Worker (a chave real fica escondida no servidor).
+    const tokenRes = await fetch('https://traducao-culto-api.leandrobisp-s.workers.dev/session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session: { type: 'transcription' } })
+    });
+    if (!tokenRes.ok) {
+      const errText = await tokenRes.text();
+      throw new Error('Failed to get transcription token (' + tokenRes.status + '): ' + errText);
+    }
+    const tokenData = await tokenRes.json();
+    const ephemeralKey = tokenData?.client_secret?.value || tokenData?.value;
+    if (!ephemeralKey) {
+      throw new Error('Ephemeral token missing in Worker response: ' + JSON.stringify(tokenData));
+    }
+
+    ws = new WebSocket(
+      'wss://api.openai.com/v1/realtime?intent=transcription',
+      ['realtime', `openai-insecure-api-key.${ephemeralKey}`]
+    );
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify({
+        type: 'session.update',
+        session: {
+          type: 'transcription',
+          audio: {
+            input: {
+              format: { type: 'audio/pcm', rate: 24000 },
+              transcription: {
+                model: TRANSCRIBE_MODEL,
+                ...(langParam ? { language: langParam } : {}),
+                ...(TRANSCRIBE_MODEL === 'gpt-realtime-whisper' ? {} : { prompt: transcriptionContext() })
+              },
+              ...(isLineInput ? {} : { noise_reduction: { type: 'far_field' } }),
+              ...(TRANSCRIBE_MODEL === 'gpt-realtime-whisper' ? {} : {
+                turn_detection: {
+                  type: 'server_vad',
+                  threshold: isLineInput ? 0.5 : 0.7,
+                  prefix_padding_ms: 300,
+                  silence_duration_ms: SENTENCE_LENGTH_MS[sentenceLength] || SILENCE_DURATION_MS
+                }
+              })
+            }
+          }
+        }
+      }));
+
+      isRunning = true;
+      reconnectAttempts = 0;
+      setStatus('listening');
+      hideError();
+      animateWave(true);
+      startAudioStreaming();
+      startTelemetry();
+      startUsage();
+    };
+
+    ws.onmessage = (event) => {
+      try { handleRealtimeEvent(JSON.parse(event.data)); }
+      catch (err) { console.error('Erro ao processar mensagem:', err); }
+    };
+
+    ws.onerror = (err) => { console.error('WS error:', err); };
+
+    ws.onclose = (e) => {
+      logTelemetry('ws_close', { code: e.code, reason: (e.reason || '').slice(0, 80), upMin: +(((performance.now() - tele.start) / 60000).toFixed(1)), attempt: reconnectAttempts });
+      if (isRunning) scheduleReconnect(e.code, e.reason);
+    };
+  } catch (err) {
+    setStatus('error');
+    showError(T('op.err_mic') + err.message, true);
+    logTelemetry('mic_error', { name: err.name || '', msg: (err.message || '').slice(0, 120), busyHint: err.name === 'NotReadableError' });
+    console.error(err);
+  }
+}
+
+function scheduleReconnect(code, reason) {
+  if (code === 1008 || code === 4001 || code === 4003) {
+    setStatus('error');
+    showError(T('op.err_auth'), true);
+    isRunning = false;
+    return;
+  }
+  reconnectAttempts++;
+  const delay = Math.min(BASE_RECONNECT_DELAY * Math.pow(2, reconnectAttempts - 1), MAX_RECONNECT_DELAY);
+  const delaySeconds = Math.round(delay / 1000);
+
+  setStatus('reconnecting');
+  showError(T('op.reconnecting_in').replace('{s}', delaySeconds).replace('{n}', reconnectAttempts), true);
+
+  if (processorNode) { try { processorNode.disconnect(); } catch {} processorNode = null; }
+  if (audioContext) { try { audioContext.close(); } catch {} audioContext = null; }
+  if (activeStream) { activeStream.getTracks().forEach(t => t.stop()); activeStream = null; }
+
+  if (reconnectAttempts > 8) {
+    setStatus('error');
+    showError(T('op.err_reconnect'), true);
+    isRunning = false;
+    return;
+  }
+
+  clearTimeout(reconnectTimer);
+  reconnectTimer = setTimeout(() => { if (isRunning) startRealtimeSession(); }, delay);
+}
+
+// estado do corte manual (modo whisper, sem server_vad)
+let _audioSinceCommit = false;
+let _silenceMs = 0;
+let _segmentStartAt = 0;
+
+function startAudioStreaming() {
+  audioContext = new AudioContext({ sampleRate: 24000 });
+  const source = audioContext.createMediaStreamSource(activeStream);
+  processorNode = audioContext.createScriptProcessor(4096, 1, 1);
+  _audioSinceCommit = false; _silenceMs = 0; _segmentStartAt = 0;
+  const manualCommit = (TRANSCRIBE_MODEL === 'gpt-realtime-whisper');
+  const PAUSE_MS = 600;                          // pausa natural fecha a frase
+  const SIL_THRESH = isLineInput ? 0.006 : 0.012; // energia abaixo disso = silêncio
+  processorNode.onaudioprocess = (e) => {
+    if (!isRunning || isPaused || !ws || ws.readyState !== WebSocket.OPEN) return;
+    const float32 = e.inputBuffer.getChannelData(0);
+    const pcm16 = float32ToPcm16(float32);
+    const b64 = arrayBufferToBase64(pcm16.buffer);
+    ws.send(JSON.stringify({ type: 'input_audio_buffer.append', audio: b64 }));
+
+    if (!manualCommit) return; // gpt-4o-transcribe usa server_vad (sem corte manual)
+
+    // energia (RMS) do trecho para detectar pausa
+    let sum = 0;
+    for (let i = 0; i < float32.length; i++) sum += float32[i] * float32[i];
+    const rms = Math.sqrt(sum / float32.length);
+    const chunkMs = (float32.length / 24000) * 1000;
+
+    if (rms >= SIL_THRESH) {
+      if (isRunning && !isPaused) {
+        activeVoiceMs += chunkMs;
+        lastVoiceAt = performance.now();
+      }
+      _audioSinceCommit = true;
+      _silenceMs = 0;
+      if (!_segmentStartAt) _segmentStartAt = performance.now();
+    } else {
+      _silenceMs += chunkMs;
+    }
+
+    const maxInterval = COMMIT_INTERVAL_MS[sentenceLength] || 7000;
+    const elapsed = _segmentStartAt ? (performance.now() - _segmentStartAt) : 0;
+
+    // fecha o trecho: numa pausa natural OU ao atingir o tempo máximo (corte forçado)
+    if (_audioSinceCommit && (_silenceMs >= PAUSE_MS || elapsed >= maxInterval)) {
+      try { ws.send(JSON.stringify({ type: 'input_audio_buffer.commit' })); } catch (err) {}
+      _audioSinceCommit = false;
+      _silenceMs = 0;
+      _segmentStartAt = 0;
+    }
+  };
+  source.connect(processorNode);
+  processorNode.connect(audioContext.destination);
+}
+
+// ── Instrumentação de latência (Rodada 1) — só MEDE e imprime no Console (F12); não altera o fluxo ──
+const LatTrace = {
+  items: new Map(),
+  mark(id, name) {
+    try {
+      if (!id) return;
+      let t = this.items.get(id);
+      if (!t) { t = {}; this.items.set(id, t); }
+      if (t[name] == null) t[name] = performance.now();
+    } catch (e) {}
+  },
+  report(id) {
+    try {
+      const t = this.items.get(id); if (!t) return;
+      const d = (a, b) => (t[a] != null && t[b] != null) ? Math.round(t[b] - t[a]) : null;
+      console.log('%c⏱ Atos2 — latência da frase (ms)', 'color:#c9a84c;font-weight:bold');
+      console.table({
+        '1. fala → 1o parcial': d('speech_started', 'first_delta'),
+        '2. 1o parcial → final (espera do completed)': d('first_delta', 'completed'),
+        '3. final → traducao pronta': d('completed', 'translate_done'),
+        '4. traducao → legenda na tela': d('translate_done', 'caption_shown'),
+        'TOTAL fala → legenda': d('speech_started', 'caption_shown')
+      });
+      this.items.delete(id);
+    } catch (e) {}
+  }
+};
+
+function handleRealtimeEvent(msg) {
+  switch (msg.type) {
+    case 'conversation.item.input_audio_transcription.delta':
+      LatTrace.mark(msg.item_id, 'first_delta');
+      if (msg.delta) {
+        if (CAMINHO_B) {
+          if (!thoughtId) thoughtId = genThoughtId();
+          deltaBuffer += msg.delta;
+          setSourceText((thoughtBuffer ? thoughtBuffer + ' ' : '') + deltaBuffer);
+          clearTimeout(partialTimer);
+          partialTimer = setTimeout(() => {
+            const txt = ((thoughtBuffer ? thoughtBuffer + ' ' : '') + deltaBuffer).trim();
+            if (txt) translatePartial(txt, thoughtId);
+          }, PARTIAL_DEBOUNCE_MS);
+        } else {
+          const current = $('source-text').textContent;
+          const isPlaceholder = $('source-text').classList.contains('source-placeholder');
+          setSourceText(isPlaceholder ? msg.delta : current + msg.delta);
+        }
+      }
+      break;
+    case 'conversation.item.input_audio_transcription.completed':
+      LatTrace.mark(msg.item_id, 'completed');
+      if (msg.transcript && msg.transcript.trim().length > 1) {
+        const fragment = msg.transcript.trim();
+        if (CAMINHO_B) {
+          onThoughtSegment(fragment, msg.item_id);
+        } else {
+          setSourceText(fragment);
+          translateChunk(fragment, msg.item_id);
+        }
+      }
+      break;
+    case 'input_audio_buffer.speech_started':
+      LatTrace.mark(msg.item_id, 'speech_started');
+      setStatus('listening');
+      animateWave(true);
+      setSourceText('', true);
+      break;
+    case 'input_audio_buffer.speech_stopped':
+      setStatus('translating');
+      break;
+    case 'error':
+      console.error('Realtime API error:', msg.error);
+      const errMsg = msg.error?.message || 'desconhecido';
+      if (msg.error?.code === 'session_expired') showError(T('op.err_session'));
+      else showError(T('op.err_api') + errMsg);
+      break;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// TRADUÇÃO COM CONTEXTO E FILA ORDENADA
+// ══════════════════════════════════════════════════════════════
+function buildSystemPrompt(langArg) {
+  const langNames = LANG_NAMES;
+  const _lang = langArg || targetLang;
+  const targetName = langNames[_lang] || _lang;
+  const sourceName = SOURCE_LANG_NAMES[sourceLang] || sourceLang;
+
+  return `You are a professional simultaneous interpreter for an Evangelical Christian church service, translating from ${sourceName} to ${targetName}.
+
+CRITICAL RULES:
+1. Translate ONLY. Never explain, answer questions, or add commentary.
+2. The input is a fragment from a live sermon. Translate it AS A CONTINUATION of what came before — do NOT restart the sentence or repeat earlier context in your output.
+3. Output should be 1-3 short lines, suitable for a teleprompter. Break naturally at clause boundaries.
+4. Preserve a reverent pastoral tone, matching how Scripture and worship are spoken in ${targetName}.
+5. Bible book names and verse references: render them in the conventional form of ${targetName}, keeping the numbers exactly (a reference like "3:16" stays "3:16", never spelled out).
+6. Theological terms (sanctification, anointing, grace, salvation, Holy Spirit, Kingdom of Heaven, covenant, etc.): use the established ${targetName} equivalent.
+7. Worship exclamations ("Glory to God!", "Hallelujah!", "Amen!" and the like): use the natural ${targetName} form.
+8. If the fragment is filler only (hesitations or fillers), return an empty string.
+9. NEVER use quotation marks around your output. NEVER prefix with "Translation:". Return ONLY the translated text.
+10. NATURALNESS: Render the meaning as a native ${targetName} interpreter would actually speak it — idiomatic and fluent, NOT word-for-word. Restructure freely for fluency; never produce a literal calque of the ${sourceName} construction.
+11. Naturalness must NEVER alter meaning, Bible references, theological terms, or the reverent pastoral tone. Translate faithfully in sense — fluently in form. This faithfulness rule is SOVEREIGN: it always wins over naturalness.${customContext ? `\n12. Proper nouns specific to this church/event (keep accurate and natural in ${targetName}): ${customContext}.` : ''}${sermonSummary ? `\n13. This service's sermon is about: ${sermonSummary} Use this only to resolve ambiguity and pick the right sense — never inject it into the output.` : ''}${sermonTerms ? `\n14. Names and terms that appear in this sermon (translate them consistently and correctly): ${sermonTerms}.` : ''}`;
+}
+
+function genThoughtId() { return 'th_' + Date.now().toString(36) + Math.floor(Math.random()*1296).toString(36); }
+
+// Prompt curto para a PARCIAL (rascunho ao vivo) — sem glossário gigante, para controlar custo
+function buildShortPrompt(lang) {
+  const targetName = LANG_NAMES[lang] || lang;
+  const sourceName = SOURCE_LANG_NAMES[sourceLang] || sourceLang;
+  return `Live church sermon interpreter, ${sourceName} to ${targetName}. Translate the fragment naturally and faithfully, the way a native speaker would actually say it. This is a rough live draft. Output ONLY the translation — no quotes, no commentary, no "Translation:".`;
+}
+
+// HOLD (A+): segura a FINAL quando o trecho termina obviamente incompleto (acentos normalizados)
+function shouldHoldFinal(text) {
+  const norm = (text || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const endings = ['porque','mas','quando','se','para que','ainda que','mesmo que',
+    'deus vai','o senhor vai','o senhor esta','aquele que','aquela que'];
+  return endings.some(e => norm === e || norm.endsWith(' ' + e));
+}
+
+// completed do whisper: mescla no pensamento e decide finalizar ou segurar (hold)
+function onThoughtSegment(fragment, itemId) {
+  if (!thoughtId) thoughtId = genThoughtId();
+  thoughtBuffer = (thoughtBuffer ? thoughtBuffer + ' ' : '') + fragment;
+  deltaBuffer = '';
+  setSourceText(thoughtBuffer);
+  clearTimeout(holdTimer); holdTimer = null;
+  if (shouldHoldFinal(thoughtBuffer)) {
+    holdTimer = setTimeout(() => finalizeThought(itemId), HOLD_MAX_MS); // teto: não segura pra sempre
+  } else {
+    finalizeThought(itemId);
+  }
+}
+
+// dispara a tradução FINAL de alta qualidade (gpt-4o + glossário) e reinicia o pensamento
+function finalizeThought(itemId) {
+  clearTimeout(holdTimer); holdTimer = null;
+  clearTimeout(partialTimer); partialTimer = null;
+  const text = (thoughtBuffer || '').trim();
+  const id = thoughtId;
+  thoughtId = null; thoughtBuffer = ''; deltaBuffer = '';   // reset ANTES da tradução async
+  if (!text) return;
+  translateChunk(text, itemId, { mode: 'final', id: id, kind: 'final' });
+}
+
+// PARCIAL ao vivo (mini, prompt curto) — sem fila ordenada; revision resolve a ordem no celular
+async function translatePartial(text, id) {
+  const langs = activeTargetLangs();
+  if (!langs.length) return;
+  const rev = ++pkgRevision;
+  try {
+    const results = await Promise.all(langs.map(L => translateToLang(text, L, 'partial')));
+    const map = {};
+    results.forEach((r, i) => { if (r.ok && r.text) map[langs[i]] = r.text; });
+    if (!map[defaultLang]) return;            // sem o idioma padrão, não emite parcial
+    broadcastPackage({ original: text, langs: map }, 'partial', id, rev);
+  } catch (e) {}
+}
+
+async function translateChunk(sourceFragment, itemId, opts) {
+  translationCounter++;
+  const myId = translationCounter;
+  translationOrder.push(myId);
+  if (typeof tele !== 'undefined' && translationOrder.length > tele.maxQueue) tele.maxQueue = translationOrder.length;
+  const mode = (opts && opts.mode) || 'legacy';
+  pendingChunks.set(myId, { status: 'pending', original: sourceFragment, langs: {}, itemId: itemId, tid: (opts && opts.id) || '', kind: (opts && opts.kind) || 'final', revision: ++pkgRevision });
+
+  const targetLangsNow = activeTargetLangs();   // padrão + ativados com ouvinte (sob demanda)
+
+  const timeoutId = setTimeout(() => {
+    const entry = pendingChunks.get(myId);
+    if (entry && entry.status === 'pending') {
+      console.warn(`Tradução #${myId} excedeu timeout.`);
+      entry.status = 'timeout';
+      tryFlushOrdered();
+    }
+  }, TRANSLATION_TIMEOUT_MS);
+
+  try {
+    const results = await Promise.all(targetLangsNow.map(L => translateToLang(sourceFragment, L, mode)));
+    clearTimeout(timeoutId);
+
+    const entry = pendingChunks.get(myId);
+    if (!entry || entry.status === 'timeout') return; // já liberado pelo timeout
+
+    const map = {};
+    let defaultOk = false;
+    results.forEach((r, i) => {
+      const L = targetLangsNow[i];
+      if (r.ok && r.text) { map[L] = r.text; if (L === defaultLang) defaultOk = true; }
+    });
+
+    if (!defaultOk) {
+      // Sem o idioma padrão não há linha (mantém o comportamento de erro de hoje).
+      entry.status = 'error';
+      const d = results[0];
+      if (d && d.status === 401) showError(T('op.err_auth_server'), true);
+      else if (d && d.status === 429) showError(T('op.err_limit'));
+      else if (d && d.status && d.status !== 200) showError(T('op.err_translation').replace('{code}', d.status));
+      tryFlushOrdered();
+      return;
+    }
+
+    entry.status = 'done';
+    entry.langs = map;
+    LatTrace.mark(itemId, 'translate_done');
+    tryFlushOrdered();
+  } catch (err) {
+    clearTimeout(timeoutId);
+    console.error(`Erro tradução #${myId}:`, err);
+    const entry = pendingChunks.get(myId);
+    if (entry && entry.status !== 'timeout') entry.status = 'error';
+    tryFlushOrdered();
+  }
+}
+
+// Garante ordem das traduções mesmo se chegarem fora de ordem
+function tryFlushOrdered() {
+  while (translationOrder.length > 0) {
+    const nextId = translationOrder[0];
+    const entry = pendingChunks.get(nextId);
+    if (!entry) { translationOrder.shift(); continue; }
+    if (entry.status === 'pending') break; // espera completar
+    translationOrder.shift();
+    pendingChunks.delete(nextId);
+    if (entry.status === 'done' && entry.langs && entry.langs[defaultLang]) {
+      appendPrompterLine(entry.langs[defaultLang]);   // telão = idioma padrão
+      Object.keys(entry.langs).forEach(L => {
+        if (L === defaultLang) return;                // o padrão já entra em prompterLines
+        if (!langHistory[L]) langHistory[L] = [];
+        langHistory[L].push(entry.langs[L]);
+        if (langHistory[L].length > PROMPTER_HISTORY_SIZE) langHistory[L].shift();
+      });
+      broadcastPackage(entry, entry.kind, entry.tid, entry.revision); // final/legacy com kind+id+revision
+      if (entry.itemId) { LatTrace.mark(entry.itemId, 'caption_shown'); LatTrace.report(entry.itemId); }
+    }
+  }
+  if (translationOrder.length === 0) setStatus('listening');
+}
+
+// ══════════════════════════════════════════════════════════════
+// PARAR TUDO
+// ══════════════════════════════════════════════════════════════
+function stopAll() {
+  isRunning = false;
+  clearTimeout(reconnectTimer);
+  if (ws) { try { ws.close(); } catch {} ws = null; }
+  if (processorNode) { try { processorNode.disconnect(); } catch {} processorNode = null; }
+  if (audioContext) { try { audioContext.close(); } catch {} audioContext = null; }
+  if (activeStream) { activeStream.getTracks().forEach(t => t.stop()); activeStream = null; }
+  stopStatsPolling();
+  stopTelemetry();
+  stopUsage();
+  stopCostGuard();
+  animateWave(false);
+  setStatus('idle');
+  clearTimeout(holdTimer); holdTimer = null;
+  clearTimeout(partialTimer); partialTimer = null;
+  thoughtId = null; thoughtBuffer = ''; deltaBuffer = '';
+}
+
+// ══════════════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════════════
+function float32ToPcm16(float32Array) {
+  const pcm = new Int16Array(float32Array.length);
+  for (let i = 0; i < float32Array.length; i++) {
+    const s = Math.max(-1, Math.min(1, float32Array[i]));
+    pcm[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+  }
+  return pcm;
+}
+
+function arrayBufferToBase64(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+  }
+  return btoa(binary);
+}
+
+// Inicialização
+buildWaveform();
+loadAudioDevices();
+loadSavedApiKey();
+</script>
+
+</body>
+</html>
